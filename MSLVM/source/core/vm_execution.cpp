@@ -361,9 +361,40 @@ namespace MSLVM
 				//JUMPED flag doesnt be setted because we need to skip call instruction
 				break;
 			}
+			
 			case VMOperationCode::HALT:
 				state.registers[SpecialRegister::FL].u |= Flag::STOPPED;
 				break;
+				}
+
+				//--------------------VM Calls Operations  
+				{
+			case VMOperationCode::VM_CALL: break;
+				
+				
+				}
+
+				//--------------------Type Convertion Operations  
+				{
+			case VMOperationCode::TC_ITR_R: 
+				state.registers[operation.dest].r = static_cast<register_real>(state.registers[operation.dest].i);
+				break;
+			case VMOperationCode::TC_RTI_R: 
+				state.registers[operation.dest].i = static_cast<register_integer>(state.registers[operation.dest].r);
+				break;
+			case VMOperationCode::TC_UTR_R: 
+				state.registers[operation.dest].r = static_cast<register_real>(state.registers[operation.dest].u);
+				break;
+			case VMOperationCode::TC_UTI_R: 
+				state.registers[operation.dest].i = static_cast<register_integer>(state.registers[operation.dest].u);
+				break;
+			case VMOperationCode::TC_RTU_R: 
+				state.registers[operation.dest].u = static_cast<register_unsigned>(state.registers[operation.dest].r);
+				break;
+			case VMOperationCode::TC_ITU_R: 
+				state.registers[operation.dest].u = static_cast<register_unsigned>(state.registers[operation.dest].i);
+				break;
+
 				}
 			default:
 				break;

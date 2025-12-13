@@ -147,13 +147,14 @@ namespace MSLVM
 		VM_CALL,   //destination[VMCall], source0[param0], source1[param1]
 
 
-		// Other
-		TC_ITD_R,    //Type Convertion Integer To Double
-		TC_DTI_R,    //Type Convertion Double To Integer
+		// Type Convertion
+		TC_ITR_R,    //Type Convertion Integer To Real
+		TC_RTI_R,    //Type Convertion Real To Integer
 
-		TC_UTD_R,    //Type Convertion Unsigned Integer To Double
+		TC_UTR_R,    //Type Convertion Unsigned Integer To Real
 		TC_UTI_R,    //Type Convertion Unsigned Integer To Integer
-		TC_DTU_R,    //Type Convertion Double To Unsigned Integer
+
+		TC_RTU_R,    //Type Convertion Real To Unsigned Integer
 		TC_ITU_R,    //Type Convertion Integer To Unsigned Integer
 	};		   
 
