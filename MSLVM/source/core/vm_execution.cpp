@@ -1,9 +1,25 @@
 #include "..\..\include\mslvm\vm_execution.hpp"
-#include "..\..\include\mslvm\vm_memory.hpp"
 
 
 namespace MSLVM
 {
+	void clear_vm_state(VMState& state, bool clear_memory)
+	{
+		state.call_stack.clear();
+		state.error_stack.clear();
+		for (size_t i = 0; i < TOTAL_REGISTERS; i++) 
+		{
+			state.registers[i].u = 0;
+		}
+		state.registers[SpecialRegister::SP].u = STACK_START;
+		state.registers[SpecialRegister::FP].u = STACK_START;
+
+		if (clear_memory) 
+		{
+			std::memset(state.memory.heap, 0, HEAP_SIZE);
+			std::memset(state.memory.stack, 0, STACK_SIZE);
+		}
+	}
 	void execute_code_switch(VMState& state, VMOperation* operations, size_t length)
 	{
 		state.registers[SpecialRegister::IP].u = 0;
@@ -305,8 +321,50 @@ namespace MSLVM
 				write_little_endian(state.memory.stack, address, value, size);
 				break;
 			}
-			case ALLOCATE_MEMORY: break;
-			case FREE_MEMORY: break;
+			case ALLOCATE_MEMORY:
+			{
+				uint64_t address = 0;
+				if (!allocate_memory(state.memory.HFI, address, operation.src0))//src0 - size of interval
+				{
+					errcode = ErrorCode::FailedMemoryAllocation;
+					break;
+				}
+				state.registers[operation.dest].u = address;
+				break;
+			}
+			case FREE_MEMORY:
+			{
+				uint64_t address = state.registers[operation.dest].u;
+				uint64_t size = operation.src0;
+				if (address < HEAP_START || address + size - 1 > HEAP_END) {
+					errcode = ErrorCode::InvalidMemoryAccess;
+					break;
+				}
+				if (!free_memory(state.memory.HFI, address, size)) {
+					errcode = ErrorCode::FailedMemoryFreeing;
+					break;
+				}
+				break;
+
+			case EXPAND_FRAME_DOWN: 
+			{
+				uint64_t expanded_bytes = operation.dest;
+
+				if (state.call_stack.empty()) 
+				{	
+					errcode = ErrorCode::FrameExpansionFailed;
+					break;
+				}
+				auto&t = state.call_stack.top();
+				if (t.sp - expanded_bytes < t.fp)
+				{
+					errcode = ErrorCode::FrameExpansionFailed;
+					break;
+				}
+				t.sp -= expanded_bytes;
+				state.registers[SpecialRegister::FP].u -= expanded_bytes;
+			}
+			}
 				}
 
 				//--------------------Control Flow Operations  

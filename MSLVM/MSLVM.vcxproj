@@ -132,6 +132,7 @@
     <ClInclude Include="include\mslvm\vm_definitions.hpp" />
     <ClInclude Include="include\mslvm\vm_errors.hpp" />
     <ClInclude Include="include\mslvm\vm_execution.hpp" />
+    <ClInclude Include="include\mslvm\vm_linked_list.hpp" />
     <ClInclude Include="include\mslvm\vm_memory.hpp" />
     <ClInclude Include="include\mslvm\vm_types.hpp" />
     <ClInclude Include="include\mslvm\vm_native.hpp" />

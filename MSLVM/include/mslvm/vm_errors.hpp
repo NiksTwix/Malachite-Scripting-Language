@@ -11,10 +11,14 @@ namespace MSLVM
 		NoError = 0,
 
 		//Memory errors
+		FailedMemoryFreeing,
 		FailedMemoryAllocation,
 		StackOverflow,
 		StackUnderflow,
 		InvalidMemoryAccess,
+
+		FrameExpansionFailed,
+
 
 		//Arithmetic
 		ZeroDivision,

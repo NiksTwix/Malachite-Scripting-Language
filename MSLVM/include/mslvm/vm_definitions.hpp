@@ -132,8 +132,10 @@ namespace MSLVM
 		//STORE_ENCLOSING_R,     //destination[memory-offset]       source0[register]              source1[size and depth] size - 32 little bits, depth - 32 big bits       we store variable to n frame from top
 		//LOAD_ENCLOSING_R,      //destination[register]            source0[memory-offset]         source1[size and depth] size - 32 little bits, depth - 32 big bits       we load variable from n frame  from top
 
-		ALLOCATE_MEMORY,
-		FREE_MEMORY,
+		ALLOCATE_MEMORY,		//dest[register of address's saving], src0[size of memory's interval]
+		FREE_MEMORY,			//dest[register with address], src0[size of memory's interval]
+
+		EXPAND_FRAME_DOWN,		//dest[bytes] 
 
 		// Control flow destination = where
 		JMP,

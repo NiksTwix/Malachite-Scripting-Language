@@ -53,5 +53,8 @@
     <ClInclude Include="include\mslvm\vm_memory.hpp">
       <Filter>Файлы заголовков\include</Filter>
     </ClInclude>
+    <ClInclude Include="include\mslvm\vm_linked_list.hpp">
+      <Filter>Файлы заголовков\include</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -18,4 +18,7 @@ namespace MSLVM
 
 	struct ErrorFrame;
 	using ErrorStack = VMStack<ErrorFrame, ERROR_STACK_SIZE>;
+
+	struct HeapFreeIntervals;
+
 }

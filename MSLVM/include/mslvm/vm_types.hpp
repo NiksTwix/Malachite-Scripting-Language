@@ -1,6 +1,8 @@
 #pragma once
 #include "vm_definitions.hpp"
 #include "vm_errors.hpp"
+#include <vector>
+#include "vm_memory.hpp"
 
 namespace MSLVM
 {
@@ -8,7 +10,11 @@ namespace MSLVM
 	{
 		memory_cell heap[HEAP_SIZE]{};
 		memory_cell stack[STACK_SIZE]{};
+		HeapFreeIntervals HFI{0, HEAP_END};
 	};
+
+
+
 	struct alignas(8) Register
 	{
 		union
