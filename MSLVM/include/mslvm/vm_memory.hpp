@@ -1,6 +1,5 @@
 #pragma once
 #include <cstdint>
-#include "vm_definitions.hpp"
 #include "vm_linked_list.hpp"
 #include <iostream>
 

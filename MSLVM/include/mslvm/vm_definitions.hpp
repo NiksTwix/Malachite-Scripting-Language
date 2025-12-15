@@ -1,10 +1,11 @@
 #pragma once
 #include <cstdint>
-
+#include <vector>
+#include <string>
 namespace MSLVM
 {
 	using memory_cell = uint8_t;
-	using register_index = uint8_t;
+	using register_index = uint64_t;
 
 	using register_integer = int64_t;
 	using register_unsigned = uint64_t;
@@ -25,11 +26,11 @@ namespace MSLVM
 		A2 = 126,    // Argument/Accumulator 2 (R126)
 		RT = 127     // Return Value Temporary (R127)
 	};
-	
+
 
 	constexpr uint32_t HEAP_SIZE = 32768; //32 KB
 	constexpr uint32_t HEAP_START = 0;
-	constexpr uint32_t HEAP_END = HEAP_SIZE-1;
+	constexpr uint32_t HEAP_END = HEAP_SIZE - 1;
 
 	constexpr uint32_t STACK_SIZE = 32768; //32 KB
 	constexpr uint32_t STACK_START = 0;
@@ -66,7 +67,7 @@ namespace MSLVM
 
 	using operation_code = uint16_t;
 
-	enum VMOperationCode: uint8_t
+	enum VMOperationCode : uint8_t
 	{
 		NOP = 0,
 
@@ -101,52 +102,51 @@ namespace MSLVM
 		BIT_OFFSET_LEFT_RRR,
 		BIT_OFFSET_RIGHT_RRR,
 
-		CMP_RR_INTEGER,          //destination - null, source0 - first, source1 - second
-		CMP_RR_UNSIGNED,          //destination - null, source0 - first, source1 - second
-		CMP_RR_REAL,     //destination - null, source0 - first, source1 - second; For double with nan checking
-		GET_FLAG,    //destination - register, source0 - flag type (check FLAG enum)
+		CMP_RR_INTEGER,          //arg0 - null, arg1 - first, arg2 - second
+		CMP_RR_UNSIGNED,          //arg0 - null, arg1 - first, arg2 - second
+		CMP_RR_REAL,     //arg0 - null, arg1 - first, arg2 - second; For double with nan checking
+		GET_FLAG,    //arg0 - register, arg1 - flag type (check FLAG enum)
 
 		//Memory
 
-		//LOAD_RM,    //register-destination,             address loading from - source0, size [1-8 bytes] - source1
-		//STORE_MR,        //Address saving to-destination,    register - source0,             size [1-8 bytes] - source1
+		//LOAD_RM,    //register-arg0,             address loading from - arg1, size [1-8 bytes] - arg2
+		//STORE_MR,        //Address saving to-arg0,    register - arg1,             size [1-8 bytes] - arg2
 
 		MOV_RR,
-		MOV_RI_INTEGER,          //Integer
-		MOV_RI_UNSIGNED,         //Unsigned integer
-		MOV_RI_REAL,       //Double
+		MOV_RI_INTEGER,          //Integer	arg0 - register-destination, arg1 - immediated
+		MOV_RI_UNSIGNED,         //Unsigned integer arg0 - register-destination, arg1 - immediated
+		MOV_RI_REAL,       //Double arg0 - register-destination, arg1 - immediated
 
-		PUSH,                // destination[size (not register)], source0[register from]
-		POP,                 // destination[register to], source0[size (not register)]
+		PUSH,                // arg0[size (not register)], arg1[register from]
+		POP,                 // arg0[register to], arg1[size (not register)]
 
 		//Current scope
-		LOAD_LOCAL,          //destination[register]            source[memory-offset]          source1[size in bytes]  
-		STORE_LOCAL,         //destination[memory-offset]       source[register]               source1[size in bytes]  
+		LOAD_LOCAL,          //arg0[register]            arg1[memory-offset]          arg2[size in bytes]  
+		STORE_LOCAL,         //arg0[memory-offset]       arg1[register]               arg2[size in bytes]  
 		//Global scope
-		LOAD_GLOBAL,          //destination[register]            source[memory-offset]          source1[size in bytes]  
-		STORE_GLOBAL,         //destination[memory-offset]       source[register]               source1[size in bytes]  
+		LOAD_GLOBAL,          //arg0[register]            arg1[memory-offset]          arg2[size in bytes]  
+		STORE_GLOBAL,         //arg0[memory-offset]       arg1[register]               arg2[size in bytes]  
 
 		// A - absolute, r - relatively
-		//STORE_ENCLOSING_A,     //destination[memory-offset]       source0[register]              source1[size and depth] size - 32 little bits, depth - 32 big bits       we store variable to n frame at start
-		//LOAD_ENCLOSING_A,      //destination[register]            source0[memory-offset]         source1[size and depth] size - 32 little bits, depth - 32 big bits       we load variable from n frame at start
-		//STORE_ENCLOSING_R,     //destination[memory-offset]       source0[register]              source1[size and depth] size - 32 little bits, depth - 32 big bits       we store variable to n frame from top
-		//LOAD_ENCLOSING_R,      //destination[register]            source0[memory-offset]         source1[size and depth] size - 32 little bits, depth - 32 big bits       we load variable from n frame  from top
+		//STORE_ENCLOSING_A,     //arg0[memory-offset]       arg1[register]              arg2[size and depth] size - 32 little bits, depth - 32 big bits       we store variable to n frame at start
+		//LOAD_ENCLOSING_A,      //arg0[register]            arg1[memory-offset]         arg2[size and depth] size - 32 little bits, depth - 32 big bits       we load variable from n frame at start
+		//STORE_ENCLOSING_R,     //arg0[memory-offset]       arg1[register]              arg2[size and depth] size - 32 little bits, depth - 32 big bits       we store variable to n frame from top
+		//LOAD_ENCLOSING_R,      //arg0[register]            arg1[memory-offset]         arg2[size and depth] size - 32 little bits, depth - 32 big bits       we load variable from n frame  from top
 
-		ALLOCATE_MEMORY,		//dest[register of address's saving], src0[size of memory's interval]
-		FREE_MEMORY,			//dest[register with address], src0[size of memory's interval]
+		ALLOCATE_MEMORY,		//arg0[register of address's saving], arg1[size of memory's interval]
+		FREE_MEMORY,			//arg0[register with address], arg1[size of memory's interval]
 
-		EXPAND_FRAME_DOWN,		//dest[bytes] 
-
-		// Control flow destination = where
+		EXPAND_FRAME_DOWN,		//arg0[bytes] 
+		// Control flow arg0 = where
 		JMP,
-		JMP_CV,      //CV- Condition Valid - destination[where], source0[condition register]
-		JMP_CNV,     //CNV - Condition Not Valid - destination[where], source0[condition register]
+		JMP_CV,      //CV- Condition Valid - arg0[where], arg1[condition register]
+		JMP_CNV,     //CNV - Condition Not Valid - arg0[where], arg1[condition register]
 		CALL,
 		RET,
 		HALT,	//EXT
 
 		// Calls 
-		VM_CALL,   //destination[VMCall], source0[param0], source1[param1]
+		VM_CALL,   //arg0[VMCall], arg1[parameter0], arg2[parameter1]
 
 
 		// Type Convertion
@@ -158,7 +158,15 @@ namespace MSLVM
 
 		TC_RTU_R,    //Type Convertion Real To Unsigned Integer
 		TC_ITU_R,    //Type Convertion Integer To Unsigned Integer
-	};		   
+	};
 
 
+	enum VMCallType 
+	{
+		//PRINTING
+		PRINT_INTEGER,		//arg0[VMCall], arg1[register_from]
+		PRINT_REAL,			//arg0[VMCall], arg1[register_from]
+		PRINT_UNSIGNED,		//arg0[VMCall], arg1[register_from]
+		PRINT_CHAR,			//arg0[VMCall], arg1[register_from]
+	};
 }

@@ -1,8 +1,11 @@
 #pragma once
-#include "vm_definitions.hpp"
 #include "vm_errors.hpp"
-#include <vector>
 #include "vm_memory.hpp"
+
+#define REG_U(reg) ((reg).u)	   // для номеров регистров
+#define REG_I(reg) ((reg).i)		// для immediate integer
+#define REG_R(reg) ((reg).r)		// для immediate real
+
 
 namespace MSLVM
 {
@@ -31,7 +34,7 @@ namespace MSLVM
 		{
 			i = imm_i;
 		}
-		explicit Register(register_unsigned imm_u)
+		Register(register_unsigned imm_u)	//Register number
 		{
 			u = imm_u;
 		}
@@ -41,20 +44,18 @@ namespace MSLVM
 		}
 	};
 
-	struct alignas(8) VMOperation	//16 bytes
+	struct alignas(8) VMOperation	//32 bytes
 	{
-		Register imm{};			//8 bytes
-		uint32_t dsi{};			//debug symbol index 2 bytes
+		Register arg0{};	//8 byte
+		Register arg1{};	//8 byte
+		Register arg2{};	//8 byte
+		uint32_t dsi{};			//4 byte
 		VMOperationCode code{};	//1 byte
-		register_index dest{};	//1 byte
-		register_index src0{};	//1 byte
-		register_index src1{};	//1 byte
-
-		VMOperation(VMOperationCode code, register_index dest, register_index src0, register_index src1, Register imm, uint32_t debug_symbol_index) : code(code), dest(dest), src0(src0), src1(src1), imm(imm), dsi(debug_symbol_index) {}
-		VMOperation(VMOperationCode code, register_index dest, register_index src0, register_index src1, Register imm) : code(code), dest(dest), src0(src0), src1(src1), imm(imm) {}
-		VMOperation(VMOperationCode code, register_index dest, register_index src0, register_index src1) : code(code), dest(dest), src0(src0), src1(src1) {}
-		VMOperation(VMOperationCode code, register_index dest, register_index src0) : code(code), dest(dest), src0(src0){}
-		VMOperation(VMOperationCode code, register_index dest, Register imm) : code(code), dest(dest), imm(imm) {}
+		VMOperation(VMOperationCode code, Register arg0, Register arg1, Register arg2, uint32_t debug_symbol_index) : code(code), arg0(arg0), arg1(arg1), arg2(arg2), dsi(debug_symbol_index) {}
+		VMOperation(VMOperationCode code, Register arg0, Register arg1, Register arg2) : code(code), arg0(arg0), arg1(arg1), arg2(arg2){}
+		VMOperation(VMOperationCode code, Register arg0, Register arg1) : code(code), arg0(arg0), arg1(arg1){}
+		VMOperation(VMOperationCode code, Register arg0) : code(code), arg0(arg0) {}
+		VMOperation() {}
 	};
 
 	struct CallFrame

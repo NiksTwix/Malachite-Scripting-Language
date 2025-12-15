@@ -1,4 +1,5 @@
 #include "..\..\include\mslvm\vm_execution.hpp"
+#include <cstring>
 
 
 namespace MSLVM
@@ -11,13 +12,13 @@ namespace MSLVM
 		{
 			state.registers[i].u = 0;
 		}
-		state.registers[SpecialRegister::SP].u = STACK_START;
-		state.registers[SpecialRegister::FP].u = STACK_START;
+		state.registers[(uint64_t)SpecialRegister::SP].u = STACK_START;
+		state.registers[(uint64_t)SpecialRegister::FP].u = STACK_START;
 
 		if (clear_memory) 
 		{
-			std::memset(state.memory.heap, 0, HEAP_SIZE);
-			std::memset(state.memory.stack, 0, STACK_SIZE);
+			memset(state.memory.heap, 0, HEAP_SIZE);
+			memset(state.memory.stack, 0, STACK_SIZE);
 		}
 	}
 	void execute_code_switch(VMState& state, VMOperation* operations, size_t length)
@@ -34,75 +35,75 @@ namespace MSLVM
 				//--------------------Arithmetic Operations
 				{
 			case VMOperationCode::ADD_RRR_REAL:
-				state.registers[operation.dest].r = state.registers[operation.src0].r + state.registers[operation.src1].r; break;
+				state.registers[REG_U(operation.arg0)].r = state.registers[REG_U(operation.arg1)].r + state.registers[REG_U(operation.arg2)].r; break;
 			case VMOperationCode::ADD_RRR_UNSIGNED:
-				state.registers[operation.dest].u = state.registers[operation.src0].u + state.registers[operation.src1].u; break;
+				state.registers[REG_U(operation.arg0)].u = state.registers[REG_U(operation.arg1)].u + state.registers[REG_U(operation.arg2)].u; break;
 			case VMOperationCode::ADD_RRR_INTEGER:
-				state.registers[operation.dest].i = state.registers[operation.src0].i + state.registers[operation.src1].i; break;
+				state.registers[REG_U(operation.arg0)].i = state.registers[REG_U(operation.arg1)].i + state.registers[REG_U(operation.arg2)].i; break;
 
 			case VMOperationCode::SUB_RRR_REAL:
-				state.registers[operation.dest].r = state.registers[operation.src0].r - state.registers[operation.src1].r; break;
+				state.registers[REG_U(operation.arg0)].r = state.registers[REG_U(operation.arg1)].r - state.registers[REG_U(operation.arg2)].r; break;
 			case VMOperationCode::SUB_RRR_UNSIGNED:
-				state.registers[operation.dest].u = state.registers[operation.src0].u - state.registers[operation.src1].u; break;
+				state.registers[REG_U(operation.arg0)].u = state.registers[REG_U(operation.arg1)].u - state.registers[REG_U(operation.arg2)].u; break;
 			case VMOperationCode::SUB_RRR_INTEGER:
-				state.registers[operation.dest].i = state.registers[operation.src0].i - state.registers[operation.src1].i; break;
+				state.registers[REG_U(operation.arg0)].i = state.registers[REG_U(operation.arg1)].i - state.registers[REG_U(operation.arg2)].i; break;
 
 			case VMOperationCode::MUL_RRR_REAL:
-				state.registers[operation.dest].r = state.registers[operation.src0].r * state.registers[operation.src1].r; break;
+				state.registers[REG_U(operation.arg0)].r = state.registers[REG_U(operation.arg1)].r * state.registers[REG_U(operation.arg2)].r; break;
 			case VMOperationCode::MUL_RRR_UNSIGNED:
-				state.registers[operation.dest].u = state.registers[operation.src0].u * state.registers[operation.src1].u; break;
+				state.registers[REG_U(operation.arg0)].u = state.registers[REG_U(operation.arg1)].u * state.registers[REG_U(operation.arg2)].u; break;
 			case VMOperationCode::MUL_RRR_INTEGER:
-				state.registers[operation.dest].i = state.registers[operation.src0].i * state.registers[operation.src1].i; break;
+				state.registers[REG_U(operation.arg0)].i = state.registers[REG_U(operation.arg1)].i * state.registers[REG_U(operation.arg2)].i; break;
 
 			case VMOperationCode::DIV_RRR_REAL:
 			{
-				if (state.registers[operation.src1].r == 0) {
+				if (state.registers[REG_U(operation.arg2)].r == 0) {
 					errcode = ErrorCode::ZeroDivision; break;
 				}
-				state.registers[operation.dest].r = state.registers[operation.src0].r / state.registers[operation.src1].r; break;
+				state.registers[REG_U(operation.arg0)].r = state.registers[REG_U(operation.arg1)].r / state.registers[REG_U(operation.arg2)].r; break;
 			}
 			case VMOperationCode::DIV_RRR_UNSIGNED:
 			{
-				if (state.registers[operation.src1].u == 0) {
+				if (state.registers[REG_U(operation.arg2)].u == 0) {
 					errcode = ErrorCode::ZeroDivision; break;
 				}
-				state.registers[operation.dest].u = state.registers[operation.src0].u / state.registers[operation.src1].u; break;
+				state.registers[REG_U(operation.arg0)].u = state.registers[REG_U(operation.arg1)].u / state.registers[REG_U(operation.arg2)].u; break;
 			}
 			case VMOperationCode::DIV_RRR_INTEGER: {
-				if (state.registers[operation.src1].i == 0) {
+				if (state.registers[REG_U(operation.arg2)].i == 0) {
 					errcode = ErrorCode::ZeroDivision; break;
 				}
-				state.registers[operation.dest].i = state.registers[operation.src0].i / state.registers[operation.src1].i; break;
+				state.registers[REG_U(operation.arg0)].i = state.registers[REG_U(operation.arg1)].i / state.registers[REG_U(operation.arg2)].i; break;
 			}
 
 			case VMOperationCode::NEG_RR_REAL:
-				state.registers[operation.dest].r = -state.registers[operation.src0].r; break;
+				state.registers[REG_U(operation.arg0)].r = -state.registers[REG_U(operation.arg1)].r; break;
 			case VMOperationCode::NEG_RR_INTEGER:
-				state.registers[operation.dest].i = -state.registers[operation.src0].i; break;
+				state.registers[REG_U(operation.arg0)].i = -state.registers[REG_U(operation.arg1)].i; break;
 
 			case VMOperationCode::MOD_RR_UNSIGNED:
-				if (state.registers[operation.src1].u == 0) {
+				if (state.registers[REG_U(operation.arg2)].u == 0) {
 					errcode = ErrorCode::ZeroDivision; break;
 				}
-				state.registers[operation.dest].u = state.registers[operation.src0].u % state.registers[operation.src1].u; break;
+				state.registers[REG_U(operation.arg0)].u = state.registers[REG_U(operation.arg1)].u % state.registers[REG_U(operation.arg2)].u; break;
 			case VMOperationCode::MOD_RR_INTEGER:
-				if (state.registers[operation.src1].i == 0) {
+				if (state.registers[REG_U(operation.arg2)].i == 0) {
 					errcode = ErrorCode::ZeroDivision; break;
 				}
-				state.registers[operation.dest].i = state.registers[operation.src0].i % state.registers[operation.src1].i; break;
+				state.registers[REG_U(operation.arg0)].i = state.registers[REG_U(operation.arg1)].i % state.registers[REG_U(operation.arg2)].i; break;
 				}
 				//--------------------Logical Operations
 				{
 			case VMOperationCode::AND_RRR:
-				state.registers[operation.dest].u = (state.registers[operation.src0].u != 0 && state.registers[operation.src1].u != 0) ? 1 : 0;
+				state.registers[REG_U(operation.arg0)].u = (state.registers[REG_U(operation.arg1)].u != 0 && state.registers[REG_U(operation.arg2)].u != 0) ? 1 : 0;
 				break;
 
 			case VMOperationCode::OR_RRR:
-				state.registers[operation.dest].u = (state.registers[operation.src0].u != 0 || state.registers[operation.src1].u != 0) ? 1 : 0;
+				state.registers[REG_U(operation.arg0)].u = (state.registers[REG_U(operation.arg1)].u != 0 || state.registers[REG_U(operation.arg2)].u != 0) ? 1 : 0;
 				break;
 
 			case VMOperationCode::NOT_RR:
-				state.registers[operation.dest].u = (state.registers[operation.src0].u == 0) ? 1 : 0;
+				state.registers[REG_U(operation.arg0)].u = (state.registers[REG_U(operation.arg1)].u == 0) ? 1 : 0;
 				break;
 				}
 
@@ -110,23 +111,23 @@ namespace MSLVM
 				{
 					// Битовые операции
 			case VMOperationCode::BIT_AND_RRR:
-				state.registers[operation.dest].u = state.registers[operation.src0].u & state.registers[operation.src1].u;
+				state.registers[REG_U(operation.arg0)].u = state.registers[REG_U(operation.arg1)].u & state.registers[REG_U(operation.arg2)].u;
 				break;
 
 			case VMOperationCode::BIT_OR_RRR:
-				state.registers[operation.dest].u = state.registers[operation.src0].u | state.registers[operation.src1].u;
+				state.registers[REG_U(operation.arg0)].u = state.registers[REG_U(operation.arg1)].u | state.registers[REG_U(operation.arg2)].u;
 				break;
 
 			case VMOperationCode::BIT_NOT_RR:
-				state.registers[operation.dest].u = ~state.registers[operation.src0].u;
+				state.registers[REG_U(operation.arg0)].u = ~state.registers[REG_U(operation.arg1)].u;
 				break;
 
 			case VMOperationCode::BIT_OFFSET_LEFT_RRR:
-				state.registers[operation.dest].u = state.registers[operation.src0].u << state.registers[operation.src1].u;
+				state.registers[REG_U(operation.arg0)].u = state.registers[REG_U(operation.arg1)].u << state.registers[REG_U(operation.arg2)].u;
 				break;
 
 			case VMOperationCode::BIT_OFFSET_RIGHT_RRR:
-				state.registers[operation.dest].u = state.registers[operation.src0].u >> state.registers[operation.src1].u;
+				state.registers[REG_U(operation.arg0)].u = state.registers[REG_U(operation.arg1)].u >> state.registers[REG_U(operation.arg2)].u;
 				break;
 				}
 
@@ -137,10 +138,10 @@ namespace MSLVM
 				//Reset logic flags state
 				state.registers[SpecialRegister::FL].u &= ~(Flag::ZERO | Flag::LESS | Flag::GREATER);
 
-				if (state.registers[operation.src0].i == state.registers[operation.src1].i) {
+				if (state.registers[REG_U(operation.arg1)].i == state.registers[REG_U(operation.arg2)].i) {
 					state.registers[SpecialRegister::FL].u |= Flag::ZERO;
 				}
-				else if (state.registers[operation.src0].i > state.registers[operation.src1].i)
+				else if (state.registers[REG_U(operation.arg1)].i > state.registers[REG_U(operation.arg2)].i)
 				{
 					state.registers[SpecialRegister::FL].u |= Flag::GREATER;
 				}
@@ -152,10 +153,10 @@ namespace MSLVM
 			case VMOperationCode::CMP_RR_UNSIGNED:
 				//Reset logic flags state
 				state.registers[SpecialRegister::FL].u &= ~(Flag::ZERO | Flag::LESS | Flag::GREATER);
-				if (state.registers[operation.src0].u == state.registers[operation.src1].u) {
+				if (state.registers[REG_U(operation.arg1)].u == state.registers[REG_U(operation.arg2)].u) {
 					state.registers[SpecialRegister::FL].u |= Flag::ZERO;
 				}
-				else if (state.registers[operation.src0].u > state.registers[operation.src1].u)
+				else if (state.registers[REG_U(operation.arg1)].u > state.registers[REG_U(operation.arg2)].u)
 				{
 					state.registers[SpecialRegister::FL].u |= Flag::GREATER;
 				}
@@ -175,14 +176,14 @@ namespace MSLVM
 					uint64_t mantissa = bits & 0xFFFFFFFFFFFFF; // 52 bits for mantissa
 					return (exponent == 0x7FF) && (mantissa != 0);
 					};
-				if (is_nan(state.registers[operation.src0].r) || is_nan(state.registers[operation.src1].r)) {
+				if (is_nan(state.registers[REG_U(operation.arg1)].r) || is_nan(state.registers[REG_U(operation.arg2)].r)) {
 					// NaN detected - don't set comparison flags
 					errcode = ErrorCode::NanValue; break;
 				}
-				if (state.registers[operation.src0].r == state.registers[operation.src1].r) {
+				if (state.registers[REG_U(operation.arg1)].r == state.registers[REG_U(operation.arg2)].r) {
 					state.registers[SpecialRegister::FL].u |= Flag::ZERO;
 				}
-				else if (state.registers[operation.src0].r > state.registers[operation.src1].r)
+				else if (state.registers[REG_U(operation.arg1)].r > state.registers[REG_U(operation.arg2)].r)
 				{
 					state.registers[SpecialRegister::FL].u |= Flag::GREATER;
 				}
@@ -194,35 +195,35 @@ namespace MSLVM
 			}
 			case VMOperationCode::GET_FLAG: //destination - register, source0 - flag type (check FLAG enum)
 			{
-				Flag flag = (Flag)operation.src0;	// uint64_t -> uint32_t
-				state.registers[operation.dest].u = state.registers[SpecialRegister::FL].u & flag;
+				Flag flag = (Flag)operation.arg1.u;	// uint64_t -> uint32_t
+				state.registers[REG_U(operation.arg0)].u = state.registers[SpecialRegister::FL].u & flag;
 			}
 			break;
 				}
 				//--------------------Memory Operations                                      
 				{
 			case MOV_RR:
-				state.registers[operation.dest].u = state.registers[operation.src0].u;
+				state.registers[REG_U(operation.arg0)].u = state.registers[REG_U(operation.arg1)].u;
 				break;
 			case MOV_RI_INTEGER:
-				state.registers[operation.dest].i = operation.imm.i;
+				state.registers[REG_U(operation.arg0)].i = operation.arg1.i;
 				break;
 			case MOV_RI_UNSIGNED:
-				state.registers[operation.dest].u = operation.imm.u;
+				state.registers[REG_U(operation.arg0)].u = operation.arg1.u;
 				break;
 			case MOV_RI_REAL:
-				state.registers[operation.dest].r = operation.imm.r;
+				state.registers[REG_U(operation.arg0)].r = operation.arg1.r;
 				break;
 			case PUSH:
 			{
-				uint64_t size = operation.dest;
+				uint64_t size = REG_U(operation.arg0);
 
 				if (state.registers[SpecialRegister::SP].u + size > STACK_END) {	//OVERFLOW OF UINT64_T
 					errcode = ErrorCode::StackOverflow;
 					break;
 				}
 				uint64_t start_address = state.registers[SpecialRegister::SP].u;	//register subtracted on size before
-				uint64_t value = state.registers[operation.src0].u;
+				uint64_t value = state.registers[REG_U(operation.arg1)].u;
 				write_little_endian(state.memory.stack, start_address, value, size);
 				state.registers[SpecialRegister::SP].u += size;
 				break;
@@ -230,7 +231,7 @@ namespace MSLVM
 
 			case POP:
 			{
-				uint64_t size = operation.src0;
+				uint64_t size = operation.arg1.u;
 				uint64_t sp = state.registers[SpecialRegister::SP].u;
 
 				//  Underflow checking: subtraction size from SP is fobidden if SP < size 
@@ -240,13 +241,13 @@ namespace MSLVM
 				}
 				state.registers[SpecialRegister::SP].u -= size;
 				uint64_t start_address = state.registers[SpecialRegister::SP].u;
-				state.registers[operation.dest].u = read_little_endian(state.memory.stack, start_address, size);
+				state.registers[REG_U(operation.arg0)].u = read_little_endian(state.memory.stack, start_address, size);
 				break;
 			}
 			case LOAD_LOCAL: // dest-register, src0-offset from FP, src1-data size (in bytes)
 			{
-				uint64_t offset = operation.src0;
-				uint64_t size = operation.src1;
+				uint64_t offset = operation.arg1.u;
+				uint64_t size = operation.arg2.u;
 
 				// Local variable are AFTER FP (stack grows to top)
 				uint64_t address = state.registers[SpecialRegister::FP].u + offset;
@@ -259,15 +260,15 @@ namespace MSLVM
 
 				// Read little-endian
 				uint64_t value = read_little_endian(state.memory.stack, address, size);
-				state.registers[operation.dest].u = value;
+				state.registers[REG_U(operation.arg0)].u = value;
 				break;
 			}
 
 			case STORE_LOCAL: // dest-offset from FP, src0-register, src1-data size
 			{
-				uint64_t offset = operation.dest;
-				uint64_t size = operation.src1;
-				uint64_t value = state.registers[operation.src0].u;
+				uint64_t offset = REG_U(operation.arg0);
+				uint64_t size = operation.arg2.u;
+				uint64_t value = state.registers[REG_U(operation.arg1)].u;
 
 				uint64_t address = state.registers[SpecialRegister::FP].u + offset;
 
@@ -284,8 +285,8 @@ namespace MSLVM
 
 			case LOAD_GLOBAL: // dest-register, src0-offset from STACK_START, src1-data size
 			{
-				uint64_t offset = operation.src0;
-				uint64_t size = operation.src1;
+				uint64_t offset = operation.arg1.u;
+				uint64_t size = operation.arg2.u;
 
 				// Global variables are in bottom part of stack  (near to STACK_START)
 				// offset - is offset from STACK_START to TOP
@@ -299,15 +300,15 @@ namespace MSLVM
 
 				// Read little-endian
 				uint64_t value = read_little_endian(state.memory.stack, address, size);
-				state.registers[operation.dest].u = value;
+				state.registers[REG_U(operation.arg0)].u = value;
 				break;
 			}
 
 			case STORE_GLOBAL: // dest-offset from STACK_START, src0-register, src1-data size
 			{
-				uint64_t offset = operation.dest;
-				uint64_t size = operation.src1;
-				uint64_t value = state.registers[operation.src0].u;
+				uint64_t offset = REG_U(operation.arg0);
+				uint64_t size = operation.arg2.u;
+				uint64_t value = state.registers[REG_U(operation.arg1)].u;
 
 				uint64_t address = STACK_START + offset;
 
@@ -324,18 +325,18 @@ namespace MSLVM
 			case ALLOCATE_MEMORY:
 			{
 				uint64_t address = 0;
-				if (!allocate_memory(state.memory.HFI, address, operation.src0))//src0 - size of interval
+				if (!allocate_memory(state.memory.HFI, address, operation.arg1.u))//src0 - size of interval
 				{
 					errcode = ErrorCode::FailedMemoryAllocation;
 					break;
 				}
-				state.registers[operation.dest].u = address;
+				state.registers[REG_U(operation.arg0)].u = address;
 				break;
 			}
 			case FREE_MEMORY:
 			{
-				uint64_t address = state.registers[operation.dest].u;
-				uint64_t size = operation.src0;
+				uint64_t address = state.registers[REG_U(operation.arg0)].u;
+				uint64_t size = operation.arg1.u;
 				if (address < HEAP_START || address + size - 1 > HEAP_END) {
 					errcode = ErrorCode::InvalidMemoryAccess;
 					break;
@@ -345,10 +346,10 @@ namespace MSLVM
 					break;
 				}
 				break;
-
+			}
 			case EXPAND_FRAME_DOWN: 
 			{
-				uint64_t expanded_bytes = operation.dest;
+				uint64_t expanded_bytes = REG_U(operation.arg0);
 
 				if (state.call_stack.empty()) 
 				{	
@@ -364,26 +365,25 @@ namespace MSLVM
 				t.sp -= expanded_bytes;
 				state.registers[SpecialRegister::FP].u -= expanded_bytes;
 			}
-			}
 				}
 
 				//--------------------Control Flow Operations  
 				{
 			case VMOperationCode::JMP:
-				state.registers[SpecialRegister::IP].u = operation.dest;
+				state.registers[SpecialRegister::IP].u = REG_U(operation.arg0);
 				state.registers[SpecialRegister::FL].u |= Flag::JUMPED;
 				break;
 			case VMOperationCode::JMP_CV:
-				if (state.registers[operation.src0].u != 0)
+				if (state.registers[REG_U(operation.arg1)].u != 0)
 				{
-					state.registers[SpecialRegister::IP].u = operation.dest;
+					state.registers[SpecialRegister::IP].u = REG_U(operation.arg0);
 					state.registers[SpecialRegister::FL].u |= Flag::JUMPED;
 				}
 				break;
 			case VMOperationCode::JMP_CNV:
-				if (state.registers[operation.src0].u == 0)
+				if (state.registers[REG_U(operation.arg1)].u == 0)
 				{
-					state.registers[SpecialRegister::IP].u = operation.dest;
+					state.registers[SpecialRegister::IP].u = REG_U(operation.arg0);
 					state.registers[SpecialRegister::FL].u |= Flag::JUMPED;
 				}
 				break;
@@ -400,7 +400,7 @@ namespace MSLVM
 
 				state.registers[SpecialRegister::FP].u = state.registers[SpecialRegister::SP].u;
 
-				state.registers[SpecialRegister::IP].u = operation.dest;
+				state.registers[SpecialRegister::IP].u = REG_U(operation.arg0);
 				state.registers[SpecialRegister::FL].u |= Flag::JUMPED;
 
 				break;
@@ -427,30 +427,30 @@ namespace MSLVM
 
 				//--------------------VM Calls Operations  
 				{
-			case VMOperationCode::VM_CALL: break;
-				
-				
+			case VMOperationCode::VM_CALL:
+					handle_vm_call(state, operation);
+					break;
 				}
 
 				//--------------------Type Convertion Operations  
 				{
 			case VMOperationCode::TC_ITR_R: 
-				state.registers[operation.dest].r = static_cast<register_real>(state.registers[operation.dest].i);
+				state.registers[REG_U(operation.arg0)].r = static_cast<register_real>(state.registers[REG_U(operation.arg0)].i);
 				break;
 			case VMOperationCode::TC_RTI_R: 
-				state.registers[operation.dest].i = static_cast<register_integer>(state.registers[operation.dest].r);
+				state.registers[REG_U(operation.arg0)].i = static_cast<register_integer>(state.registers[REG_U(operation.arg0)].r);
 				break;
 			case VMOperationCode::TC_UTR_R: 
-				state.registers[operation.dest].r = static_cast<register_real>(state.registers[operation.dest].u);
+				state.registers[REG_U(operation.arg0)].r = static_cast<register_real>(state.registers[REG_U(operation.arg0)].u);
 				break;
 			case VMOperationCode::TC_UTI_R: 
-				state.registers[operation.dest].i = static_cast<register_integer>(state.registers[operation.dest].u);
+				state.registers[REG_U(operation.arg0)].i = static_cast<register_integer>(state.registers[REG_U(operation.arg0)].u);
 				break;
 			case VMOperationCode::TC_RTU_R: 
-				state.registers[operation.dest].u = static_cast<register_unsigned>(state.registers[operation.dest].r);
+				state.registers[REG_U(operation.arg0)].u = static_cast<register_unsigned>(state.registers[REG_U(operation.arg0)].r);
 				break;
 			case VMOperationCode::TC_ITU_R: 
-				state.registers[operation.dest].u = static_cast<register_unsigned>(state.registers[operation.dest].i);
+				state.registers[REG_U(operation.arg0)].u = static_cast<register_unsigned>(state.registers[REG_U(operation.arg0)].i);
 				break;
 
 				}
@@ -471,6 +471,43 @@ namespace MSLVM
 			if (state.registers[SpecialRegister::FL].u & STOPPED) break;	//flags reset in "clear_vm_state" function
 
 			state.registers[SpecialRegister::IP].u += 1;
+		}
+	}
+#if defined(__clang__) || defined(__GNUC__)
+	void execute_code_compute_goto(VMState& state, VMOperation* operations, size_t length)
+	{
+	}
+#endif
+
+	void handle_vm_call(VMState& state, VMOperation& operation)
+	{
+		auto call = REG_U(operation.arg0);
+		switch (call)
+		{
+			case VMCallType::PRINT_INTEGER:
+			{
+				int64_t value = state.registers[REG_U(operation.arg1)].i;	//Take value from register
+				std::cout << value;
+				break;
+			}
+			case VMCallType::PRINT_UNSIGNED:
+			{
+				uint64_t value = state.registers[REG_U(operation.arg1)].u;	//Take value from register
+				std::cout << value;
+				break;
+			}
+			case  VMCallType::PRINT_CHAR:
+			{
+				putchar(state.registers[REG_U(operation.arg1)].i);//Take value from register
+				break;
+			}
+			case  VMCallType::PRINT_REAL:
+			{
+				double value = state.registers[REG_U(operation.arg1)].r;	//Take value from register
+				std::cout << value;
+				break;
+			}
+			default: break;
 		}
 	}
 }

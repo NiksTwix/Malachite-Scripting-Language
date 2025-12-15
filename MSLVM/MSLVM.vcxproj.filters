@@ -24,6 +24,9 @@
     <ClCompile Include="source\core\vm_execution.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="source\api\virtual_machine.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\mslvm\fwd.hpp">
