@@ -83,13 +83,13 @@ namespace MSLVM
 		DIV_RRR_INTEGER,
 		MUL_RRR_INTEGER,
 		NEG_RR_INTEGER,
-		MOD_RR_INTEGER,
+		MOD_RRR_INTEGER,
 
 		ADD_RRR_UNSIGNED,
 		SUB_RRR_UNSIGNED,
 		DIV_RRR_UNSIGNED,
 		MUL_RRR_UNSIGNED,
-		MOD_RR_UNSIGNED,
+		MOD_RRR_UNSIGNED,
 
 		//Logic
 
@@ -105,18 +105,13 @@ namespace MSLVM
 		CMP_RR_INTEGER,          //arg0 - null, arg1 - first, arg2 - second
 		CMP_RR_UNSIGNED,          //arg0 - null, arg1 - first, arg2 - second
 		CMP_RR_REAL,     //arg0 - null, arg1 - first, arg2 - second; For double with nan checking
-		GET_FLAG,    //arg0 - register, arg1 - flag type (check FLAG enum)
-
 		//Memory
 
 		//LOAD_RM,    //register-arg0,             address loading from - arg1, size [1-8 bytes] - arg2
 		//STORE_MR,        //Address saving to-arg0,    register - arg1,             size [1-8 bytes] - arg2
 
 		MOV_RR,
-		MOV_RI_INTEGER,          //Integer	arg0 - register-destination, arg1 - immediated
-		MOV_RI_UNSIGNED,         //Unsigned integer arg0 - register-destination, arg1 - immediated
-		MOV_RI_REAL,       //Double arg0 - register-destination, arg1 - immediated
-
+		MOV_RI,				//arg0 - register-destination, arg1 - immediated
 		PUSH,                // arg0[size (not register)], arg1[register from]
 		POP,                 // arg0[register to], arg1[size (not register)]
 
@@ -135,8 +130,9 @@ namespace MSLVM
 
 		ALLOCATE_MEMORY,		//arg0[register of address's saving], arg1[size of memory's interval]
 		FREE_MEMORY,			//arg0[register with address], arg1[size of memory's interval]
-
-		EXPAND_FRAME_DOWN,		//arg0[bytes] 
+		LOAD_RM,				//arg0[register_to], arg1[address of loading] arg2(size: 1-8 bytes)
+		STORE_MR,				//arg0[address of storing], arg1[register from] arg2(size: 1-8 bytes)
+		GRAB_FRAME,		//arg0[bytes] 
 		// Control flow arg0 = where
 		JMP,
 		JMP_CV,      //CV- Condition Valid - arg0[where], arg1[condition register]

@@ -8,7 +8,7 @@ namespace MSLVM
 	{
 		state.call_stack.clear();
 		state.error_stack.clear();
-		for (size_t i = 0; i < TOTAL_REGISTERS; i++) 
+		for (size_t i = 0; i < TOTAL_REGISTERS; i++)	//IP also will be zero
 		{
 			state.registers[i].u = 0;
 		}
@@ -23,8 +23,6 @@ namespace MSLVM
 	}
 	void execute_code_switch(VMState& state, VMOperation* operations, size_t length)
 	{
-		state.registers[SpecialRegister::IP].u = 0;
-
 		while (state.registers[SpecialRegister::IP].u < length)
 		{
 			VMOperation operation = *(operations + state.registers[SpecialRegister::IP].u);
@@ -81,12 +79,12 @@ namespace MSLVM
 			case VMOperationCode::NEG_RR_INTEGER:
 				state.registers[REG_U(operation.arg0)].i = -state.registers[REG_U(operation.arg1)].i; break;
 
-			case VMOperationCode::MOD_RR_UNSIGNED:
+			case VMOperationCode::MOD_RRR_UNSIGNED:
 				if (state.registers[REG_U(operation.arg2)].u == 0) {
 					errcode = ErrorCode::ZeroDivision; break;
 				}
 				state.registers[REG_U(operation.arg0)].u = state.registers[REG_U(operation.arg1)].u % state.registers[REG_U(operation.arg2)].u; break;
-			case VMOperationCode::MOD_RR_INTEGER:
+			case VMOperationCode::MOD_RRR_INTEGER:
 				if (state.registers[REG_U(operation.arg2)].i == 0) {
 					errcode = ErrorCode::ZeroDivision; break;
 				}
@@ -138,10 +136,10 @@ namespace MSLVM
 				//Reset logic flags state
 				state.registers[SpecialRegister::FL].u &= ~(Flag::ZERO | Flag::LESS | Flag::GREATER);
 
-				if (state.registers[REG_U(operation.arg1)].i == state.registers[REG_U(operation.arg2)].i) {
+				if (state.registers[REG_U(operation.arg0)].i == state.registers[REG_U(operation.arg1)].i) {
 					state.registers[SpecialRegister::FL].u |= Flag::ZERO;
 				}
-				else if (state.registers[REG_U(operation.arg1)].i > state.registers[REG_U(operation.arg2)].i)
+				else if (state.registers[REG_U(operation.arg0)].i > state.registers[REG_U(operation.arg1)].i)
 				{
 					state.registers[SpecialRegister::FL].u |= Flag::GREATER;
 				}
@@ -153,10 +151,10 @@ namespace MSLVM
 			case VMOperationCode::CMP_RR_UNSIGNED:
 				//Reset logic flags state
 				state.registers[SpecialRegister::FL].u &= ~(Flag::ZERO | Flag::LESS | Flag::GREATER);
-				if (state.registers[REG_U(operation.arg1)].u == state.registers[REG_U(operation.arg2)].u) {
+				if (state.registers[REG_U(operation.arg0)].u == state.registers[REG_U(operation.arg1)].u) {
 					state.registers[SpecialRegister::FL].u |= Flag::ZERO;
 				}
-				else if (state.registers[REG_U(operation.arg1)].u > state.registers[REG_U(operation.arg2)].u)
+				else if (state.registers[REG_U(operation.arg0)].u > state.registers[REG_U(operation.arg1)].u)
 				{
 					state.registers[SpecialRegister::FL].u |= Flag::GREATER;
 				}
@@ -176,14 +174,14 @@ namespace MSLVM
 					uint64_t mantissa = bits & 0xFFFFFFFFFFFFF; // 52 bits for mantissa
 					return (exponent == 0x7FF) && (mantissa != 0);
 					};
-				if (is_nan(state.registers[REG_U(operation.arg1)].r) || is_nan(state.registers[REG_U(operation.arg2)].r)) {
+				if (is_nan(state.registers[REG_U(operation.arg0)].r) || is_nan(state.registers[REG_U(operation.arg1)].r)) {
 					// NaN detected - don't set comparison flags
 					errcode = ErrorCode::NanValue; break;
 				}
-				if (state.registers[REG_U(operation.arg1)].r == state.registers[REG_U(operation.arg2)].r) {
+				if (state.registers[REG_U(operation.arg0)].r == state.registers[REG_U(operation.arg1)].r) {
 					state.registers[SpecialRegister::FL].u |= Flag::ZERO;
 				}
-				else if (state.registers[REG_U(operation.arg1)].r > state.registers[REG_U(operation.arg2)].r)
+				else if (state.registers[REG_U(operation.arg0)].r > state.registers[REG_U(operation.arg1)].r)
 				{
 					state.registers[SpecialRegister::FL].u |= Flag::GREATER;
 				}
@@ -193,26 +191,15 @@ namespace MSLVM
 				}
 				break;
 			}
-			case VMOperationCode::GET_FLAG: //destination - register, source0 - flag type (check FLAG enum)
-			{
-				Flag flag = (Flag)operation.arg1.u;	// uint64_t -> uint32_t
-				state.registers[REG_U(operation.arg0)].u = state.registers[SpecialRegister::FL].u & flag;
-			}
 			break;
 				}
 				//--------------------Memory Operations                                      
 				{
 			case MOV_RR:
-				state.registers[REG_U(operation.arg0)].u = state.registers[REG_U(operation.arg1)].u;
+				state.registers[REG_U(operation.arg0)] = state.registers[REG_U(operation.arg1)];
 				break;
-			case MOV_RI_INTEGER:
-				state.registers[REG_U(operation.arg0)].i = operation.arg1.i;
-				break;
-			case MOV_RI_UNSIGNED:
-				state.registers[REG_U(operation.arg0)].u = operation.arg1.u;
-				break;
-			case MOV_RI_REAL:
-				state.registers[REG_U(operation.arg0)].r = operation.arg1.r;
+			case MOV_RI:
+				state.registers[REG_U(operation.arg0)] = operation.arg1;
 				break;
 			case PUSH:
 			{
@@ -253,7 +240,7 @@ namespace MSLVM
 				uint64_t address = state.registers[SpecialRegister::FP].u + offset;
 
 				// Checking
-				if (address > STACK_END || address + size - 1 > STACK_END) {
+				if (address > STACK_END || size > STACK_END - address + 1) {
 					errcode = ErrorCode::InvalidMemoryAccess;
 					break;
 				}
@@ -273,7 +260,7 @@ namespace MSLVM
 				uint64_t address = state.registers[SpecialRegister::FP].u + offset;
 
 				// Проверка границ
-				if (address > STACK_END || address + size - 1 > STACK_END) {
+				if (address > STACK_END || size > STACK_END - address + 1) {
 					errcode = ErrorCode::InvalidMemoryAccess;
 					break;
 				}
@@ -293,7 +280,7 @@ namespace MSLVM
 				uint64_t address = STACK_START + offset;
 
 				// Checking
-				if (address > STACK_END || address + size - 1 > STACK_END) {
+				if (address > STACK_END || size > STACK_END - address + 1) {
 					errcode = ErrorCode::InvalidMemoryAccess;
 					break;
 				}
@@ -313,7 +300,7 @@ namespace MSLVM
 				uint64_t address = STACK_START + offset;
 
 				// Checking
-				if (address > STACK_END || address + size - 1 > STACK_END) {
+				if (address > STACK_END ||  size > STACK_END - address + 1) {
 					errcode = ErrorCode::InvalidMemoryAccess;
 					break;
 				}
@@ -337,7 +324,7 @@ namespace MSLVM
 			{
 				uint64_t address = state.registers[REG_U(operation.arg0)].u;
 				uint64_t size = operation.arg1.u;
-				if (address < HEAP_START || address + size - 1 > HEAP_END) {
+				if (address < HEAP_START ||  size > HEAP_END - address + 1) {
 					errcode = ErrorCode::InvalidMemoryAccess;
 					break;
 				}
@@ -347,7 +334,48 @@ namespace MSLVM
 				}
 				break;
 			}
-			case EXPAND_FRAME_DOWN: 
+			case LOAD_RM: 
+			{
+				uint64_t address = HEAP_START + operation.arg1.u;
+				uint64_t size = operation.arg2.u;
+				if (size > 8) 
+				{
+					errcode = ErrorCode::RegisterOverflow;
+					break;
+				}
+
+				// Checking
+				if (address > HEAP_END || size > (HEAP_END - address + 1)) {
+					errcode = ErrorCode::InvalidMemoryAccess;
+					break;
+				}
+
+				// Read little-endian
+				uint64_t value = read_little_endian(state.memory.heap, address, size);
+				state.registers[REG_U(operation.arg0)].u = value;
+				break;
+			}
+			case STORE_MR:
+			{
+				uint64_t address = HEAP_START + REG_U(operation.arg0);
+				uint64_t size = operation.arg2.u;
+				uint64_t value = state.registers[REG_U(operation.arg1)].u;
+				if (size > 8)
+				{
+					errcode = ErrorCode::RegisterOverflow;
+					break;
+				}
+				// Checking
+				if (address > HEAP_END || size > (HEAP_END - address + 1)) {
+					errcode = ErrorCode::InvalidMemoryAccess;
+					break;
+				}
+
+				// Write little-endian
+				write_little_endian(state.memory.heap, address, value, size);
+				break;
+			}
+			case GRAB_FRAME: 
 			{
 				uint64_t expanded_bytes = REG_U(operation.arg0);
 
