@@ -336,7 +336,7 @@ namespace MSLVM
 			}
 			case LOAD_RM: 
 			{
-				uint64_t address = HEAP_START + operation.arg1.u;
+				uint64_t address = HEAP_START + state.registers[REG_U(operation.arg1)].u;	//operation.arg1 - register with address of loading
 				uint64_t size = operation.arg2.u;
 				if (size > 8) 
 				{
@@ -357,7 +357,7 @@ namespace MSLVM
 			}
 			case STORE_MR:
 			{
-				uint64_t address = HEAP_START + REG_U(operation.arg0);
+				uint64_t address = HEAP_START + state.registers[REG_U(operation.arg0)].u;	//operation.arg0 - register with address of storing
 				uint64_t size = operation.arg2.u;
 				uint64_t value = state.registers[REG_U(operation.arg1)].u;
 				if (size > 8)

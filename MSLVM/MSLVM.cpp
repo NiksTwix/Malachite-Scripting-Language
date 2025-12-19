@@ -13,6 +13,10 @@ int main()
     {
         {VMOperationCode::ALLOCATE_MEMORY,0,HEAP_SIZE/2},
         {VMOperationCode::ALLOCATE_MEMORY,1,HEAP_SIZE / 2},
+        {VMOperationCode::MOV_RI, 2, 9000},
+
+        {VMOperationCode::STORE_MR, 1, 2, 8},
+        {VMOperationCode::LOAD_RM, 3, 1, 8},
     };
 
     execute_code_switch(state, operations.data(), operations.size());

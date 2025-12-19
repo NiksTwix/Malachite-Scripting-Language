@@ -130,8 +130,8 @@ namespace MSLVM
 
 		ALLOCATE_MEMORY,		//arg0[register of address's saving], arg1[size of memory's interval]
 		FREE_MEMORY,			//arg0[register with address], arg1[size of memory's interval]
-		LOAD_RM,				//arg0[register_to], arg1[address of loading] arg2(size: 1-8 bytes)
-		STORE_MR,				//arg0[address of storing], arg1[register from] arg2(size: 1-8 bytes)
+		LOAD_RM,				//arg0[register_to], arg1[register with address of loading] arg2(size: 1-8 bytes)
+		STORE_MR,				//arg0[register with address of storing], arg1[register from] arg2(size: 1-8 bytes)
 		GRAB_FRAME,		//arg0[bytes] 
 		// Control flow arg0 = where
 		JMP,
