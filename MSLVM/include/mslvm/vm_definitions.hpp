@@ -116,17 +116,15 @@ namespace MSLVM
 		POP,                 // arg0[register to], arg1[size (not register)]
 
 		//Current scope
-		LOAD_LOCAL,          //arg0[register]            arg1[memory-offset]          arg2[size in bytes]  
-		STORE_LOCAL,         //arg0[memory-offset]       arg1[register]               arg2[size in bytes]  
+		LOAD_LOCAL,          //arg0[register]            arg1[immediate value of memory-offset]          arg2[size in bytes]  
+		STORE_LOCAL,         //arg0[immediate value of memory-offset]       arg1[register]               arg2[size in bytes]  
 		//Global scope
-		LOAD_GLOBAL,          //arg0[register]            arg1[memory-offset]          arg2[size in bytes]  
-		STORE_GLOBAL,         //arg0[memory-offset]       arg1[register]               arg2[size in bytes]  
+		LOAD_GLOBAL,          //arg0[register]            arg1[immediate value of memory-offset]          arg2[size in bytes]  
+		STORE_GLOBAL,         //arg0[immediate value of memory-offset]       arg1[register]               arg2[size in bytes]  
 
-		// A - absolute, r - relatively
-		//STORE_ENCLOSING_A,     //arg0[memory-offset]       arg1[register]              arg2[size and depth] size - 32 little bits, depth - 32 big bits       we store variable to n frame at start
-		//LOAD_ENCLOSING_A,      //arg0[register]            arg1[memory-offset]         arg2[size and depth] size - 32 little bits, depth - 32 big bits       we load variable from n frame at start
-		//STORE_ENCLOSING_R,     //arg0[memory-offset]       arg1[register]              arg2[size and depth] size - 32 little bits, depth - 32 big bits       we store variable to n frame from top
-		//LOAD_ENCLOSING_R,      //arg0[register]            arg1[memory-offset]         arg2[size and depth] size - 32 little bits, depth - 32 big bits       we load variable from n frame  from top
+		LOAD_BY_ADDRESS,		//arg0[register for loading]            arg1[register with address in stack]          arg2[size in bytes]  
+		STORE_BY_ADDRESS,		//arg0[register with address in stack]            arg1[register for storing]          arg2[size in bytes] 
+		GET_GLOBAL_ADDRESS_STATIC,			//arg0[register for address saving]            arg1[immediate value of offset(local/global)]          arg2[FLAG: LOCAL =0; GLOBAL = 1]
 
 		ALLOCATE_MEMORY,		//arg0[register of address's saving], arg1[size of memory's interval]
 		FREE_MEMORY,			//arg0[register with address], arg1[size of memory's interval]

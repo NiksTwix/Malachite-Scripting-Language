@@ -282,10 +282,10 @@ namespace MSLVM
             if (end < address) return FREE_FAILURE; // Overflow
 
             // Create new free block
-            HeapFreeInterval freed_block(address, end);
+            HeapFreeInterval free_block(address, end);
 
             // Append it in indices
-            add_interval(freed_block);
+            add_interval(free_block);
 
             // Merge adjacent (смежные) blocks
             coalesce();

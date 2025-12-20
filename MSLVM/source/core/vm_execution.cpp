@@ -309,6 +309,67 @@ namespace MSLVM
 				write_little_endian(state.memory.stack, address, value, size);
 				break;
 			}
+			case LOAD_BY_ADDRESS: //arg0[register for loading]            arg1[register with address in stack]          arg2[size in bytes] 
+			{
+				uint64_t address = STACK_START + state.registers[REG_U(operation.arg1)].u;
+				uint64_t size = operation.arg2.u;
+
+				// Checking
+				if (address > STACK_END || size > STACK_END - address + 1) {
+					errcode = ErrorCode::InvalidMemoryAccess;
+					break;
+				}
+
+				// Read little-endian
+				uint64_t value = read_little_endian(state.memory.stack, address, size);
+				state.registers[REG_U(operation.arg0)].u = value;
+				break;
+			}
+
+			case STORE_BY_ADDRESS: //arg0[register with address in stack]            arg1[register for storing]          arg2[size in bytes] 
+			{
+				uint64_t address = STACK_START + state.registers[REG_U(operation.arg0)].u;
+				uint64_t size = operation.arg2.u;
+				uint64_t value = state.registers[REG_U(operation.arg1)].u;
+
+
+				// Checking
+				if (address > STACK_END || size > STACK_END - address + 1) {
+					errcode = ErrorCode::InvalidMemoryAccess;
+					break;
+				}
+
+				// Write little-endian
+				write_little_endian(state.memory.stack, address, value, size);
+				break;
+			}
+		
+			case GET_GLOBAL_ADDRESS_STATIC: //arg0[register for address saving]            arg1[immediate value of offset(local/global)]          arg2[FLAG: LOCAL =0; GLOBAL = 1]
+			{
+				uint64_t offset = operation.arg1.u;
+				uint8_t flag = operation.arg2.u & 0x1;
+
+				// For compiler: flag == 0 is more probably
+				#if defined(CLANG_OR_GNUC)
+				if (__builtin_expect(flag == 0, 1)) {
+					// LOCAL: FP + offset (hot path путь)
+					state.registers[REG_U(operation.arg0)].u =
+						state.registers[SpecialRegister::FP].u + offset;
+				}
+				#else
+				if (flag == 0) {
+					// LOCAL: FP + offset (hot path путь)
+					state.registers[REG_U(operation.arg0)].u =
+						state.registers[SpecialRegister::FP].u + offset;
+				}
+				#endif
+				else {
+					// GLOBAL: absolute offset (cold path)
+					state.registers[REG_U(operation.arg0)].u = offset;
+				}
+				break;
+			}
+
 			case ALLOCATE_MEMORY:
 			{
 				uint64_t address = 0;
@@ -322,7 +383,7 @@ namespace MSLVM
 			}
 			case FREE_MEMORY:
 			{
-				uint64_t address = state.registers[REG_U(operation.arg0)].u;
+				uint64_t address = HEAP_START + state.registers[REG_U(operation.arg0)].u;
 				uint64_t size = operation.arg1.u;
 				if (address < HEAP_START ||  size > HEAP_END - address + 1) {
 					errcode = ErrorCode::InvalidMemoryAccess;
@@ -392,6 +453,7 @@ namespace MSLVM
 				}
 				t.sp -= expanded_bytes;
 				state.registers[SpecialRegister::FP].u -= expanded_bytes;
+				break;
 			}
 				}
 
@@ -501,12 +563,11 @@ namespace MSLVM
 			state.registers[SpecialRegister::IP].u += 1;
 		}
 	}
-#if defined(__clang__) || defined(__GNUC__)
+#if defined(CLANG_OR_GNUC)
 	void execute_code_compute_goto(VMState& state, VMOperation* operations, size_t length)
 	{
 	}
 #endif
-
 	void handle_vm_call(VMState& state, VMOperation& operation)
 	{
 		auto call = REG_U(operation.arg0);
