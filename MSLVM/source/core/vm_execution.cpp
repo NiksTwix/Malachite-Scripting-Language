@@ -373,7 +373,7 @@ namespace MSLVM
 			case ALLOCATE_MEMORY:
 			{
 				uint64_t address = 0;
-				if (!allocate_memory(state.memory.HFI, address, operation.arg1.u))//src0 - size of interval
+				if (!allocate_memory(state.memory.HFI, address, state.registers[REG_U(operation.arg1)].u))//arg1 - size of interval in register
 				{
 					errcode = ErrorCode::FailedMemoryAllocation;
 					break;
@@ -384,7 +384,7 @@ namespace MSLVM
 			case FREE_MEMORY:
 			{
 				uint64_t address = HEAP_START + state.registers[REG_U(operation.arg0)].u;
-				uint64_t size = operation.arg1.u;
+				uint64_t size = state.registers[REG_U(operation.arg1)].u;
 				if (address < HEAP_START ||  size > HEAP_END - address + 1) {
 					errcode = ErrorCode::InvalidMemoryAccess;
 					break;

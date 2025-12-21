@@ -126,8 +126,8 @@ namespace MSLVM
 		STORE_BY_ADDRESS,		//arg0[register with address in stack]            arg1[register for storing]          arg2[size in bytes] 
 		GET_GLOBAL_ADDRESS_STATIC,			//arg0[register for address saving]            arg1[immediate value of offset(local/global)]          arg2[FLAG: LOCAL =0; GLOBAL = 1]
 
-		ALLOCATE_MEMORY,		//arg0[register of address's saving], arg1[size of memory's interval]
-		FREE_MEMORY,			//arg0[register with address], arg1[size of memory's interval]
+		ALLOCATE_MEMORY,		//arg0[register of address's saving], arg1[register with size of memory's interval]
+		FREE_MEMORY,			//arg0[register with address], arg1[register with size of memory's interval]
 		LOAD_RM,				//arg0[register_to], arg1[register with address of loading] arg2(size: 1-8 bytes)
 		STORE_MR,				//arg0[register with address of storing], arg1[register from] arg2(size: 1-8 bytes)
 		GRAB_FRAME,		//arg0[bytes] 

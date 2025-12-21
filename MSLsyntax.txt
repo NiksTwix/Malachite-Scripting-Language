@@ -1,0 +1,116 @@
+// Malachite Scripting Language syntax example
+
+//Directives (compiler)
+#define_const CONTANT_1 = 2000	//Inserts in the place of using
+#define_const string_1 = "String"
+
+#import "test.1"		//imports module 
+/*
+#func_inherit
+#func_define_block 
+#func_override_block
+For function th
+*/
+//Defining variables
+
+int x = 200;
+float y = 200.0;
+
+const int x = 200;
+
+//Arrays
+int size = 10
+int* array = allocate_memory(size)	//allocate_memory - its function in standard library
+free_memory(array,size)
+
+//or
+
+int* array = new int[size]	
+delete array			//size will be inserted by compiler
+
+//VM programming
+
+op_code			//Lite mode
+{
+	//default pseudo commands: mathematic, logic, push/pop, load/store, allocate/free,  label and jumping
+}
+
+op_code kernel		//Kernel mode
+{
+	//all vmoperations
+}
+
+/*
+	Compiler takes from 120 (i think it will be 115-120) general register 6 for op_code section and gives them names: RA,RB,RC,RD,RE,RF 
+	VM can use 114 register for operations.
+*/
+
+
+//Condition checking
+if (x == y): x = 2001
+elif (x != y + 1)
+{
+	x = 2002
+}
+else
+{
+	x = 2003
+}
+
+//Loops
+
+loop
+{
+	//body
+}
+
+
+for x (start,end,step)
+{
+
+}
+
+while (x==y)
+{
+	if (x != y) break;
+	elif (x != y + 1)
+	{
+		x += 1
+		y += 1
+	}
+}
+
+func f1(int x, int y, int z) -> int
+{
+	return x*y*z;
+}
+
+//func inheritance 
+
+func f2(int x,int y, int z) -> int
+{
+	#func_define_block result_calculating
+	{
+	
+		return x*y*z;
+	}
+}
+func f3(int x,int y, int z) -> int
+{
+	#func_inherit f2 (x,y,z) //new names of parameters; copies code from f1 and inserts here
+	//code before result_calculating
+	#func_override_block result_calculating
+	{
+		return x*y*z * 2;
+	}
+	//code after result_calculating	
+}
+
+
+//OOP
+
+class 
+
+
+
+
