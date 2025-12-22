@@ -28,13 +28,15 @@ namespace MSLVM
 	};
 
 
-	constexpr uint32_t HEAP_SIZE = 32768; //32 KB
-	constexpr uint32_t HEAP_START = 0;
-	constexpr uint32_t HEAP_END = HEAP_SIZE - 1;
-
 	constexpr uint32_t STACK_SIZE = 32768; //32 KB
 	constexpr uint32_t STACK_START = 0;
-	constexpr uint32_t STACK_END = STACK_SIZE - 1;
+	constexpr uint32_t STACK_END = STACK_START + STACK_SIZE - 1;
+
+	constexpr uint32_t HEAP_SIZE = 32768; //32 KB
+	constexpr uint32_t HEAP_START = STACK_END + 1;
+	constexpr uint32_t HEAP_END = HEAP_START + HEAP_SIZE - 1;
+
+	
 
 	constexpr uint32_t CALL_STACK_SIZE = 256;
 	constexpr uint32_t ERROR_STACK_SIZE = 64;
@@ -112,25 +114,20 @@ namespace MSLVM
 
 		MOV_RR,
 		MOV_RI,				//arg0 - register-destination, arg1 - immediated
-		PUSH,                // arg0[size (not register)], arg1[register from]
+		PUSH,                // arg0[register from], arg1[size (not register)]
 		POP,                 // arg0[register to], arg1[size (not register)]
 
 		//Current scope
 		LOAD_LOCAL,          //arg0[register]            arg1[immediate value of memory-offset]          arg2[size in bytes]  
-		STORE_LOCAL,         //arg0[immediate value of memory-offset]       arg1[register]               arg2[size in bytes]  
-		//Global scope
-		LOAD_GLOBAL,          //arg0[register]            arg1[immediate value of memory-offset]          arg2[size in bytes]  
-		STORE_GLOBAL,         //arg0[immediate value of memory-offset]       arg1[register]               arg2[size in bytes]  
+		STORE_LOCAL,         //arg0[register]       arg1[immediate value of memory-offset]               arg2[size in bytes]  
 
-		LOAD_BY_ADDRESS,		//arg0[register for loading]            arg1[register with address in stack]          arg2[size in bytes]  
-		STORE_BY_ADDRESS,		//arg0[register with address in stack]            arg1[register for storing]          arg2[size in bytes] 
-		GET_GLOBAL_ADDRESS_STATIC,			//arg0[register for address saving]            arg1[immediate value of offset(local/global)]          arg2[FLAG: LOCAL =0; GLOBAL = 1]
+		CALC_FRAME_ADDRESS,		//register(ARG0) offset(ARG1)
+		LOAD_BY_ADDRESS,			// register(ARG0), register - address(ARG1), size(ARG2)
+		STORE_BY_ADDRESS,			// register(ARG0), register - address(ARG1), size(ARG2)
 
 		ALLOCATE_MEMORY,		//arg0[register of address's saving], arg1[register with size of memory's interval]
 		FREE_MEMORY,			//arg0[register with address], arg1[register with size of memory's interval]
-		LOAD_RM,				//arg0[register_to], arg1[register with address of loading] arg2(size: 1-8 bytes)
-		STORE_MR,				//arg0[register with address of storing], arg1[register from] arg2(size: 1-8 bytes)
-		GRAB_FRAME,		//arg0[bytes] 
+		GRAB_FRAME,				//arg0[bytes] 
 		// Control flow arg0 = where
 		JMP,
 		JMP_CV,      //CV- Condition Valid - arg0[where], arg1[condition register]

@@ -17,8 +17,7 @@ namespace MSLVM
 
 		if (clear_memory) 
 		{
-			memset(state.memory.heap, 0, HEAP_SIZE);
-			memset(state.memory.stack, 0, STACK_SIZE);
+			memset(state.memory.memory, 0, STACK_SIZE + HEAP_SIZE);
 		}
 	}
 	void execute_code_switch(VMState& state, VMOperation* operations, size_t length)
@@ -203,35 +202,42 @@ namespace MSLVM
 				break;
 			case PUSH:
 			{
-				uint64_t size = REG_U(operation.arg0);
+				uint64_t size = REG_U(operation.arg1);
+				uint64_t current_sp = state.registers[SpecialRegister::SP].u;
+				uint64_t new_sp = current_sp + size;
 
-				if (state.registers[SpecialRegister::SP].u + size > STACK_END) {	//OVERFLOW OF UINT64_T
+				if (new_sp > STACK_END) {
 					errcode = ErrorCode::StackOverflow;
 					break;
 				}
-				uint64_t start_address = state.registers[SpecialRegister::SP].u;	//register subtracted on size before
-				uint64_t value = state.registers[REG_U(operation.arg1)].u;
-				write_little_endian(state.memory.stack, start_address, value, size);
-				state.registers[SpecialRegister::SP].u += size;
+
+				uint64_t value = state.registers[REG_U(operation.arg0)].u;
+				write_little_endian(state.memory.memory, current_sp, value, size);
+
+				state.registers[SpecialRegister::SP].u = new_sp;
 				break;
 			}
 
 			case POP:
 			{
 				uint64_t size = operation.arg1.u;
-				uint64_t sp = state.registers[SpecialRegister::SP].u;
+				uint64_t current_sp = state.registers[SpecialRegister::SP].u;
 
-				//  Underflow checking: subtraction size from SP is fobidden if SP < size 
-				if (sp < size) {  // sp - size приведёт к underflow через 0
+				if (current_sp < size) {
 					errcode = ErrorCode::StackUnderflow;
 					break;
 				}
-				state.registers[SpecialRegister::SP].u -= size;
-				uint64_t start_address = state.registers[SpecialRegister::SP].u;
-				state.registers[REG_U(operation.arg0)].u = read_little_endian(state.memory.stack, start_address, size);
+
+				uint64_t new_sp = current_sp - size;
+
+				uint64_t value = read_little_endian(state.memory.memory, new_sp, size);
+				state.registers[REG_U(operation.arg0)].u = value;
+
+				// Обновление SP
+				state.registers[SpecialRegister::SP].u = new_sp;
 				break;
 			}
-			case LOAD_LOCAL: // dest-register, src0-offset from FP, src1-data size (in bytes)
+			case LOAD_LOCAL:
 			{
 				uint64_t offset = operation.arg1.u;
 				uint64_t size = operation.arg2.u;
@@ -246,16 +252,16 @@ namespace MSLVM
 				}
 
 				// Read little-endian
-				uint64_t value = read_little_endian(state.memory.stack, address, size);
+				uint64_t value = read_little_endian(state.memory.memory, address, size);
 				state.registers[REG_U(operation.arg0)].u = value;
 				break;
 			}
 
-			case STORE_LOCAL: // dest-offset from FP, src0-register, src1-data size
+			case STORE_LOCAL: 
 			{
-				uint64_t offset = REG_U(operation.arg0);
+				uint64_t offset = REG_U(operation.arg1);
 				uint64_t size = operation.arg2.u;
-				uint64_t value = state.registers[REG_U(operation.arg1)].u;
+				uint64_t value = state.registers[REG_U(operation.arg0)].u;
 
 				uint64_t address = state.registers[SpecialRegister::FP].u + offset;
 
@@ -266,124 +272,67 @@ namespace MSLVM
 				}
 
 				// Write little-endian
-				write_little_endian(state.memory.stack, address, value, size);
+				write_little_endian(state.memory.memory, address, value, size);
 				break;
 			}
-
-			case LOAD_GLOBAL: // dest-register, src0-offset from STACK_START, src1-data size
+			case LOAD_BY_ADDRESS: 
 			{
-				uint64_t offset = operation.arg1.u;
+				uint64_t address = state.registers[REG_U(operation.arg1)].u;
 				uint64_t size = operation.arg2.u;
 
-				// Global variables are in bottom part of stack  (near to STACK_START)
-				// offset - is offset from STACK_START to TOP
-				uint64_t address = STACK_START + offset;
-
 				// Checking
-				if (address > STACK_END || size > STACK_END - address + 1) {
+				if (size > HEAP_END - address + 1) {
 					errcode = ErrorCode::InvalidMemoryAccess;
 					break;
 				}
 
 				// Read little-endian
-				uint64_t value = read_little_endian(state.memory.stack, address, size);
+				uint64_t value = read_little_endian(state.memory.memory, address, size);
 				state.registers[REG_U(operation.arg0)].u = value;
 				break;
 			}
 
-			case STORE_GLOBAL: // dest-offset from STACK_START, src0-register, src1-data size
+			case STORE_BY_ADDRESS: 
 			{
-				uint64_t offset = REG_U(operation.arg0);
+				uint64_t value = state.registers[REG_U(operation.arg0)].u;
+				uint64_t address = state.registers[REG_U(operation.arg1)].u;
 				uint64_t size = operation.arg2.u;
-				uint64_t value = state.registers[REG_U(operation.arg1)].u;
 
-				uint64_t address = STACK_START + offset;
 
 				// Checking
-				if (address > STACK_END ||  size > STACK_END - address + 1) {
+				if (size > HEAP_END - address + 1) {
 					errcode = ErrorCode::InvalidMemoryAccess;
 					break;
 				}
 
 				// Write little-endian
-				write_little_endian(state.memory.stack, address, value, size);
-				break;
-			}
-			case LOAD_BY_ADDRESS: //arg0[register for loading]            arg1[register with address in stack]          arg2[size in bytes] 
-			{
-				uint64_t address = STACK_START + state.registers[REG_U(operation.arg1)].u;
-				uint64_t size = operation.arg2.u;
-
-				// Checking
-				if (address > STACK_END || size > STACK_END - address + 1) {
-					errcode = ErrorCode::InvalidMemoryAccess;
-					break;
-				}
-
-				// Read little-endian
-				uint64_t value = read_little_endian(state.memory.stack, address, size);
-				state.registers[REG_U(operation.arg0)].u = value;
-				break;
-			}
-
-			case STORE_BY_ADDRESS: //arg0[register with address in stack]            arg1[register for storing]          arg2[size in bytes] 
-			{
-				uint64_t address = STACK_START + state.registers[REG_U(operation.arg0)].u;
-				uint64_t size = operation.arg2.u;
-				uint64_t value = state.registers[REG_U(operation.arg1)].u;
-
-
-				// Checking
-				if (address > STACK_END || size > STACK_END - address + 1) {
-					errcode = ErrorCode::InvalidMemoryAccess;
-					break;
-				}
-
-				// Write little-endian
-				write_little_endian(state.memory.stack, address, value, size);
+				write_little_endian(state.memory.memory, address, value, size);
 				break;
 			}
 		
-			case GET_GLOBAL_ADDRESS_STATIC: //arg0[register for address saving]            arg1[immediate value of offset(local/global)]          arg2[FLAG: LOCAL =0; GLOBAL = 1]
+			case CALC_FRAME_ADDRESS:        
 			{
 				uint64_t offset = operation.arg1.u;
-				uint8_t flag = operation.arg2.u & 0x1;
 
-				// For compiler: flag == 0 is more probably
-				#if defined(CLANG_OR_GNUC)
-				if (__builtin_expect(flag == 0, 1)) {
-					// LOCAL: FP + offset (hot path путь)
-					state.registers[REG_U(operation.arg0)].u =
-						state.registers[SpecialRegister::FP].u + offset;
-				}
-				#else
-				if (flag == 0) {
-					// LOCAL: FP + offset (hot path путь)
-					state.registers[REG_U(operation.arg0)].u =
-						state.registers[SpecialRegister::FP].u + offset;
-				}
-				#endif
-				else {
-					// GLOBAL: absolute offset (cold path)
-					state.registers[REG_U(operation.arg0)].u = offset;
-				}
+				state.registers[REG_U(operation.arg0)].u = state.registers[SpecialRegister::FP].u + offset;
+
 				break;
 			}
 
 			case ALLOCATE_MEMORY:
 			{
-				uint64_t address = 0;
-				if (!allocate_memory(state.memory.HFI, address, state.registers[REG_U(operation.arg1)].u))//arg1 - size of interval in register
+				uint64_t address = HEAP_START;
+				if (!allocate_memory(state.memory.HFI, address, state.registers[REG_U(operation.arg1)].u))
 				{
 					errcode = ErrorCode::FailedMemoryAllocation;
 					break;
 				}
-				state.registers[REG_U(operation.arg0)].u = address;
+				state.registers[REG_U(operation.arg0)].u =  address;
 				break;
 			}
 			case FREE_MEMORY:
 			{
-				uint64_t address = HEAP_START + state.registers[REG_U(operation.arg0)].u;
+				uint64_t address = state.registers[REG_U(operation.arg0)].u;
 				uint64_t size = state.registers[REG_U(operation.arg1)].u;
 				if (address < HEAP_START ||  size > HEAP_END - address + 1) {
 					errcode = ErrorCode::InvalidMemoryAccess;
@@ -395,64 +344,31 @@ namespace MSLVM
 				}
 				break;
 			}
-			case LOAD_RM: 
-			{
-				uint64_t address = HEAP_START + state.registers[REG_U(operation.arg1)].u;	//operation.arg1 - register with address of loading
-				uint64_t size = operation.arg2.u;
-				if (size > 8) 
-				{
-					errcode = ErrorCode::RegisterOverflow;
-					break;
-				}
 
-				// Checking
-				if (address > HEAP_END || size > (HEAP_END - address + 1)) {
-					errcode = ErrorCode::InvalidMemoryAccess;
-					break;
-				}
-
-				// Read little-endian
-				uint64_t value = read_little_endian(state.memory.heap, address, size);
-				state.registers[REG_U(operation.arg0)].u = value;
-				break;
-			}
-			case STORE_MR:
-			{
-				uint64_t address = HEAP_START + state.registers[REG_U(operation.arg0)].u;	//operation.arg0 - register with address of storing
-				uint64_t size = operation.arg2.u;
-				uint64_t value = state.registers[REG_U(operation.arg1)].u;
-				if (size > 8)
-				{
-					errcode = ErrorCode::RegisterOverflow;
-					break;
-				}
-				// Checking
-				if (address > HEAP_END || size > (HEAP_END - address + 1)) {
-					errcode = ErrorCode::InvalidMemoryAccess;
-					break;
-				}
-
-				// Write little-endian
-				write_little_endian(state.memory.heap, address, value, size);
-				break;
-			}
-			case GRAB_FRAME: 
+			case GRAB_FRAME:
 			{
 				uint64_t expanded_bytes = REG_U(operation.arg0);
 
-				if (state.call_stack.empty()) 
-				{	
+				if (state.call_stack.empty()) {
 					errcode = ErrorCode::FrameExpansionFailed;
 					break;
 				}
-				auto&t = state.call_stack.top();
-				if (t.sp - expanded_bytes < t.fp)
-				{
+
+				auto& t = state.call_stack.top();
+				uint64_t new_fp = state.registers[SpecialRegister::FP].u - expanded_bytes;
+
+				if (new_fp < STACK_START || new_fp > STACK_END) {
+					errcode = ErrorCode::StackOverflow;
+					break;
+				}
+
+				if (new_fp < t.fp) {  
 					errcode = ErrorCode::FrameExpansionFailed;
 					break;
 				}
+
 				t.sp -= expanded_bytes;
-				state.registers[SpecialRegister::FP].u -= expanded_bytes;
+				state.registers[SpecialRegister::FP].u = new_fp;
 				break;
 			}
 				}

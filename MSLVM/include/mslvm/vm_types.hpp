@@ -11,9 +11,8 @@ namespace MSLVM
 {
 	struct alignas(8) LinearMemory
 	{
-		memory_cell heap[HEAP_SIZE]{};
-		memory_cell stack[STACK_SIZE]{};
-		HeapFreeIntervals HFI{0, HEAP_END};
+		memory_cell memory[STACK_SIZE + HEAP_SIZE]{};
+		HeapFreeIntervals HFI{HEAP_START, HEAP_END};
 	};
 
 

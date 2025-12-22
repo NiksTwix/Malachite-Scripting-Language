@@ -4,6 +4,14 @@
 #define_const CONTANT_1 = 2000	//Inserts in the place of using
 #define_const string_1 = "String"
 
+#define_insertion FUNC(x,y,z)
+{
+	x = y + z * x
+}
+
+#property(get:public, set:protected)
+
+
 #import "test.1"		//imports module 
 /*
 #func_inherit
@@ -16,7 +24,7 @@ For function th
 int x = 200;
 float y = 200.0;
 
-const int x = 200;
+const int x1 = 200;
 
 //Arrays
 int size = 10
@@ -26,16 +34,16 @@ free_memory(array,size)
 //or
 
 int* array = new int[size]	
-delete array			//size will be inserted by compiler
+delete array			
 
 //VM programming
 
-op_code			//Lite mode
+op_code			//Lite mode (vm asm compiler)
 {
 	//default pseudo commands: mathematic, logic, push/pop, load/store, allocate/free,  label and jumping
 }
 
-op_code kernel		//Kernel mode
+op_code kernel		//Kernel mode (vm asm compiler, but with more instructions)
 {
 	//all vmoperations
 }
@@ -59,13 +67,12 @@ else
 
 //Loops
 
-loop
-{
-	//body
-}
-
-
 for x (start,end,step)
+{
+
+}
+//Interval cycles (in the future)
+for x in [start_index,end_index,step] // another combinations: (), [), (]
 {
 
 }
@@ -108,9 +115,46 @@ func f3(int x,int y, int z) -> int
 
 
 //OOP
+class INT
+{
+private:
+	int x;
+public:
+	INT();
+}
+class Vector	: INT
+{
+//code
+public:
+	#property(get:public, set:protected)
+	int field1;
+} 
 
-class 
+Vector k = new Vector();	//Pointer!
+k->y = 0;			//Pointer + y_offset
+delete k
+
+gc Vector k = new Vector();	//GC mode
+
+//deletes automatically
+ 
+//Alias
+alias meter: int
 
 
+namespace MalachiteTest	
+{
+	private int test = 0		//label "private" - another symbols are automatically public
+	private class Vector1
+	{
+		
+	}
 
+	private:
+		int c = 0;
+	public:
+	func K():return 10
+
+
+}
 

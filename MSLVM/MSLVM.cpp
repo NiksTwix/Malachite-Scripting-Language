@@ -11,12 +11,13 @@ int main()
 
     std::vector<VMOperation> operations =
     {
-        {VMOperationCode::ALLOCATE_MEMORY,0,HEAP_SIZE/2},
-        {VMOperationCode::ALLOCATE_MEMORY,1,HEAP_SIZE / 2},
+        
         {VMOperationCode::MOV_RI, 2, 9000},
-
-        {VMOperationCode::STORE_MR, 1, 2, 8},
-        {VMOperationCode::LOAD_RM, 3, 1, 8},
+        {VMOperationCode::MOV_RI, 5, HEAP_SIZE / 2},
+        {VMOperationCode::ALLOCATE_MEMORY,0,5},
+        {VMOperationCode::ALLOCATE_MEMORY,1,5},
+        {VMOperationCode::STORE_BY_ADDRESS, 2, 1, 8},
+        {VMOperationCode::LOAD_BY_ADDRESS, 3, 1, 8},
     };
 
     execute_code_switch(state, operations.data(), operations.size());
@@ -30,8 +31,8 @@ int main()
 
     operations =
     {
-        {VMOperationCode::FREE_MEMORY,0,HEAP_SIZE / 2},
-        {VMOperationCode::FREE_MEMORY,1,HEAP_SIZE / 2},
+        {VMOperationCode::FREE_MEMORY,0,5},
+        {VMOperationCode::FREE_MEMORY,1,5},
     };
     state.registers[SpecialRegister::IP] = 0;
     execute_code_switch(state, operations.data(), operations.size());
