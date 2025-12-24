@@ -21,10 +21,10 @@
     <ClCompile Include="MSLVM.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="source\core\vm_execution.cpp">
+    <ClCompile Include="source\api\virtual_machine.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="source\api\virtual_machine.cpp">
+    <ClCompile Include="source\execution\vm_execution.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>

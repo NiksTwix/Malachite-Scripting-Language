@@ -220,7 +220,7 @@ namespace MSLVM
 
 			case POP:
 			{
-				uint64_t size = operation.arg1.u;
+				uint64_t size = REG_U(operation.arg1);
 				uint64_t current_sp = state.registers[SpecialRegister::SP].u;
 
 				if (current_sp < size) {
@@ -239,8 +239,8 @@ namespace MSLVM
 			}
 			case LOAD_LOCAL:
 			{
-				uint64_t offset = operation.arg1.u;
-				uint64_t size = operation.arg2.u;
+				uint64_t offset = REG_U(operation.arg1);
+				uint64_t size = REG_U(operation.arg2);
 
 				// Local variable are AFTER FP (stack grows to top)
 				uint64_t address = state.registers[SpecialRegister::FP].u + offset;
@@ -260,7 +260,7 @@ namespace MSLVM
 			case STORE_LOCAL: 
 			{
 				uint64_t offset = REG_U(operation.arg1);
-				uint64_t size = operation.arg2.u;
+				uint64_t size = REG_U(operation.arg2);
 				uint64_t value = state.registers[REG_U(operation.arg0)].u;
 
 				uint64_t address = state.registers[SpecialRegister::FP].u + offset;
@@ -278,10 +278,16 @@ namespace MSLVM
 			case LOAD_BY_ADDRESS: 
 			{
 				uint64_t address = state.registers[REG_U(operation.arg1)].u;
-				uint64_t size = operation.arg2.u;
+				uint64_t size = REG_U(operation.arg2);
 
-				// Checking
-				if (size > HEAP_END - address + 1) {
+				if (size == 0) {
+					state.registers[REG_U(operation.arg0)].u = 0;
+					break;
+				}
+
+				uint64_t check_address = HEAP_END + 1 - size - address;	//uint64_t overflow
+
+				if (check_address > HEAP_END) {
 					errcode = ErrorCode::InvalidMemoryAccess;
 					break;
 				}
@@ -296,11 +302,15 @@ namespace MSLVM
 			{
 				uint64_t value = state.registers[REG_U(operation.arg0)].u;
 				uint64_t address = state.registers[REG_U(operation.arg1)].u;
-				uint64_t size = operation.arg2.u;
+				uint64_t size = REG_U(operation.arg2);
 
+				if (size == 0) {
+					break;
+				}
+				uint64_t check_address = HEAP_END + 1 - size - address;
 
 				// Checking
-				if (size > HEAP_END - address + 1) {
+				if (check_address > HEAP_END) {
 					errcode = ErrorCode::InvalidMemoryAccess;
 					break;
 				}
@@ -312,7 +322,7 @@ namespace MSLVM
 		
 			case CALC_FRAME_ADDRESS:        
 			{
-				uint64_t offset = operation.arg1.u;
+				uint64_t offset = REG_U(operation.arg1);
 
 				state.registers[REG_U(operation.arg0)].u = state.registers[SpecialRegister::FP].u + offset;
 
@@ -357,7 +367,7 @@ namespace MSLVM
 				auto& t = state.call_stack.top();
 				uint64_t new_fp = state.registers[SpecialRegister::FP].u - expanded_bytes;
 
-				if (new_fp < STACK_START || new_fp > STACK_END) {
+				if (new_fp > STACK_END) {	//STACK_START = 0 -> underflow -> new_fp > STACK_END
 					errcode = ErrorCode::StackOverflow;
 					break;
 				}

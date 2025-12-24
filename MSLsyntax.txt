@@ -4,21 +4,32 @@
 #define_const CONTANT_1 = 2000	//Inserts in the place of using
 #define_const string_1 = "String"
 
+
 #define_insertion FUNC(x,y,z)
 {
 	x = y + z * x
 }
 
-#property(get:public, set:protected)
 
 
 #import "test.1"		//imports module 
 /*
-#func_inherit
-#func_define_block 
-#func_override_block
+
 For function th
 */
+
+//Attributes
+@stack_only
+
+@property(get:public, set:protected)
+@foverride_block
+@fblock
+@finherit
+
+@public
+@private
+@protected
+
 //Defining variables
 
 int x = 200;
@@ -96,17 +107,17 @@ func f1(int x, int y, int z) -> int
 
 func f2(int x,int y, int z) -> int
 {
-	#func_define_block result_calculating
+	@fblock result_calculating
 	{
 	
 		return x*y*z;
 	}
 }
+@finherit f2 (x,y,z) //new names of parameters; copies code from f1 and inserts here
 func f3(int x,int y, int z) -> int
 {
-	#func_inherit f2 (x,y,z) //new names of parameters; copies code from f1 and inserts here
 	//code before result_calculating
-	#func_override_block result_calculating
+	@foverride_block result_calculating
 	{
 		return x*y*z * 2;
 	}
@@ -115,18 +126,18 @@ func f3(int x,int y, int z) -> int
 
 
 //OOP
-class INT
+object_template INT
 {
-private:
+@access_mode(private)
 	int x;
-public:
+@access_mode(public)
 	INT();
 }
-class Vector	: INT
+object_template Vector: INT
 {
 //code
-public:
-	#property(get:public, set:protected)
+@access_mode(public)
+	@property(get:public, set:protected)
 	int field1;
 } 
 
@@ -144,15 +155,18 @@ alias meter: int
 
 namespace MalachiteTest	
 {
-	private int test = 0		//label "private" - another symbols are automatically public
-	private class Vector1
+	@private 
+	int test = 0		//label "private" - another symbols are automatically public
+	@stack_only
+	@private 
+	object_template Vector1
 	{
 		
 	}
 
-	private:
-		int c = 0;
-	public:
+	@private
+	int c = 0;
+	@public
 	func K():return 10
 
 
