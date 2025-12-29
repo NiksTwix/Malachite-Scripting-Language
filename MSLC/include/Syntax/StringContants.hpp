@@ -25,6 +25,7 @@ namespace MSLC
 		constexpr std::string_view 	w_delete    = "delete";
 		constexpr std::string_view 	w_namespace = "namespace";
 		constexpr std::string_view 	w_const     = "const";
+		constexpr std::string_view 	w_gc		= "gc";
 	}
 	namespace BasicTypeMarkers
 	{
@@ -39,21 +40,16 @@ namespace MSLC
 	{
 		constexpr std::string_view w_true	= "true";
 		constexpr std::string_view w_false = "false";
-		//For attributes
-		constexpr std::string_view w_public = "public";
-		constexpr std::string_view w_private = "private";
-		constexpr std::string_view w_protected = "protected";
+
 	}
 	namespace Attributes	//@ + attribute name
 	{
 		constexpr std::string_view 	w_access_mode  = "access_mode";
 
-		constexpr std::string_view 	w_access_mode = "override";
-		constexpr std::string_view 	w_access_mode = "static";
-		constexpr std::string_view 	w_access_mode = "inline";
-
-		constexpr std::string_view 	w_access_mode = "virtual";
-		constexpr std::string_view 	w_access_mode = "inline";
+		constexpr std::string_view 	w_override = "override";
+		constexpr std::string_view 	w_static = "static";
+		constexpr std::string_view 	w_virtual = "virtual";
+		constexpr std::string_view 	w_inline = "inline";
 
 		constexpr std::string_view 	w_obj_property = "property";
 		constexpr std::string_view 	w_stack_only = "stack_only";
@@ -67,7 +63,13 @@ namespace MSLC
 		constexpr std::string_view 	w_obj_property_set_mode = "set";
 		constexpr std::string_view 	w_obj_property_get_mode = "get";
 	}
-
+	namespace AttributeArgs
+	{
+		//For attributes
+		constexpr std::string_view w_public = "public";
+		constexpr std::string_view w_private = "private";
+		constexpr std::string_view w_protected = "protected";
+	}
 	namespace Directives	//# + directive name
 	{
 		constexpr std::string_view 	w_import = "import";

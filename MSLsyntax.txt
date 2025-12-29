@@ -12,39 +12,24 @@
 
 
 
-#import "test.1"		//imports module 
-/*
-
-For function th
-*/
-
-//Attributes
-@stack_only
-
-@property(get:public, set:protected)
-@foverride_block
-@fblock
-@finherit
-
-@public
-@private
-@protected
+#import "test1.msl"		//imports module 
+#importlib "test2"		//imports library 
 
 //Defining variables
 
 int x = 200;
-float y = 200.0;
+real y = 200.0;
 
 const int x1 = 200;
 
 //Arrays
 int size = 10
-int* array = allocate_memory(size)	//allocate_memory - its function in standard library
+`int array = allocate_memory(size)	//allocate_memory - its function in standard library
 free_memory(array,size)
 
 //or
 
-int* array = new int[size]	
+`int array = new int[size]	
 delete array			
 
 //VM programming
@@ -155,18 +140,18 @@ alias meter: int
 
 namespace MalachiteTest	
 {
-	@private 
+	@access_mode(private) 
 	int test = 0		//label "private" - another symbols are automatically public
 	@stack_only
-	@private 
+	@access_mode(private) 
 	object_template Vector1
 	{
 		
 	}
 
-	@private
+	@access_mode(private)
 	int c = 0;
-	@public
+	@access_mode(public)
 	func K():return 10
 
 
