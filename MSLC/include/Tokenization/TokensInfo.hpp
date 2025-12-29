@@ -126,11 +126,18 @@ namespace MSLC
 					{"-", TokenType::OPERATOR},
 					{"+u", TokenType::OPERATOR},    //u-unary
 					{"-u", TokenType::OPERATOR},
-					//Pointers
-					{"&u", TokenType::OPERATOR},
-					{"`u", TokenType::OPERATOR},
 
-					{"`", TokenType::OPERATOR},
+					//Prefix
+					{"++u", TokenType::OPERATOR},
+					{"--u", TokenType::OPERATOR},
+					//Postfix
+					{"u++", TokenType::OPERATOR},
+					{"u--", TokenType::OPERATOR},
+
+					//Pointers
+					{"&u", TokenType::OPERATOR},	//Get pointer
+					{"*u", TokenType::OPERATOR},	//Get value
+					{"u*", TokenType::OPERATOR},	//Operator/Type modificator
 					//Pointers end
 
 					{"/", TokenType::OPERATOR},

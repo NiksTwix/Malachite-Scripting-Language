@@ -14,8 +14,17 @@ namespace MSLC
 			bool was_neg_value = false;
 			size_t current_index = 0;
 			size_t module_id = 0;
+
+			bool in_string = false;
+			bool in_symbol_literal = false;
+			std::string text;
 		};
 
+		enum class UnaryType {
+			None,     // Binary
+			Prefix,   // Prefix (++x, -x, !x, ~x, &x)
+			Postfix   // Postfix (x++, x--)
+		};
 
 		class Lexer
 		{
@@ -32,13 +41,29 @@ namespace MSLC
 
 			Token CreateToken(LexingState& lex_state,std::string operand);
 			char ProcessCharLiteral(LexingState& lex_state,const std::string& str);
+
 			std::string ProcessStringLiteral(LexingState& lex_state, const std::string& str);
 
 			Token ProcessOperator(LexingState& lex_state,const std::string& text, std::vector<Token>& tokens);
 
 			Token InsertOpEnd(LexingState& lex_state, std::vector<Token>& tokens, const std::string& text);
 
-			bool IsUnary(const LexingState& state, const std::vector<Token>& tokens);
+			UnaryType IsUnary(const LexingState& state, const std::string& text, const std::vector<Token>& tokens, const std::string& operator_str);
+
+			bool IsOperatorChar(char c) {
+				return TokensTypeTable::Get().GetTokenType(std::string(1, c)) == TokenType::OPERATOR;
+			}
+
+			bool IsPostfixOperator(const std::string& op) {
+				return TokensTypeTable::Get().GetTokenType("u" + op) == TokenType::OPERATOR;
+			}
+
+			bool IsPrefixOperator(const std::string& op) {
+				return TokensTypeTable::Get().GetTokenType(op + "u") == TokenType::OPERATOR;
+			}
+
+			Token GetNext(LexingState& state, const std::string& text);
+
 		public:
 			std::vector<Token> ToTokens(std::string text, size_t module_id = 0);
 		};

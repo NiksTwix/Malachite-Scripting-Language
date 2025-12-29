@@ -15,13 +15,13 @@ int main()
 // Malachite Scripting Language syntax example
 
 //Directives (compiler)
-#define_const CONTANT_1 = -x	//Inserts in the place of using
+#define_const CONTANT_1 = 2000	//Inserts in the place of using
 #define_const string_1 = "String"
 
 
 #define_insertion FUNC(x,y,z)
 {
-	x = y + z * x
+	x = y + z * x + *x
 }
 
 
@@ -32,7 +32,7 @@ int main()
 //Defining variables
 
 int x = 200;
-float y = 200.0;
+real y = 200.0;
 
 const int x1 = 200;
 
@@ -170,7 +170,6 @@ namespace MalachiteTest
 
 
 }
-
 )Code";
 	Tokenization::Lexer lex;
 	auto tokens = lex.ToTokens(b, 0);

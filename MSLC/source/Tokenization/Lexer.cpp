@@ -140,6 +140,7 @@ namespace MSLC
 			Diagnostics::Logger::Get().PrintToCmd(Diagnostics::InformationMessage("Invalid char.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceCode, lex_state.current_line));
 			return '\0';
 		}
+
 		std::string Lexer::ProcessStringLiteral(LexingState& lex_state, const std::string& str)
 		{
 			std::string result;
@@ -171,29 +172,146 @@ namespace MSLC
 			}
 			return result;
 		}
-		bool Lexer::IsUnary(const LexingState& state, const std::vector<Token>& tokens)
+		UnaryType Lexer::IsUnary(const LexingState& state,
+			const std::string& text,
+			const std::vector<Token>& tokens,
+			const std::string& operator_str)
 		{
-			if (tokens.size() == 0)  return true;
+			if (tokens.empty()) {
+				return IsPrefixOperator(operator_str) ? UnaryType::Prefix : UnaryType::None;
+			}
 
-			bool wasnt_closings_brackets = tokens.back().value.strVal != ")" && tokens.back().value.strVal != "]";	// && tokens.back().value.strVal != "}"
-			bool wasnt_expression = tokens.back().type != TokenType::IDENTIFIER && tokens.back().type != TokenType::LITERAL;
-			return wasnt_closings_brackets && wasnt_expression;
+			const Token& last = tokens.back();
+
+			// 1. Проверяем, может ли быть постфиксным
+			if (IsPostfixOperator(operator_str)) {
+				bool last_is_expression =
+					last.type == TokenType::IDENTIFIER ||
+					last.type == TokenType::TYPE_MARKER ||
+					last.type == TokenType::LITERAL ||
+					last.value.strVal == ")" ||
+					last.value.strVal == "]" ||
+					last.value.strVal == "}";
+				if (last_is_expression) {
+					// После выражения * и & - всегда бинарные
+					if ((operator_str == "*") && last.type != TokenType::TYPE_MARKER) {
+						return UnaryType::None;
+					}
+				}
+				if (last_is_expression) {
+					return UnaryType::Postfix;
+				}
+			}
+
+			// 2. Проверяем, может ли быть префиксным
+			if (IsPrefixOperator(operator_str)) {
+				// Стандартная проверка для других префиксных операторов
+				bool last_is_not_expression =
+					last.type == TokenType::OPERATOR ||
+					last.value.strVal == "(" ||
+					last.value.strVal == "[" ||
+					last.value.strVal == "{" ||
+					last.value.strVal == "," ||
+					last.value.strVal == ":" ||
+					last.value.strVal == ";" ||
+					last.type == TokenType::KEYWORD;
+
+				if (last_is_not_expression) {
+					return UnaryType::Prefix;
+				}
+			}
+
+			return UnaryType::None;
 		}
 
-		Token Lexer::ProcessOperator(LexingState& lex_state, const std::string& text, std::vector<Token>& tokens)
-		{
-			//Multichar operators: <<= and etc
 
+		Token Lexer::ProcessOperator(LexingState& lex_state,
+			const std::string& text,
+			std::vector<Token>& tokens)
+		{
+			// Собираем оператор
 			std::string operator_;
-			bool is_unary = IsUnary(lex_state,tokens);
-			for (; lex_state.current_index < text.size(); lex_state.current_index++)
-			{
+
+			for (; lex_state.current_index < text.size(); lex_state.current_index++) {
 				char c = text[lex_state.current_index];
-				if (GetTokenType(lex_state,std::string(1, c)) == TokenType::OPERATOR)	operator_.push_back(c);
-				else break;
+
+				if (IsOperatorChar(c)) {
+					operator_.push_back(c);
+
+					// Проверяем, может ли быть более длинный оператор
+					if (lex_state.current_index + 1 < text.size()) {
+						char next_c = text[lex_state.current_index + 1];
+						if (IsOperatorChar(next_c)) {
+							std::string potential_op = operator_ + next_c;
+							// Проверяем, существует ли такой оператор в таблице
+							// (в любой форме: префиксной, постфиксной, бинарной)
+							if (TokensTypeTable::Get().GetTokenType(potential_op) != TokenType::UNDEFINED ||
+								TokensTypeTable::Get().GetTokenType(potential_op + "u") != TokenType::UNDEFINED ||
+								TokensTypeTable::Get().GetTokenType("u" + potential_op) != TokenType::UNDEFINED) {
+								// Продолжаем собирать
+								continue;
+							}
+						}
+					}
+					// Прерываем сбор
+					lex_state.current_index++;
+					break;
+				}
+				else {
+					break;
+				}
 			}
-			if (is_unary) operator_.push_back('u');
-			return Token(operator_,TokensTypeTable::Get().GetTokenType(operator_), lex_state.current_line, lex_state.module_id);
+
+			if (operator_.empty()) {
+				// Это не оператор вообще
+				return Token(TokenType::UNDEFINED, lex_state.current_line, lex_state.module_id);
+			}
+
+			// Определяем тип унарности, передавая уже собранный оператор
+			UnaryType unary_type = IsUnary(lex_state, text, tokens, operator_);
+
+			// Формируем финальную строку оператора
+			std::string final_op = operator_;
+
+			switch (unary_type) {
+			case UnaryType::Prefix:
+				// Проверяем, есть ли в таблице оператор с суффиксом 'u'
+				if (TokensTypeTable::Get().GetTokenType(operator_ + "u") != TokenType::UNDEFINED) {
+					final_op = operator_ + "u";
+				}
+				break;
+
+			case UnaryType::Postfix:
+				// Проверяем, есть ли в таблице оператор с префиксом 'u'
+				if (TokensTypeTable::Get().GetTokenType("u" + operator_) != TokenType::UNDEFINED) {
+					final_op = "u" + operator_;
+				}
+				break;
+
+			case UnaryType::None:
+				// Бинарный оператор - оставляем как есть
+				break;
+			}
+
+			// Ищем в таблице токенов
+			TokenType token_type = TokensTypeTable::Get().GetTokenType(final_op);
+
+			if (token_type == TokenType::UNDEFINED) {
+				// Пробуем найти оператор без модификатора
+				token_type = TokensTypeTable::Get().GetTokenType(operator_);
+				if (token_type != TokenType::UNDEFINED) {
+					final_op = operator_;
+				}
+				else {
+					// Неизвестный оператор
+					Diagnostics::InformationMessage message("Unknown operator: '" + operator_ + "'.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, lex_state.current_line);
+
+					Diagnostics::Logger::Get().PrintToCmd(message);
+					return Token(TokenType::UNDEFINED, lex_state.current_line, lex_state.module_id);
+				}
+			}
+
+			return Token(final_op, token_type, lex_state.current_line, lex_state.module_id);
 		}
 
 		Token Lexer::InsertOpEnd(LexingState& lex_state, std::vector<Token>& tokens, const std::string& text)

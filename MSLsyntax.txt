@@ -7,7 +7,7 @@
 
 #define_insertion FUNC(x,y,z)
 {
-	x = y + z * x
+	x = y + z * x + *x
 }
 
 
@@ -24,12 +24,12 @@ const int x1 = 200;
 
 //Arrays
 int size = 10
-`int array = allocate_memory(size)	//allocate_memory - its function in standard library
+int* array = allocate_memory(size)	//allocate_memory - its function in standard library
 free_memory(array,size)
 
 //or
 
-`int array = new int[size]	
+int* array = new int[size]	
 delete array			
 
 //VM programming
