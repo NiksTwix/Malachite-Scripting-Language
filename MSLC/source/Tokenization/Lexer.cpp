@@ -172,10 +172,8 @@ namespace MSLC
 			}
 			return result;
 		}
-		UnaryType Lexer::IsUnary(const LexingState& state,
-			const std::string& text,
-			const std::vector<Token>& tokens,
-			const std::string& operator_str)
+		
+		UnaryType Lexer::IsUnary(const LexingState& state,const std::string& text,const std::vector<Token>& tokens,const std::string& operator_str)
 		{
 			if (tokens.empty()) {
 				return IsPrefixOperator(operator_str) ? UnaryType::Prefix : UnaryType::None;
@@ -183,7 +181,7 @@ namespace MSLC
 
 			const Token& last = tokens.back();
 
-			// 1. Проверяем, может ли быть постфиксным
+			// 1. Check: can it be postfix?
 			if (IsPostfixOperator(operator_str)) {
 				bool last_is_expression =
 					last.type == TokenType::IDENTIFIER ||
@@ -193,7 +191,7 @@ namespace MSLC
 					last.value.strVal == "]" ||
 					last.value.strVal == "}";
 				if (last_is_expression) {
-					// После выражения * и & - всегда бинарные
+					// After expression * and & - always binary
 					if ((operator_str == "*") && last.type != TokenType::TYPE_MARKER) {
 						return UnaryType::None;
 					}
@@ -203,9 +201,9 @@ namespace MSLC
 				}
 			}
 
-			// 2. Проверяем, может ли быть префиксным
+			// 2. Check: can it be prefix
 			if (IsPrefixOperator(operator_str)) {
-				// Стандартная проверка для других префиксных операторов
+				// Standard checking for another prefix operators?
 				bool last_is_not_expression =
 					last.type == TokenType::OPERATOR ||
 					last.value.strVal == "(" ||
@@ -229,7 +227,7 @@ namespace MSLC
 			const std::string& text,
 			std::vector<Token>& tokens)
 		{
-			// Собираем оператор
+			// Build operator
 			std::string operator_;
 
 			for (; lex_state.current_index < text.size(); lex_state.current_index++) {
@@ -238,22 +236,21 @@ namespace MSLC
 				if (IsOperatorChar(c)) {
 					operator_.push_back(c);
 
-					// Проверяем, может ли быть более длинный оператор
+					//  Check: can it be more long operator?
 					if (lex_state.current_index + 1 < text.size()) {
 						char next_c = text[lex_state.current_index + 1];
 						if (IsOperatorChar(next_c)) {
 							std::string potential_op = operator_ + next_c;
-							// Проверяем, существует ли такой оператор в таблице
-							// (в любой форме: префиксной, постфиксной, бинарной)
+							// Check: does this operator exist in the tokens table?
+							// (in any formе: prefix, postfix, binary)
 							if (TokensTypeTable::Get().GetTokenType(potential_op) != TokenType::UNDEFINED ||
 								TokensTypeTable::Get().GetTokenType(potential_op + "u") != TokenType::UNDEFINED ||
 								TokensTypeTable::Get().GetTokenType("u" + potential_op) != TokenType::UNDEFINED) {
-								// Продолжаем собирать
+								// Continue building
 								continue;
 							}
 						}
 					}
-					// Прерываем сбор
 					lex_state.current_index++;
 					break;
 				}
@@ -263,47 +260,47 @@ namespace MSLC
 			}
 
 			if (operator_.empty()) {
-				// Это не оператор вообще
+				// Its not operator
 				return Token(TokenType::UNDEFINED, lex_state.current_line, lex_state.module_id);
 			}
 
-			// Определяем тип унарности, передавая уже собранный оператор
+			// Define type of unarity when handing over already built operator
 			UnaryType unary_type = IsUnary(lex_state, text, tokens, operator_);
 
-			// Формируем финальную строку оператора
+			// Build final version of operator
 			std::string final_op = operator_;
 
 			switch (unary_type) {
 			case UnaryType::Prefix:
-				// Проверяем, есть ли в таблице оператор с суффиксом 'u'
+				// Check: Does exist operator with postfix 'u' in the tokens table?
 				if (TokensTypeTable::Get().GetTokenType(operator_ + "u") != TokenType::UNDEFINED) {
 					final_op = operator_ + "u";
 				}
 				break;
 
 			case UnaryType::Postfix:
-				// Проверяем, есть ли в таблице оператор с префиксом 'u'
+				// Check: Does exist operator with prefix 'u' in the tokens table?
 				if (TokensTypeTable::Get().GetTokenType("u" + operator_) != TokenType::UNDEFINED) {
 					final_op = "u" + operator_;
 				}
 				break;
 
 			case UnaryType::None:
-				// Бинарный оператор - оставляем как есть
+				// Bunary operator - dont touch
 				break;
 			}
 
-			// Ищем в таблице токенов
+			// Find in the tokens table
 			TokenType token_type = TokensTypeTable::Get().GetTokenType(final_op);
 
 			if (token_type == TokenType::UNDEFINED) {
-				// Пробуем найти оператор без модификатора
+				// Try to find operator without modifier
 				token_type = TokensTypeTable::Get().GetTokenType(operator_);
 				if (token_type != TokenType::UNDEFINED) {
 					final_op = operator_;
 				}
 				else {
-					// Неизвестный оператор
+					// Unknown operator
 					Diagnostics::InformationMessage message("Unknown operator: '" + operator_ + "'.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, lex_state.current_line);
 
 					Diagnostics::Logger::Get().PrintToCmd(message);

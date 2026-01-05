@@ -75,5 +75,6 @@ namespace MSLC
 		constexpr std::string_view 	w_import = "import";
 
 		constexpr std::string_view 	w_define_const = "define_const";
+		constexpr std::string_view 	w_define_insertion = "define_insertion";
 	}
 } 

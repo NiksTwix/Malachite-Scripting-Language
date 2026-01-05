@@ -25,7 +25,8 @@ namespace MSLC
 			ATTRIBUTE_ARG,		//public,protected,private
 
 			//Directives
-			PREPROCESSOR_DIRECTIVE
+			PREPROCESSOR_DIRECTIVE,
+			PREPROCESSOR_DIRECTIVE_CALL,
 		};
 	
 		enum class CompilationLabel : uint8_t
@@ -42,7 +43,6 @@ namespace MSLC
 			METHOD_CALL,     //For class.method(params)
 
 			NODES_GROUP,
-
 		};
 
 		struct Token 

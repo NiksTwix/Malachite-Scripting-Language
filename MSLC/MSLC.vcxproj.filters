@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Файлы заголовков\Frontend">
+      <UniqueIdentifier>{6c784d2c-6298-49fc-a8b9-3d8b4b7396b1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы заголовков\CompilationInfo">
+      <UniqueIdentifier>{89e51601-31db-47f1-a27e-333b96e2796d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MSLC.cpp">
@@ -30,28 +36,70 @@
     <ClCompile Include="source\Tokenization\Lexer.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="source\Preprocessing\MacrosInfo.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="source\CompilationInfo\CompilationState.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Preprocessing\Preprocessor.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="source\AST\ASTBuilder.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Compiler.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\Syntax\StringContants.hpp">
+    <ClInclude Include="include\Common\Strings\StringOperations.hpp">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="include\Preprocessing\AMGBuilder.hpp">
-      <Filter>Файлы заголовков</Filter>
+      <Filter>Файлы заголовков\Frontend</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Preprocessing\Preprocessor.hpp">
+      <Filter>Файлы заголовков\Frontend</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Syntax\StringContants.hpp">
+      <Filter>Файлы заголовков\Frontend</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Tokenization\TokensInfo.hpp">
+      <Filter>Файлы заголовков\Frontend</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Definitions\ValueContainer.hpp">
+      <Filter>Файлы заголовков\Frontend</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Tokenization\Lexer.hpp">
+      <Filter>Файлы заголовков\Frontend</Filter>
     </ClInclude>
     <ClInclude Include="include\Common\Diagnostics\Diagnostics.hpp">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="include\Tokenization\TokensInfo.hpp">
+    <ClInclude Include="include\Preprocessing\MacrosInfo.hpp">
+      <Filter>Файлы заголовков\Frontend</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AST\ASTBuilder.hpp">
+      <Filter>Файлы заголовков\Frontend</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Compiler.hpp">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="include\Definitions\ValueContainer.hpp">
+    <ClInclude Include="include\CompilationInfo\CompilationState.hpp">
+      <Filter>Файлы заголовков\CompilationInfo</Filter>
+    </ClInclude>
+    <ClInclude Include="include\CompilationInfo\Types.hpp">
+      <Filter>Файлы заголовков\CompilationInfo</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Definitions\CommonEnums.hpp">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="include\Common\Strings\StringOperations.hpp">
-      <Filter>Файлы заголовков</Filter>
+    <ClInclude Include="include\CompilationInfo\Functions.hpp">
+      <Filter>Файлы заголовков\CompilationInfo</Filter>
     </ClInclude>
-    <ClInclude Include="include\Tokenization\Lexer.hpp">
-      <Filter>Файлы заголовков</Filter>
+    <ClInclude Include="include\CompilationInfo\CommonInfo.hpp">
+      <Filter>Файлы заголовков\CompilationInfo</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
