@@ -146,6 +146,7 @@
     <ClInclude Include="include\CompilationInfo\CompilationState.hpp" />
     <ClInclude Include="include\CompilationInfo\Functions.hpp" />
     <ClInclude Include="include\CompilationInfo\Types.hpp" />
+    <ClInclude Include="include\CompilationInfo\Variables.hpp" />
     <ClInclude Include="include\Compiler.hpp" />
     <ClInclude Include="include\Definitions\CommonEnums.hpp" />
     <ClInclude Include="include\Definitions\ValueContainer.hpp" />

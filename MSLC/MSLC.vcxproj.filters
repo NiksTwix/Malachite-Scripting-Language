@@ -101,6 +101,9 @@
     <ClInclude Include="include\CompilationInfo\CommonInfo.hpp">
       <Filter>Файлы заголовков\CompilationInfo</Filter>
     </ClInclude>
+    <ClInclude Include="include\CompilationInfo\Variables.hpp">
+      <Filter>Файлы заголовков\CompilationInfo</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\MSLsyntax.txt">

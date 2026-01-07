@@ -3,25 +3,19 @@
 
 #include <iostream>
 
-#include "include\Tokenization\Lexer.hpp"
-#include "include\Preprocessing\AMGBuilder.hpp"
+#include "include\Compiler.hpp"
+
 using namespace MSLC;
 
 int main()
 {
     Diagnostics::Logger::Get().PrintWithFormat(Diagnostics::InformationMessage("Hello world, %s!", Diagnostics::MessageType::TypeError, 0 == -1 ? Diagnostics::None : Diagnostics::SourceCode, 0), "Nirinis");
 
-    std::string b_path = "C:\\Users\\korsi\\OneDrive\\Рабочий стол\\MSLCTests\\ImportChainTests\\p1.txt";
+    std::string b_path = "C:\\Users\\korsi\\OneDrive\\Рабочий стол\\MSLCTests\\AST\\first.msl";//C:\\Users\\korsi\\OneDrive\\Рабочий стол\\MSLCTests\\ImportChainTests\\p1.txt
 
-    Preprocessing::AMGBuilder amg;
+    Compiler comp;
 
-    auto result = amg.Analyze(b_path);
-
-    for (auto id: result.processing_order)
-    {
-        std::cout << result.files[id].path << "\n";
-    }
-
+    comp.TestCompile(b_path);
 }
 
 // Запуск программы: CTRL+F5 или меню "Отладка" > "Запуск без отладки"

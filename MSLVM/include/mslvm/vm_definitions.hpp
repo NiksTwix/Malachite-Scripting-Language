@@ -127,7 +127,7 @@ namespace MSLVM
 
 		ALLOCATE_MEMORY,		//arg0[register of address's saving], arg1[register with size of memory's interval]
 		FREE_MEMORY,			//arg0[register with address], arg1[register with size of memory's interval]
-		GRAB_FRAME,				//arg0[bytes] 
+		GRAB_FRAME,				//arg0[bytes] If bytes < 0 => grab to up, else - grab to down 
 		// Control flow arg0 = where
 		JMP,
 		JMP_CV,      //CV- Condition Valid - arg0[where], arg1[condition register]

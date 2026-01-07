@@ -38,7 +38,7 @@ namespace MSLC
 			struct TypeField 
 			{
 				std::string name;		//name of field
-				MSLTypeID type_id;			//type of data
+				TypeID type_id;			//type of data
 				uint32_t offset = 0;	//Offset from start of object
 				Definitions::AccessMode access_mode = Definitions::AccessMode::Public;
 			};
@@ -52,8 +52,8 @@ namespace MSLC
 				std::unordered_map<std::string, Functions::FunctionID> connected_functions;
 				std::string name;
 				size_t size;
-				MSLTypeID id;		//Sets from outside (CompilationState?)
-				MSLTypeID inheriting_id = INVALID_TYPE_ID;
+				TypeID id;		//Sets from outside (CompilationState?)
+				TypeID inheriting_id = INVALID_ID;
 				TypeFlags flags;
 				TypeCategory category;
 

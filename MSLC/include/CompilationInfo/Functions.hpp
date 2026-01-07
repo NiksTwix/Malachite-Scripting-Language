@@ -29,20 +29,22 @@ namespace MSLC
 			struct FunctionArgument 
 			{
 				std::string name;
-				Types::MSLTypeID type_id;
+				Types::TypeID type_id;
 			};
 
-			struct Function 
+			struct FunctionDescription
 			{
 				std::string name;
 				std::vector<FunctionArgument> arguments;
 				FunctionID id;
 
-				Types::MSLTypeID returned_type_id;
+				Types::TypeID returned_type_id;
+
+				Definitions::AccessMode access_mode = Definitions::AccessMode::Public;
 
 				FunctionFlags flags;
 
-				size_t vtable_index = SIZE_MAX; //Index in table of virtual methods (in the future)
+				size_t vtable_index = INVALID_ID; //Index in table of virtual methods (in the future)
 
 				//For another info (maybe instruction pointer in pseudo/byte code)
 

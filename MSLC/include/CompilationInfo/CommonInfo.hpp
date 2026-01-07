@@ -4,18 +4,24 @@ namespace MSLC
 {
 	namespace CompilationInfo
 	{
+
+		using DescriptionID = size_t;
+		constexpr DescriptionID INVALID_ID = SIZE_MAX;
+
+		constexpr DescriptionID START_COUNTER_ID = 0;
+
 		namespace Functions
 		{
-			using FunctionID = size_t;
-			constexpr FunctionID START_FUNCTION_ID = 1;
-			constexpr FunctionID INVALID_FUNCTION_ID = 0;
+			using FunctionID = DescriptionID;
 		}
 		namespace Types
 		{
-			using MSLTypeID = size_t;
+			using TypeID = DescriptionID;
+		}
 
-			constexpr MSLTypeID START_TYPE_ID = 1;
-			constexpr MSLTypeID INVALID_TYPE_ID = 0;
+		namespace Variables
+		{
+			using VariableID = DescriptionID;
 		}
 	}
 }

@@ -357,7 +357,7 @@ namespace MSLVM
 
 			case GRAB_FRAME:
 			{
-				uint64_t expanded_bytes = REG_U(operation.arg0);
+				uint64_t expanded_bytes = REG_I(operation.arg0);
 
 				if (state.call_stack.empty()) {
 					errcode = ErrorCode::FrameExpansionFailed;

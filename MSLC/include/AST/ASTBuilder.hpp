@@ -8,16 +8,34 @@ namespace MSLC
 {
 	namespace AST
 	{
+
+		enum ASTNodeType
+		{
+			None,
+			Expression,
+			CodeBlock,		//{}
+			Namespace,
+			If,
+			Elif,
+			Else,
+			ForCycle,
+			WhileCycle,
+			Function,
+			ObjectTemplate,		//Class/struct analog
+			LowLevelCodeBlock,		//op_code
+		};
+
+
 		struct ASTNode
 		{
 			std::vector<Tokenization::Token> tokens;
 			std::vector<ASTNode> children;
 			int line;
+			ASTNodeType type;
 		};
 
-		
 
-		class ASTBuilder
+		class ASTBuilder	//AbstractScopeTree
 		{
 		private:
 			struct SkipScope {
@@ -31,20 +49,22 @@ namespace MSLC
 				std::stack<SkipScope> skip_scopes;
 			};
 			std::unordered_set<std::string> scope_exceptions = {
-				std::string(Keywords::w_func),
-				std::string(Keywords::w_op_code),
-				std::string(Keywords::w_object_template),
-				std::string(Keywords::w_alias),
-				std::string(Keywords::w_for) };	//ќбъ€влени€, в блоках кода которых не надо ставить автоматический SCOPE 
+				//std::string(Keywords::w_func),
+				//std::string(Keywords::w_op_code),
+				//std::string(Keywords::w_object_template),
+				//std::string(Keywords::w_alias),
+				//std::string(Keywords::w_for) 
+			};	//ќбъ€влени€, в блоках кода которых не надо ставить автоматический SCOPE 
 			void if_scope_exception(Tokenization::Token& t, ASTState&  ast_state);
 
 			//ASTNode UniteToGroup(std::vector<ASTNode>& nodes, CompilationLabel label);
 
-
+			ASTNodeType DefineType(std::vector<Tokenization::Token>& t);
 
 		public:
-			ASTNode BuildAST(std::vector<Tokenization::Token>& tokens);
-			//void PostprocessTree(ASTNode& node);
+
+			ASTNode BuildAbsractScopeTree(std::vector<Tokenization::Token>& tokens);
+
 		};
 	}
 }

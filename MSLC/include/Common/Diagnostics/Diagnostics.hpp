@@ -52,7 +52,7 @@ namespace MSLC
 			InformationMessage(const std::string& text, MessageType m_type, SourceType s_type, size_t place) : text(text), m_type(m_type), s_type(s_type), place(place) {}
 			InformationMessage(const std::string& text, MessageType m_type, size_t place) : text(text), m_type(m_type), s_type(SourceType::SourceCode), place(place) {}
 			InformationMessage(const std::string& text, size_t place) : text(text), m_type(MessageType::Info), s_type(SourceType::SourceCode), place(place) {}
-			InformationMessage(const std::string& text) : text(text), m_type(MessageType::Info), s_type(SourceType::SourceCode), place(0) {}
+			InformationMessage(const std::string& text) : text(text), m_type(MessageType::Info), s_type(SourceType::None), place(0) {}
 		};
 	
 		
