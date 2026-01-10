@@ -74,7 +74,7 @@ namespace MSLC
                 size_t start = line.find_first_not_of(" \t");
                 if (start == std::string::npos) continue;
 
-                if (line.substr(start).starts_with("#" + std::string(Directives::w_import.data())))
+                if (line.substr(start)._Starts_with("#" + std::string(Directives::w_import.data())))
                 {
                     std::string import_path = GetImportDirectiveArgument(line);
 

@@ -11,7 +11,7 @@ int main()
 {
     Diagnostics::Logger::Get().PrintWithFormat(Diagnostics::InformationMessage("Hello world, %s!", Diagnostics::MessageType::TypeError, 0 == -1 ? Diagnostics::None : Diagnostics::SourceCode, 0), "Nirinis");
 
-    std::string b_path = "C:\\Users\\korsi\\OneDrive\\Рабочий стол\\MSLCTests\\AST\\first.msl";//C:\\Users\\korsi\\OneDrive\\Рабочий стол\\MSLCTests\\ImportChainTests\\p1.txt
+    std::string b_path = "D:\\Games\\MSLCTests\\AST\\first.msl";//C:\\Users\\korsi\\OneDrive\\Рабочий стол\\MSLCTests\\ImportChainTests\\p1.txt
 
     Compiler comp;
 

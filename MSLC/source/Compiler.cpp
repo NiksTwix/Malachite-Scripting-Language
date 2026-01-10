@@ -28,6 +28,7 @@ namespace MSLC
 			Diagnostics::Logger::Get().PrintToCmd(Diagnostics::InformationMessage("Stage: AST Building."));
 
 			AST::ASTNode tree = ast_builder.BuildAbsractScopeTree(tokens);
+			ast_builder.Postprocess(tree);
 		}
 
 	}

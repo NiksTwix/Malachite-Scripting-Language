@@ -9,7 +9,7 @@ namespace MSLC
 	namespace AST
 	{
 
-		enum ASTNodeType
+		enum class ASTNodeType
 		{
 			None,
 			Expression,
@@ -23,7 +23,15 @@ namespace MSLC
 			Function,
 			ObjectTemplate,		//Class/struct analog
 			LowLevelCodeBlock,		//op_code
+			NodeGroup
 		};
+
+		enum class ASTGroupType 
+		{
+			None,
+			IfCondition,
+		};
+
 
 
 		struct ASTNode
@@ -31,7 +39,8 @@ namespace MSLC
 			std::vector<Tokenization::Token> tokens;
 			std::vector<ASTNode> children;
 			int line;
-			ASTNodeType type;
+			ASTNodeType type  = ASTNodeType::None;
+			ASTGroupType group_type = ASTGroupType::None;
 		};
 
 
@@ -48,6 +57,8 @@ namespace MSLC
 				int last_line = 0;
 				std::stack<SkipScope> skip_scopes;
 			};
+
+
 			std::unordered_set<std::string> scope_exceptions = {
 				//std::string(Keywords::w_func),
 				//std::string(Keywords::w_op_code),
@@ -61,9 +72,19 @@ namespace MSLC
 
 			ASTNodeType DefineType(std::vector<Tokenization::Token>& t);
 
+
+			//Postprocessing
+			std::unordered_set<ASTNodeType> start_of_group_nodes = { ASTNodeType::If };	//Markers of group's start, edge cases
+
+			void UnitToGroup(ASTNode& parent, std::vector<std::pair<ASTNode, size_t>>& group, ASTGroupType group_type);
+			ASTGroupType GetGroupType(ASTNode& node);
+
 		public:
 
 			ASTNode BuildAbsractScopeTree(std::vector<Tokenization::Token>& tokens);
+
+
+			void Postprocess(ASTNode& root);
 
 		};
 	}

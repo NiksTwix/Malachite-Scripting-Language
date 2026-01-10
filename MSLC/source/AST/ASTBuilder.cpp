@@ -44,6 +44,36 @@ namespace MSLC
 
 			return foundType;
 		}
+
+		void ASTBuilder::UnitToGroup(ASTNode& parent, std::vector<std::pair<ASTNode, size_t>>& group, ASTGroupType group_type)
+		{
+			ASTNode group_header;
+			group_header.group_type = group_type;
+			group_header.type = ASTNodeType::NodeGroup;
+			group_header.line = group.front().first.line;
+			for (std::pair<ASTNode, size_t>& p : group) 
+			{
+				group_header.children.push_back(p.first);
+				
+				parent.children[p.second] = ASTNode();	//Reset node
+			}
+
+			parent.children[group[0].second] = group_header;
+
+		}
+
+		ASTGroupType ASTBuilder::GetGroupType(ASTNode& node)
+		{
+			switch (node.type)
+			{
+			case ASTNodeType::Else:
+			case ASTNodeType::If:
+			case ASTNodeType::Elif:
+				return ASTGroupType::IfCondition;
+			default:
+				return ASTGroupType::None;
+			}
+		}
 		
 
 		ASTNode ASTBuilder::BuildAbsractScopeTree(std::vector<Tokenization::Token>& tokens)
@@ -193,6 +223,43 @@ namespace MSLC
 			}
 			root = cn_stack.top();
 			return root;
+		}
+
+		void ASTBuilder::Postprocess(ASTNode& node)
+		{
+			if (node.children.size() == 0) return;
+
+			std::vector<std::pair<ASTNode,size_t>> group_of_nodes;	//IF-ELIF-ELSE, index in children
+
+			ASTGroupType last = ASTGroupType::None;
+
+
+			for (size_t i = 0; i < node.children.size(); i++)
+			{
+				ASTNode& child_node = node.children[i];
+				if (child_node.tokens.size() == 0) continue;
+				Postprocess(child_node);
+
+
+				if (auto group_type = GetGroupType(child_node); group_type != ASTGroupType::None)
+				{
+					if ((group_type != last && last != ASTGroupType::None) || (start_of_group_nodes.count(child_node.type) && !group_of_nodes.empty()))
+					{
+						UnitToGroup(node, group_of_nodes, group_type);
+						group_of_nodes.clear();
+					}
+					group_of_nodes.push_back({ child_node,i });
+					last = group_type;
+					
+				}
+				else if (!group_of_nodes.empty()) 
+				{
+					UnitToGroup(node, group_of_nodes,last);
+					last = ASTGroupType::None;
+					group_of_nodes.clear();
+				}
+
+			}
 		}
 
 		
