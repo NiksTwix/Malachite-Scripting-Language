@@ -8,6 +8,9 @@ namespace MSLC
 {
 	namespace Definitions 
 	{
+        constexpr double UPPER_BOUND_OF_NORMAL_ACCURACY = 1e10;
+        constexpr double LOWER_BOUND_OF_NORMAL_ACCURACY = 1e-10;
+
 		enum class ValueType 
 		{
 			VOID = 0,
@@ -159,5 +162,59 @@ namespace MSLC
 
         //WARNING: you must be care with this function
         ValueContainer CastTo(ValueContainer value, ValueType type, int line = -1);
+
+        class VCHash
+        {
+        public:
+            size_t operator()(const ValueContainer& value_container) const
+            {
+                switch (value_container.type)
+                {
+                case ValueType::VOID:
+                    return 0;
+                case ValueType::INT:
+                    return std::hash<int64_t>()(value_container.intVal);         
+                case ValueType::BOOL:
+                    return std::hash<bool>()(value_container.boolVal);
+                case ValueType::REAL:
+                    return std::hash<double>()(std::round(value_container.realVal * UPPER_BOUND_OF_NORMAL_ACCURACY) / UPPER_BOUND_OF_NORMAL_ACCURACY);
+                case ValueType::CHAR:
+                    return std::hash<char>()(value_container.charVal);
+                case ValueType::UINT:
+                    return std::hash<uint64_t>()(value_container.uintVal); 
+                case ValueType::STRING:
+                    return std::hash<std::string>()(value_container.strVal);
+                
+                }
+                return 0;
+            }
+        };
+        struct VCEqual
+        {
+            bool operator()(const ValueContainer& value_container0, const ValueContainer& value_container1) const
+            {
+                if (value_container0.type != value_container1.type) return false;
+                switch (value_container0.type)
+                {
+                case ValueType::VOID:
+                    return true;
+                case ValueType::INT:
+                    return value_container0.intVal == value_container1.intVal;
+                case ValueType::BOOL:
+                    return value_container0.boolVal == value_container1.boolVal;
+                case ValueType::REAL:
+                    return std::abs(value_container0.realVal - value_container1.realVal) < LOWER_BOUND_OF_NORMAL_ACCURACY;
+                case ValueType::CHAR:
+                    return value_container0.charVal == value_container1.charVal;
+                case ValueType::UINT:
+                    return value_container0.uintVal == value_container1.uintVal;
+                case ValueType::STRING:
+                    return value_container0.strVal == value_container1.strVal;
+
+                }
+                return false;
+            }
+        };
+    
 	}
 }

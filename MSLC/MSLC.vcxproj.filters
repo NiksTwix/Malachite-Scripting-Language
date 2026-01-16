@@ -19,12 +19,18 @@
     <Filter Include="Файлы заголовков\CompilationInfo">
       <UniqueIdentifier>{89e51601-31db-47f1-a27e-333b96e2796d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Файлы заголовков\IR">
+      <UniqueIdentifier>{7fcfbc38-1186-4f45-95f3-110a05c7fb3f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Исходные файлы\Frontend">
+      <UniqueIdentifier>{4c18463e-a133-4fd8-b259-37eee89f93e1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Исходные файлы\IR">
+      <UniqueIdentifier>{a5122ebe-85cd-49cc-acd9-5ae3da4dedf0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MSLC.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Preprocessing\AMGBuilder.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
     <ClCompile Include="source\Common\Diagnostics\Diagnostics.cpp">
@@ -33,23 +39,29 @@
     <ClCompile Include="source\Definitions\ValueContainer.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="source\Tokenization\Lexer.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Preprocessing\MacrosInfo.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
     <ClCompile Include="source\CompilationInfo\CompilationState.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Preprocessing\Preprocessor.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
-    <ClCompile Include="source\AST\ASTBuilder.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
     <ClCompile Include="source\Compiler.cpp">
       <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="source\AST\ASTBuilder.cpp">
+      <Filter>Исходные файлы\Frontend</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Preprocessing\AMGBuilder.cpp">
+      <Filter>Исходные файлы\Frontend</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Tokenization\Lexer.cpp">
+      <Filter>Исходные файлы\Frontend</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Preprocessing\MacrosInfo.cpp">
+      <Filter>Исходные файлы\Frontend</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Preprocessing\Preprocessor.cpp">
+      <Filter>Исходные файлы\Frontend</Filter>
+    </ClCompile>
+    <ClCompile Include="source\IR\PseudoTranslation\PseudoTranslator.cpp">
+      <Filter>Исходные файлы\IR</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -103,6 +115,15 @@
     </ClInclude>
     <ClInclude Include="include\CompilationInfo\Variables.hpp">
       <Filter>Файлы заголовков\CompilationInfo</Filter>
+    </ClInclude>
+    <ClInclude Include="include\IR\PseudoTranslation\PseudoTranslationsInfo.hpp">
+      <Filter>Файлы заголовков\IR</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Definitions\ChunkArray.hpp">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="include\IR\PseudoTranslation\PseudoTranslator.hpp">
+      <Filter>Файлы заголовков\IR</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

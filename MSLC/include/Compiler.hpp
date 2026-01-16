@@ -3,7 +3,7 @@
 #include "Preprocessing/Preprocessor.hpp"
 #include "Tokenization/Lexer.hpp"
 #include "AST/ASTBuilder.hpp"
-
+#include "IR/PseudoTranslation/PseudoTranslator.hpp"
 
 namespace MSLC 
 {

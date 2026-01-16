@@ -1,8 +1,8 @@
-#pragma once
+﻿#pragma once
 #include "..\Definitions\ValueContainer.hpp"
 #include "..\Definitions\CommonEnums.hpp"
 #include "CommonInfo.hpp"
-
+#include <unordered_map>
 
 namespace MSLC 
 {
@@ -10,11 +10,58 @@ namespace MSLC
 	{
 		namespace Variables
 		{
+			using ConstantID = size_t;
+
+			struct ImmediateConstantsTable 
+			{
+				std::vector<Definitions::ValueContainer> constants_by_id;
+
+				// Fast lookup: value → ID  
+				std::unordered_map<Definitions::ValueContainer, ConstantID,
+				Definitions::VCHash, Definitions::VCEqual> value_to_id;
+
+				// Methods
+				ConstantID GetOrAdd(const Definitions::ValueContainer& value) {
+					auto it = value_to_id.find(value);
+					if (it != value_to_id.end()) {
+						return it->second;
+					}
+
+					ConstantID new_id = constants_by_id.size();
+					constants_by_id.push_back(value);
+					value_to_id[value] = new_id;
+					return new_id;
+				}
+
+				const Definitions::ValueContainer& GetByID(ConstantID id) const {
+					return constants_by_id[id];
+				}
+
+				bool Contains(const Definitions::ValueContainer& value) const {
+					return value_to_id.find(value) != value_to_id.end();
+				}
+
+				ConstantID TryGetID(const Definitions::ValueContainer& value) const {
+					auto it = value_to_id.find(value);
+					if (it != value_to_id.end()) {
+						return it->second;
+					}
+					return INVALID_ID;
+				}
+				void Clear() {
+					constants_by_id.clear();
+					value_to_id.clear();
+				}
+			};
+
+
+
 
 			enum VariableFlags
 			{
 				None = 0,
 				Const = 1 << 0,
+				Immediate = 1 << 1,		//100,true/false and another
 			};
 
 
@@ -23,15 +70,17 @@ namespace MSLC
 				std::string name;
 
 				VariableID id;
-
+		
 				Types::TypeID type_id;
 
-				size_t stack_offset = 0;
+				ConstantID immediate_const_id = INVALID_ID;
 
-				Definitions::AccessMode access_mode = Definitions::AccessMode::Public;	//in namespaces 
+				Definitions::AccessMode access_mode = Definitions::AccessMode::Public;
+				VariableFlags flags;
 			};
 
 
+			
 		}
 	}
 }

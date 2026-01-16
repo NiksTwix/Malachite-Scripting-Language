@@ -22,6 +22,8 @@ real y = 200.0;
 
 const int x1 = 200;
 
+int* i = &x1;
+
 //Arrays
 int size = 10
 int* array = allocate_memory(size)	//allocate_memory - its function in standard library
@@ -87,7 +89,10 @@ func f1(int x, int y, int z) -> int
 {
 	return x*y*z;
 }
-
+func f1_1(int& x, int& y, int& z) -> int		//link
+{
+	return x*y*z;
+}
 //func inheritance 
 
 func f2(int x,int y, int z) -> int
@@ -152,8 +157,8 @@ namespace MalachiteTest
 	@access_mode(private)
 	int c = 0;
 	@access_mode(public)
-	func K():return 10
+	func K()-> int:return 10
 
 
 }
-
+int c = MalachiteTest::K();

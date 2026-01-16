@@ -133,6 +133,7 @@
     <ClCompile Include="source\CompilationInfo\CompilationState.cpp" />
     <ClCompile Include="source\Compiler.cpp" />
     <ClCompile Include="source\Definitions\ValueContainer.cpp" />
+    <ClCompile Include="source\IR\PseudoTranslation\PseudoTranslator.cpp" />
     <ClCompile Include="source\Preprocessing\AMGBuilder.cpp" />
     <ClCompile Include="source\Preprocessing\MacrosInfo.cpp" />
     <ClCompile Include="source\Preprocessing\Preprocessor.cpp" />
@@ -148,8 +149,11 @@
     <ClInclude Include="include\CompilationInfo\Types.hpp" />
     <ClInclude Include="include\CompilationInfo\Variables.hpp" />
     <ClInclude Include="include\Compiler.hpp" />
+    <ClInclude Include="include\Definitions\ChunkArray.hpp" />
     <ClInclude Include="include\Definitions\CommonEnums.hpp" />
     <ClInclude Include="include\Definitions\ValueContainer.hpp" />
+    <ClInclude Include="include\IR\PseudoTranslation\PseudoTranslationsInfo.hpp" />
+    <ClInclude Include="include\IR\PseudoTranslation\PseudoTranslator.hpp" />
     <ClInclude Include="include\Preprocessing\AMGBuilder.hpp" />
     <ClInclude Include="include\Preprocessing\MacrosInfo.hpp" />
     <ClInclude Include="include\Preprocessing\Preprocessor.hpp" />

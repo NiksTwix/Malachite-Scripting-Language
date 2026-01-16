@@ -40,7 +40,8 @@ namespace MSLC
 				std::string name;		//name of field
 				TypeID type_id;			//type of data
 				uint32_t offset = 0;	//Offset from start of object
-				Definitions::AccessMode access_mode = Definitions::AccessMode::Public;
+				Definitions::AccessMode read_access_mode = Definitions::AccessMode::Public;
+				Definitions::AccessMode write_access_mode = Definitions::AccessMode::Public;
 			};
 
 
