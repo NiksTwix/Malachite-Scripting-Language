@@ -26,6 +26,7 @@ namespace MSLC
 		constexpr std::string_view 	w_namespace = "namespace";
 		constexpr std::string_view 	w_const     = "const";
 		constexpr std::string_view 	w_gc		= "gc";
+		constexpr std::string_view 	w_to = "to";
 	}
 	namespace BasicTypeMarkers
 	{
@@ -52,7 +53,6 @@ namespace MSLC
 		constexpr std::string_view 	w_inline = "inline";
 
 		constexpr std::string_view 	w_obj_property = "property";
-		constexpr std::string_view 	w_stack_only = "stack_only";
 		
 		constexpr std::string_view 	w_func_inheritance = "finherit";
 		constexpr std::string_view 	w_func_block = "fblock";

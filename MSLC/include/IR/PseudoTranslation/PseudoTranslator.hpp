@@ -1,5 +1,5 @@
 #pragma once
-#include "PseudoTranslationsInfo.hpp"
+#include "ExpressionsTranslator.hpp"
 #include "..\..\AST\ASTBuilder.hpp"
 
 
@@ -16,8 +16,10 @@ namespace MSLC
 
 				void AnalyzeRecursive(AST::ASTNode& node, PseudoTranslationState& pts);
 
-			public:
+				ExpressionsTranslator expressions_translator;
 
+			public:
+				PseudoTranslator() = default;
 				POperationArray AnalyzeTree(AST::ASTNode& root, CompilationInfo::CompilationState& cs);
 
 			};

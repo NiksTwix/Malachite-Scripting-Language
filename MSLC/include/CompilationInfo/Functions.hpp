@@ -1,6 +1,5 @@
 #pragma once
-#include "..\Definitions\ValueContainer.hpp"
-#include "..\Definitions\CommonEnums.hpp"
+
 #include "CommonInfo.hpp"
 #include <unordered_map>
 
@@ -29,7 +28,7 @@ namespace MSLC
 			struct FunctionArgument 
 			{
 				std::string name;
-				Types::TypeID type_id;
+				Values::ValueInfo vinfo;
 			};
 
 			struct FunctionDescription
@@ -38,7 +37,8 @@ namespace MSLC
 				std::vector<FunctionArgument> arguments;
 				FunctionID id;
 
-				Types::TypeID returned_type_id;
+				Values::ValueInfo return_vinfo;
+
 
 				Definitions::AccessMode access_mode = Definitions::AccessMode::Public;
 

@@ -80,7 +80,7 @@ namespace MSLC
 		{
 			GlobalSymbolTable gst;
 
-			Variables::ImmediateConstantsTable ict;
+			Values::ImmediateConstantsTable ict;
 
 			//vf stack
 			std::vector<VisibleFrame> frames_stack;
@@ -93,7 +93,7 @@ namespace MSLC
 		public:
 			Preprocessing::MacrosTable& GetMacrosTable();
 			GlobalSymbolTable& GetGST();
-			Variables::ImmediateConstantsTable& GetICT();
+			Values::ImmediateConstantsTable& GetICT();
 
 		};
 

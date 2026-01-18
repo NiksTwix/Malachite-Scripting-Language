@@ -1,58 +1,20 @@
 // Malachite Scripting Language syntax example
 
-//Directives (compiler)
-#define_const CONTANT_1 = 2000	//Inserts in the place of using
-#define_const string_1 = "String"
+//Basic
+int x = 100;	//; is optional
 
+const real y = 200.0
 
-#define_insertion FUNC(x,y,z)
-{
-	x = y + z * x + *x
-}
+float* y_pointer = &y
+real y_value = *y_pointer
 
+real x_to_y = x to real
 
-
-#import "test1.msl"		//imports module 
-#importlib "test2"		//imports library 
-
-//Defining variables
-
-int x = 200;
-real y = 200.0;
-
-const int x1 = 200;
-
-int* i = &x1;
-
-//Arrays
 int size = 10
-int* array = allocate_memory(size)	//allocate_memory - its function in standard library
-free_memory(array,size)
-
-//or
-
 int* array = new int[size]	
-delete array			
+x = *(array + 5)
+delete array	
 
-//VM programming
-
-op_code			//Lite mode (vm asm compiler)
-{
-	//default pseudo commands: mathematic, logic, push/pop, load/store, allocate/free,  label and jumping
-}
-
-op_code kernel		//Kernel mode (vm asm compiler, but with more instructions)
-{
-	//all vmoperations
-}
-
-/*
-	Compiler takes from 120 (i think it will be 115-120) general register 6 for op_code section and gives them names: RA,RB,RC,RD,RE,RF 
-	VM can use 114 register for operations.
-*/
-
-
-//Condition checking
 if (x == y): x = 2001
 elif (x != y + 1)
 {
@@ -63,18 +25,14 @@ else
 	x = 2003
 }
 
-//Loops
-
 for x (start,end,step)
 {
 
 }
-//Interval cycles (in the future)
 for x in [start_index,end_index,step] // another combinations: (), [), (]
 {
 
 }
-
 while (x==y)
 {
 	if (x != y) break;
@@ -93,16 +51,8 @@ func f1_1(int& x, int& y, int& z) -> int		//link
 {
 	return x*y*z;
 }
-//func inheritance 
 
-func f2(int x,int y, int z) -> int
-{
-	@fblock result_calculating
-	{
-	
-		return x*y*z;
-	}
-}
+
 @finherit f2 (x,y,z) //new names of parameters; copies code from f1 and inserts here
 func f3(int x,int y, int z) -> int
 {
@@ -115,46 +65,76 @@ func f3(int x,int y, int z) -> int
 }
 
 
+op_code	lite/kernel
+{
+	//access not for all instructions
+}
+
+//Directives (compiler)
+#define_const CONTANT_1 = 2000	//Inserts in the place of using
+#define_const string_1 = "String"
+
+
+#define_insertion FUNC(x,y,z)
+{
+	x = y + z * x + *x
+}
+
+
+
+#import "test1.msl"		//imports module 
+#importlib "test2"		//imports library 
+
 //OOP
+
 object_template INT
 {
-@access_mode(private)
+	@access_mode(private)
 	int x;
-@access_mode(public)
+	@access_mode(public)
 	INT();
 }
 object_template Vector: INT
 {
-//code
-@access_mode(public)
+	//code
+	@access_mode(public)
 	@property(get:public, set:protected)
 	int field1;
+
+	_constructor(){}	
+
+	_coping(const Vector& v)
+	{
+
+	}
+	_coping_assing(const Vector& v)
+	{
+
+	}
 } 
 
-Vector k = new Vector();	//Pointer!
+Vector* k = new Vector();	//Pointer!
 k->y = 0;			//Pointer + y_offset
 delete k
 
-gc Vector k = new Vector();	//GC mode
+gc Vector* k = new Vector();	//GC mode
+
+
+Vector k = Vector();	//in stack
 
 //deletes automatically
  
 //Alias
 alias meter: int
 
-
 namespace MalachiteTest	
 {
 	@access_mode(private) 
 	int test = 0		//label "private" - another symbols are automatically public
-	@stack_only
-	@access_mode(private) 
 	object_template Vector1
 	{
 		
 	}
-
-	@access_mode(private)
 	int c = 0;
 	@access_mode(public)
 	func K()-> int:return 10

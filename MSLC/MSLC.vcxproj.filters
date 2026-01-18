@@ -28,18 +28,15 @@
     <Filter Include="Исходные файлы\IR">
       <UniqueIdentifier>{a5122ebe-85cd-49cc-acd9-5ae3da4dedf0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Файлы заголовков\Info">
+      <UniqueIdentifier>{4fec9a16-d6fe-495c-8fea-ed200c5e9f4b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Исходные файлы\Info">
+      <UniqueIdentifier>{00627044-c00b-449f-9b4d-30126ea702a4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MSLC.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Common\Diagnostics\Diagnostics.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Definitions\ValueContainer.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
-    <ClCompile Include="source\CompilationInfo\CompilationState.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
     <ClCompile Include="source\Compiler.cpp">
@@ -63,11 +60,26 @@
     <ClCompile Include="source\IR\PseudoTranslation\PseudoTranslator.cpp">
       <Filter>Исходные файлы\IR</Filter>
     </ClCompile>
+    <ClCompile Include="source\IR\PseudoTranslation\ExpressionsTranslator.cpp">
+      <Filter>Исходные файлы\IR</Filter>
+    </ClCompile>
+    <ClCompile Include="source\IR\PseudoTranslation\PostfixBuilder.cpp">
+      <Filter>Исходные файлы\IR</Filter>
+    </ClCompile>
+    <ClCompile Include="include\IR\PseudoTranslation\PostfixBuilder.hpp">
+      <Filter>Файлы заголовков\IR</Filter>
+    </ClCompile>
+    <ClCompile Include="source\CompilationInfo\CompilationState.cpp">
+      <Filter>Исходные файлы\Info</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Common\Diagnostics\Diagnostics.cpp">
+      <Filter>Исходные файлы\Info</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Definitions\ValueContainer.cpp">
+      <Filter>Исходные файлы\Info</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\Common\Strings\StringOperations.hpp">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
     <ClInclude Include="include\Preprocessing\AMGBuilder.hpp">
       <Filter>Файлы заголовков\Frontend</Filter>
     </ClInclude>
@@ -86,26 +98,17 @@
     <ClInclude Include="include\Tokenization\Lexer.hpp">
       <Filter>Файлы заголовков\Frontend</Filter>
     </ClInclude>
-    <ClInclude Include="include\Common\Diagnostics\Diagnostics.hpp">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
     <ClInclude Include="include\Preprocessing\MacrosInfo.hpp">
       <Filter>Файлы заголовков\Frontend</Filter>
     </ClInclude>
     <ClInclude Include="include\AST\ASTBuilder.hpp">
       <Filter>Файлы заголовков\Frontend</Filter>
     </ClInclude>
-    <ClInclude Include="include\Compiler.hpp">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
     <ClInclude Include="include\CompilationInfo\CompilationState.hpp">
       <Filter>Файлы заголовков\CompilationInfo</Filter>
     </ClInclude>
     <ClInclude Include="include\CompilationInfo\Types.hpp">
       <Filter>Файлы заголовков\CompilationInfo</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Definitions\CommonEnums.hpp">
-      <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="include\CompilationInfo\Functions.hpp">
       <Filter>Файлы заголовков\CompilationInfo</Filter>
@@ -119,11 +122,26 @@
     <ClInclude Include="include\IR\PseudoTranslation\PseudoTranslationsInfo.hpp">
       <Filter>Файлы заголовков\IR</Filter>
     </ClInclude>
-    <ClInclude Include="include\Definitions\ChunkArray.hpp">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
     <ClInclude Include="include\IR\PseudoTranslation\PseudoTranslator.hpp">
       <Filter>Файлы заголовков\IR</Filter>
+    </ClInclude>
+    <ClInclude Include="include\IR\PseudoTranslation\ExpressionsTranslator.hpp">
+      <Filter>Файлы заголовков\IR</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Definitions\ChunkArray.hpp">
+      <Filter>Файлы заголовков\Info</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Definitions\CommonEnums.hpp">
+      <Filter>Файлы заголовков\Info</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Common\Diagnostics\Diagnostics.hpp">
+      <Filter>Файлы заголовков\Info</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Common\Strings\StringOperations.hpp">
+      <Filter>Файлы заголовков\Info</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Compiler.hpp">
+      <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

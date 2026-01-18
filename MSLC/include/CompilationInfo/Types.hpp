@@ -1,6 +1,4 @@
 #pragma once
-#include "..\Definitions\ValueContainer.hpp"
-#include "..\Definitions\CommonEnums.hpp"
 #include "CommonInfo.hpp"
 #include <unordered_map>
 
@@ -38,7 +36,7 @@ namespace MSLC
 			struct TypeField 
 			{
 				std::string name;		//name of field
-				TypeID type_id;			//type of data
+				Values::ValueInfo vinfo;
 				uint32_t offset = 0;	//Offset from start of object
 				Definitions::AccessMode read_access_mode = Definitions::AccessMode::Public;
 				Definitions::AccessMode write_access_mode = Definitions::AccessMode::Public;

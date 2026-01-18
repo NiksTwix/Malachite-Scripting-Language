@@ -127,12 +127,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="include\IR\PseudoTranslation\PostfixBuilder.hpp" />
     <ClCompile Include="MSLC.cpp" />
     <ClCompile Include="source\AST\ASTBuilder.cpp" />
     <ClCompile Include="source\Common\Diagnostics\Diagnostics.cpp" />
     <ClCompile Include="source\CompilationInfo\CompilationState.cpp" />
     <ClCompile Include="source\Compiler.cpp" />
     <ClCompile Include="source\Definitions\ValueContainer.cpp" />
+    <ClCompile Include="source\IR\PseudoTranslation\ExpressionsTranslator.cpp" />
+    <ClCompile Include="source\IR\PseudoTranslation\PostfixBuilder.cpp" />
     <ClCompile Include="source\IR\PseudoTranslation\PseudoTranslator.cpp" />
     <ClCompile Include="source\Preprocessing\AMGBuilder.cpp" />
     <ClCompile Include="source\Preprocessing\MacrosInfo.cpp" />
@@ -152,6 +155,7 @@
     <ClInclude Include="include\Definitions\ChunkArray.hpp" />
     <ClInclude Include="include\Definitions\CommonEnums.hpp" />
     <ClInclude Include="include\Definitions\ValueContainer.hpp" />
+    <ClInclude Include="include\IR\PseudoTranslation\ExpressionsTranslator.hpp" />
     <ClInclude Include="include\IR\PseudoTranslation\PseudoTranslationsInfo.hpp" />
     <ClInclude Include="include\IR\PseudoTranslation\PseudoTranslator.hpp" />
     <ClInclude Include="include\Preprocessing\AMGBuilder.hpp" />

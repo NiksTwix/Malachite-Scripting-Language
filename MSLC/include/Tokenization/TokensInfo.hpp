@@ -87,6 +87,7 @@ namespace MSLC
 					{std::string(Keywords::w_delete),TokenType::KEYWORD},
 					{std::string(Keywords::w_namespace),TokenType::KEYWORD},
 					{std::string(Keywords::w_const),TokenType::KEYWORD},
+					{std::string(Keywords::w_to),TokenType::KEYWORD},
 					{std::string(BasicTypeMarkers::w_real),TokenType::TYPE_MARKER},
 					{std::string(BasicTypeMarkers::w_integer),TokenType::TYPE_MARKER},
 					{std::string(BasicTypeMarkers::w_unsigned),TokenType::TYPE_MARKER},
@@ -101,7 +102,6 @@ namespace MSLC
 					{std::string(Attributes::w_virtual),TokenType::ATTRIBUTE},
 					{std::string(Attributes::w_inline),TokenType::ATTRIBUTE},
 					{std::string(Attributes::w_obj_property),TokenType::ATTRIBUTE},
-					{std::string(Attributes::w_stack_only),TokenType::ATTRIBUTE},
 					{std::string(Attributes::w_func_inheritance),TokenType::ATTRIBUTE},
 					{std::string(Attributes::w_func_block),TokenType::ATTRIBUTE},
 					{std::string(Attributes::w_func_block_override),TokenType::ATTRIBUTE},
@@ -136,6 +136,7 @@ namespace MSLC
 
 					//Pointers
 					{"&u", TokenType::OPERATOR},	//Get pointer
+					{"u&", TokenType::OPERATOR},	//Link
 					{"*u", TokenType::OPERATOR},	//Get value
 					{"u*", TokenType::OPERATOR},	//Operator/Type modificator
 					//Pointers end
