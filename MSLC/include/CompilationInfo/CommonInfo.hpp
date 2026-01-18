@@ -35,10 +35,11 @@ namespace MSLC
 			enum ValueFlags
 			{
 				None = 0,
-				Const = 1 << 0,
-				Immediate = 1 << 1,		//100,true/false and another
-				Pointer = 1 << 2,
-				Link = 1 << 3,
+				ConstValue = 1 << 0,
+				ConstPointer = 1 << 1,
+				Immediate = 1 << 2,		//100,true/false and another
+				Pointer = 1 << 3,
+				Link = 1 << 4,
 			};
 
 			using ConstantID = size_t;
@@ -48,6 +49,13 @@ namespace MSLC
 				Types::TypeID type_id = INVALID_ID;
 				ConstantID immediate_const_id = INVALID_ID;	//in the constants table
 				ValueFlags flags;
+				uint16_t pointers_depth = 0;
+
+				inline bool isPointer() const { return flags & Pointer; }
+				inline bool isLink() const { return flags & Link; }
+				inline bool isConstPointer() const { return flags & ConstPointer; }
+				inline bool isConstValue() const { return flags & ConstValue; }
+				inline bool isImmediate() const { return flags & Immediate; }
 			};
 
 
