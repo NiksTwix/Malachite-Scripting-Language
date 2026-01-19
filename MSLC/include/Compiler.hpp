@@ -15,6 +15,7 @@ namespace MSLC
 		Preprocessing::AMGBuilder amg_builder;
 		Preprocessing::Preprocessor preprocessor;
 		AST::ASTBuilder ast_builder;
+		IntermediateRepresentation::Pseudo::PseudoTranslator preudo_translator;
 	public:
 
 		void TestCompile(std::string path);	//test compiling for development

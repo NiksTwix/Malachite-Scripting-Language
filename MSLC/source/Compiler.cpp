@@ -29,6 +29,10 @@ namespace MSLC
 
 			AST::ASTNode tree = ast_builder.BuildAbsractScopeTree(tokens);
 			ast_builder.Postprocess(tree);
+
+
+			preudo_translator.AnalyzeTree(tree, comp_state);
+
 		}
 
 	}

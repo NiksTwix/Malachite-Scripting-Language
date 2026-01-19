@@ -9,11 +9,13 @@ namespace MSLC
 		{
 			enum class GroupType 
 			{
+				Root,
 				Simple,		//alone token
 
 				//Complex
-				FunctionCall,
-				AttributeUsing,
+				FunctionCall,	//simple - identificator, complex -arguments
+				ArrayAccess,	//simple - identificator, complex -arguments
+				AttributeUsing,	//simple - identificator, complex -arguments
 				Argument,
 
 				TypeConvertion,		//x to Vector	
@@ -23,9 +25,10 @@ namespace MSLC
 			{
 
 				Tokenization::Token simple;
-				std::vector<Tokenization::Token> complex;
+				std::vector<TokensGroup> complex;
 
 				GroupType type = GroupType::Simple;
+
 
 
 				bool IsSimple() const { return type == GroupType::Simple; }
@@ -33,20 +36,42 @@ namespace MSLC
 				TokensGroup() 
 				{
 					type = GroupType::Simple;
-					simple = Tokenization::Token();
 				}
-				TokensGroup(GroupType type) 
+				TokensGroup(std::vector<TokensGroup>& tokens)
+				{
+					type = GroupType::Root;
+					complex = tokens;
+				}
+				TokensGroup(Tokenization::Token token)
+				{
+					type = GroupType::Simple;
+					simple = token;
+				}
+				TokensGroup(GroupType type) : type(type)
 				{
 					if (type == GroupType::Simple) simple = Tokenization::Token();
-					else complex = std::vector<Tokenization::Token>();
+					else complex = std::vector<TokensGroup>();
 				}
 			};
 
 
+
+
+
+
 			class PostfixBuilder 
 			{
+				std::unordered_map<std::string, int8_t> operators_priority;
+
+				GroupType IdentificateGroupType(const std::vector<Tokenization::Token>& tokens, size_t current_index);
+				TokensGroup HandleFuncCall(const std::vector<Tokenization::Token>& tokens, size_t& current_index);
+
 			public:
-				TokensGroup BuildPostfix(std::vector<Tokenization::Token> tokens);
+
+				
+
+				PostfixBuilder();
+				TokensGroup BuildPostfix(const std::vector<Tokenization::Token>& tokens);
 			};
 		}
 	}

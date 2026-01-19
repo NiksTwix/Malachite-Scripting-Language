@@ -25,7 +25,7 @@ namespace MSLC
 				}
 				else	//MSL Expression
 				{
-					Definitions::ChunkArray<PseudoOperation> operations = expressions_translator.AnalyzeExpression(node.tokens);
+					Definitions::ChunkArray<PseudoOperation> operations = expressions_translator.AnalyzeExpression(node.tokens,pts);
 					pts.pseudo_code.OverwriteBack(operations);
 				}
 

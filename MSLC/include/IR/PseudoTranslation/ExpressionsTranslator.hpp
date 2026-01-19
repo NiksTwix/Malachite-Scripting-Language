@@ -1,6 +1,6 @@
 #pragma once
 #include "PseudoTranslationsInfo.hpp"
-
+#include "PostfixBuilder.hpp"
 namespace MSLC
 {
 	namespace IntermediateRepresentation
@@ -9,6 +9,8 @@ namespace MSLC
 		{
 			class ExpressionsTranslator 
 			{
+			private:
+				PostfixBuilder postfix_builder;
 			public:
 
 				Definitions::ChunkArray<PseudoOperation> AnalyzeExpression(std::vector<Tokenization::Token> tokens, PseudoTranslationState& pts);
