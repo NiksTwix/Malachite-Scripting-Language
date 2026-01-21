@@ -24,11 +24,10 @@ namespace MSLC
 		constexpr std::string_view 	w_new       = "new";
 		constexpr std::string_view 	w_delete    = "delete";
 		constexpr std::string_view 	w_namespace = "namespace";
-		constexpr std::string_view 	w_const     = "const";
-		constexpr std::string_view 	w_gc		= "gc";
+		
 		constexpr std::string_view 	w_to = "to";
 	}
-	namespace BasicTypeMarkers
+	namespace TypeMarkers
 	{
 		constexpr std::string_view 	w_real		= "real";
 		constexpr std::string_view 	w_integer	= "int";
@@ -36,6 +35,11 @@ namespace MSLC
 		constexpr std::string_view 	w_character = "char";
 		constexpr std::string_view 	w_boolean	= "bool";
 		constexpr std::string_view 	w_void		= "void";
+
+		constexpr std::string_view 	w_const = "const";
+		constexpr std::string_view 	w_gc = "gc";
+		constexpr std::string_view 	w_ptr = "ptr";
+		constexpr std::string_view 	w_ref = "ref";
 	}
 	namespace Literals
 	{

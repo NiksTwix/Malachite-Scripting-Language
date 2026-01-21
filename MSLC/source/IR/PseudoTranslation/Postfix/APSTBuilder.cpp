@@ -60,7 +60,7 @@ namespace MSLC
 						std::vector<TokensGroup> declaration_args = stack;
 						stack.clear();
 						TokensGroup new_group(declaration_args, GroupType::Declaration);
-						std::vector<TokensGroup> gp = { new_group };
+						std::vector<TokensGroup> gp = { new_group,right };
 						TokensGroup assignment(_operator, gp, GroupType::Operation);
 						return assignment;
 					}
@@ -106,8 +106,7 @@ namespace MSLC
 			}
 			TokensGroup APSTBuilder::BuildAPST(TokensGroup& root)
 			{
-				if (root.IsSimple()) return {};
-				TokensGroup result;
+				if (root.IsSimple()) return root;
 				std::vector<TokensGroup> stack;
 				for (size_t i = 0; i < root.complex.size(); i++)
 				{
@@ -117,46 +116,56 @@ namespace MSLC
 						switch (group.simple.type)
 						{
 						case TokenType::IDENTIFIER:
-							stack.push_back(group);
-							break;
+						{
+							if (stack.empty())
+							{
+								stack.push_back(group);
+								continue;
+							}
+							else {
+								std::stack<TokensGroup> modifiers_stack = {};
+								
+								while (!stack.empty()) 
+								{
+									auto gp = stack.back();
+									if (gp.IsSimple() && gp.simple.type == TokenType::UNDEFINED) 
+									{
+										stack.pop_back();
+										continue;
+									}
+									if (gp.IsSimple() && gp.simple.type == TokenType::TYPE_MARKER)
+									{		
+										modifiers_stack.push(gp);
+										stack.pop_back();
+									}
+									else break;
+
+								}
+								if (modifiers_stack.empty())
+								{
+									stack.push_back(group);
+									continue;
+								}
+								std::vector<TokensGroup> modifiers = {};
+								while (!modifiers_stack.empty())
+								{
+									modifiers.push_back(modifiers_stack.top());
+									modifiers_stack.pop();
+								}
+								TokensGroup new_group(group, modifiers, GroupType::Type);
+								stack.push_back(new_group);
+								break;
+							}
+						}
+							
+							
+							
 						case TokenType::LITERAL:
 							stack.push_back(group);
 							break;
-						case TokenType::TYPE_MARKER:	//u*/u7 - link and pointer markers
-						{
-							if (stack.empty()) 
-							{
-								//InsertError
-								std::cout << "Error 1 (APSTBuilder)\n";
-								continue;
-							}
-
-							auto type = stack.back(); 
-							
-							if (type.IsSimple() && type.simple.type == TokenType::IDENTIFIER) //Maybe its type identifier
-							{
-								stack.pop_back();
-								auto& modifier = group;
-								std::vector<TokensGroup> modifiers = { modifier };
-								TokensGroup new_group(type, modifiers, GroupType::Type);
-
-								stack.push_back(new_group);	//Push type group
-								continue;
-							}
-							else 
-							{
-								if (type.type == GroupType::Type) 
-								{
-									type.complex.push_back(group);	// modifier
-								}
-								else 
-								{
-									//InsertError
-									std::cout << "Error 2 (APSTBuilder)\n";
-								}
-							}
+						case TokenType::TYPE_MARKER:	
+							stack.push_back(group);
 							break;
-						}
 						case TokenType::OPERATOR:
 						{
 							stack.push_back(HandleOperator(stack, group));
@@ -191,16 +200,18 @@ namespace MSLC
 					}
 					else 
 					{
-						stack.push_back(BuildAPST(group));
+						group.complex = BuildAPST(group).complex;
+						stack.push_back(group);
 					}
 				}
 
 				if (!stack.empty()) 
 				{
-					result.complex.insert(result.complex.end(), stack);
+					TokensGroup(stack, GroupType::Root);
+					return TokensGroup(stack, GroupType::Root);
 				}
 
-				return result;
+				return TokensGroup();
 			}
 		}
 	}

@@ -182,7 +182,7 @@ namespace MSLC
 			const Token& last = tokens.back();
 
 			// 1. Check: can it be postfix?
-			if (IsPostfixOperator(operator_str) || (TokensTypeTable::Get().GetTokenType("u" + operator_str) == TokenType::TYPE_MARKER)) {
+			if (IsPostfixOperator(operator_str)) {
 				bool last_is_expression =
 					last.type == TokenType::IDENTIFIER ||
 					last.type == TokenType::TYPE_MARKER ||

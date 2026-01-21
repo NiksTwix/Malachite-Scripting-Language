@@ -86,7 +86,10 @@ namespace MSLC
 					{std::string(Keywords::w_new),TokenType::KEYWORD},
 					{std::string(Keywords::w_delete),TokenType::KEYWORD},
 					{std::string(Keywords::w_namespace),TokenType::KEYWORD},
-					{std::string(Keywords::w_const),TokenType::KEYWORD},
+					{std::string(TypeMarkers::w_const),TokenType::TYPE_MARKER},
+					{std::string(TypeMarkers::w_ptr),TokenType::TYPE_MARKER},
+					{std::string(TypeMarkers::w_ref),TokenType::TYPE_MARKER},
+					{std::string(TypeMarkers::w_gc),TokenType::TYPE_MARKER},
 					{std::string(Keywords::w_to),TokenType::KEYWORD},
 					//{std::string(BasicTypeMarkers::w_real),TokenType::TYPE_MARKER},
 					//{std::string(BasicTypeMarkers::w_integer),TokenType::TYPE_MARKER},
@@ -136,9 +139,7 @@ namespace MSLC
 
 					//Pointers
 					{"&u", TokenType::OPERATOR},	//Get pointer
-					{"u&", TokenType::TYPE_MARKER},	//Link-Type modificator
 					{"*u", TokenType::OPERATOR},	//Get value
-					{"u*", TokenType::TYPE_MARKER},	//Pointer-Type modificator
 					//Pointers end
 					{"^", TokenType::OPERATOR},
 					{"/", TokenType::OPERATOR},
