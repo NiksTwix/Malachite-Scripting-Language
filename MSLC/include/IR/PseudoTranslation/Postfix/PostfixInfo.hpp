@@ -19,7 +19,10 @@ namespace MSLC
 				AttributeUsing,	//simple - identificator, complex -arguments
 				Argument,
 
+				Operation,	//Simple and complex!
+				Declaration,	//Of variable
 				Type,		//Vector or Vector* or Vector&
+				TypeCast,		//to
 			};
 
 			struct TokensGroup
@@ -43,6 +46,24 @@ namespace MSLC
 					type = GroupType::Root;
 					complex = tokens;
 				}
+				TokensGroup(std::vector<TokensGroup>& tokens, GroupType group_type)
+				{
+					type = group_type;
+					complex = tokens;
+				}
+				TokensGroup(TokensGroup&& simple_group,std::vector<TokensGroup>&& tokens, GroupType group_type)
+				{
+					type = group_type;
+					complex = std::move(tokens);
+					simple = std::move(simple_group.simple);
+				}
+				TokensGroup(TokensGroup& simple_group, std::vector<TokensGroup>& tokens, GroupType group_type)
+				{
+					type = group_type;
+					complex = tokens;
+					simple = simple_group.simple;
+				}
+
 				TokensGroup(Tokenization::Token token)
 				{
 					type = GroupType::Simple;

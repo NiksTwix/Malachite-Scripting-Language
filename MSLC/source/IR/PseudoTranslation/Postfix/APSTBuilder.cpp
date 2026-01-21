@@ -8,10 +8,181 @@ namespace MSLC
 		namespace Pseudo
 		{
 
-			void APSTBuilder::BuildAPST(TokensGroup& tokens_group)
+			TokensGroup APSTBuilder::HandleOperator(std::vector<TokensGroup>& stack, TokensGroup& _operator)
 			{
+				if (!OperatorsTable::Get().Has(_operator.simple.value.strVal))
+				{
+					//InsertError(maybe with type Development)
+					std::cout << "Error 3 (APSTBuilder)\n";
+					return{};
+				}
+				OperatorInfo info = OperatorsTable::Get().GetInfo(_operator.simple.value.strVal);
 
+				if (info.type == OperatorInfo::Type::Unary)
+				{
+					if (stack.empty())
+					{
+						//InsertError
+						std::cout << "Error 4 (APSTBuilder)\n";
+						return{};
+					}
+					auto left = stack.back(); stack.pop_back();
+					std::vector<TokensGroup> group_children = { left };
+					TokensGroup new_group(_operator, group_children, GroupType::Operation);
+					return new_group;
+				}
 
+				if (info.type == OperatorInfo::Type::Binary)
+				{
+					if (stack.size() < 2)
+					{
+						//InsertError
+						std::cout << "Error 5 (APSTBuilder)\n";
+						return{};
+					}
+					auto right = stack.back(); stack.pop_back();
+					auto left = stack.back(); stack.pop_back();
+					std::vector<TokensGroup> group_children = { left,right };
+					TokensGroup new_group(_operator, group_children, GroupType::Operation);
+					return new_group;
+				}
+				if (info.type == OperatorInfo::Type::Assignment) //Maybe declaration they 
+				{
+					if (stack.size() < 2)
+					{
+						//InsertError
+						std::cout << "Error 6 (APSTBuilder)\n";
+						return {};
+					}
+					auto right = stack.back(); stack.pop_back();	//saved value
+					if (stack.size() > 1) //TODO Check on arrays!
+					{
+						std::vector<TokensGroup> declaration_args = stack;
+						stack.clear();
+						TokensGroup new_group(declaration_args, GroupType::Declaration);
+						std::vector<TokensGroup> gp = { new_group };
+						TokensGroup assignment(_operator, gp, GroupType::Operation);
+						return assignment;
+					}
+					else 
+					{
+						auto left = stack.back(); stack.pop_back();
+						std::vector<TokensGroup> gp = { left,right };
+						TokensGroup assignment(_operator, gp, GroupType::Operation);
+						return assignment;
+					}
+				}
+				std::cout << "Error 7 (APSTBuilder::HandleOperator)\n";
+				return {};
+			}
+			TokensGroup APSTBuilder::HandleToOperator(std::vector<TokensGroup>& stack, TokensGroup& to_op)
+			{
+				// Needed: [expression] to [type]
+				if (stack.size() < 2)
+				{
+					std::cout << "Error 8 (APSTBuilder::HandleToOperator)\n";
+					return TokensGroup();
+				}
+				TokensGroup target_type = stack.back(); stack.pop_back();
+				TokensGroup expr = stack.back(); stack.pop_back();
+
+				// Just grouping without semantic
+				std::vector<TokensGroup> children = { expr, to_op, target_type };
+				return TokensGroup(children, GroupType::TypeCast);
+			}
+			TokensGroup APSTBuilder::BuildAPST(TokensGroup& root)
+			{
+				if (root.IsSimple()) return {};
+				TokensGroup result;
+				std::vector<TokensGroup> stack;
+				for (size_t i = 0; i < root.complex.size(); i++)
+				{
+					TokensGroup& group = root.complex[i];
+					if (group.IsSimple()) 
+					{
+						switch (group.simple.type)
+						{
+						case TokenType::IDENTIFIER:
+							stack.push_back(group);
+							break;
+						case TokenType::LITERAL:
+							stack.push_back(group);
+							break;
+						case TokenType::TYPE_MARKER:	//u*/u7 - link and pointer markers
+						{
+							if (stack.empty()) 
+							{
+								//InsertError
+								std::cout << "Error 1 (APSTBuilder)\n";
+								continue;
+							}
+
+							auto type = stack.back(); 
+							
+							if (type.IsSimple() && type.simple.type == TokenType::IDENTIFIER) //Maybe its type identifier
+							{
+								stack.pop_back();
+								auto& modifier = group;
+								std::vector<TokensGroup> modifiers = { modifier };
+								TokensGroup new_group(type, modifiers, GroupType::Type);
+
+								stack.push_back(new_group);	//Push type group
+								continue;
+							}
+							else 
+							{
+								if (type.type == GroupType::Type) 
+								{
+									type.complex.push_back(group);	// modifier
+								}
+								else 
+								{
+									//InsertError
+									std::cout << "Error 2 (APSTBuilder)\n";
+								}
+							}
+							break;
+						}
+						case TokenType::OPERATOR:
+						{
+							stack.push_back(HandleOperator(stack, group));
+							break;
+						}
+						case TokenType::KEYWORD:
+							if (!OperatorsTable::Get().Has(group.simple.value.strVal))
+							{
+								stack.push_back(group);
+							}
+							else 
+							{
+								auto info = OperatorsTable::Get().GetInfo(group.simple.value.strVal);
+								if (info.type == OperatorInfo::Type::Meta)
+								{
+									if (group.simple.value.strVal == Keywords::w_to) 
+									{
+										stack.push_back(HandleToOperator(stack, group));
+									}
+									continue;
+									//TODO Special handlers 
+								}
+							}
+							break;
+						default:
+							break;
+						}
+					}
+					else 
+					{
+						stack.push_back(BuildAPST(group));
+					}
+				}
+
+				if (!stack.empty()) 
+				{
+					result.complex.insert(result.complex.end(), stack);
+				}
+
+				return result;
 			}
 		}
 	}
