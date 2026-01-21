@@ -90,6 +90,20 @@ namespace MSLC
 				std::vector<TokensGroup> children = { expr, to_op, target_type };
 				return TokensGroup(children, GroupType::TypeCast);
 			}
+			TokensGroup APSTBuilder::HandleNewOperator(std::vector<TokensGroup>& stack, TokensGroup& new_op)
+			{
+				// Нужно: new тип [аргументы/размер]
+				if (stack.empty()) {
+					std::cout << "Error 9 (APSTBuilder::HandleNewOperator)\n";
+					return TokensGroup();
+				}
+
+				TokensGroup type = stack.back(); stack.pop_back();
+
+				// Базовая группировка
+				std::vector<TokensGroup> children = { new_op, type };
+				return TokensGroup(children, GroupType::NewExpression);
+			}
 			TokensGroup APSTBuilder::BuildAPST(TokensGroup& root)
 			{
 				if (root.IsSimple()) return {};
@@ -161,6 +175,10 @@ namespace MSLC
 									if (group.simple.value.strVal == Keywords::w_to) 
 									{
 										stack.push_back(HandleToOperator(stack, group));
+									}
+									else if (group.simple.value.strVal == Keywords::w_new)
+									{
+										stack.push_back(HandleNewOperator(stack, group));
 									}
 									continue;
 									//TODO Special handlers 

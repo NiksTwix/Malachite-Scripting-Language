@@ -12,6 +12,7 @@ namespace MSLC
 			private:
 				TokensGroup HandleOperator(std::vector<TokensGroup>& stack,TokensGroup& _operator);
 				TokensGroup HandleToOperator(std::vector<TokensGroup>& stack, TokensGroup& to_op);
+				TokensGroup HandleNewOperator(std::vector<TokensGroup>& stack, TokensGroup& new_op);
 			public:
 				TokensGroup BuildAPST(TokensGroup& root);
 			};

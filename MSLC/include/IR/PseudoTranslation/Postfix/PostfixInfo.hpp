@@ -23,6 +23,7 @@ namespace MSLC
 				Declaration,	//Of variable
 				Type,		//Vector or Vector* or Vector&
 				TypeCast,		//to
+				NewExpression,	//new
 			};
 
 			struct TokensGroup
