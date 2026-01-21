@@ -88,12 +88,12 @@ namespace MSLC
 					{std::string(Keywords::w_namespace),TokenType::KEYWORD},
 					{std::string(Keywords::w_const),TokenType::KEYWORD},
 					{std::string(Keywords::w_to),TokenType::KEYWORD},
-					{std::string(BasicTypeMarkers::w_real),TokenType::TYPE_MARKER},
-					{std::string(BasicTypeMarkers::w_integer),TokenType::TYPE_MARKER},
-					{std::string(BasicTypeMarkers::w_unsigned),TokenType::TYPE_MARKER},
-					{std::string(BasicTypeMarkers::w_character),TokenType::TYPE_MARKER},
-					{std::string(BasicTypeMarkers::w_boolean),TokenType::TYPE_MARKER},
-					{std::string(BasicTypeMarkers::w_void),TokenType::TYPE_MARKER},
+					//{std::string(BasicTypeMarkers::w_real),TokenType::TYPE_MARKER},
+					//{std::string(BasicTypeMarkers::w_integer),TokenType::TYPE_MARKER},
+					//{std::string(BasicTypeMarkers::w_unsigned),TokenType::TYPE_MARKER},
+					//{std::string(BasicTypeMarkers::w_character),TokenType::TYPE_MARKER},
+					//{std::string(BasicTypeMarkers::w_boolean),TokenType::TYPE_MARKER},
+					//{std::string(BasicTypeMarkers::w_void),TokenType::TYPE_MARKER},
 					{std::string(Literals::w_true),TokenType::LITERAL},
 					{std::string(Literals::w_false),TokenType::LITERAL},
 					{std::string(Attributes::w_access_mode),TokenType::ATTRIBUTE},
@@ -136,11 +136,11 @@ namespace MSLC
 
 					//Pointers
 					{"&u", TokenType::OPERATOR},	//Get pointer
-					{"u&", TokenType::OPERATOR},	//Link
+					{"u&", TokenType::TYPE_MARKER},	//Link-Type modificator
 					{"*u", TokenType::OPERATOR},	//Get value
-					{"u*", TokenType::OPERATOR},	//Operator/Type modificator
+					{"u*", TokenType::TYPE_MARKER},	//Pointer-Type modificator
 					//Pointers end
-
+					{"^", TokenType::OPERATOR},
 					{"/", TokenType::OPERATOR},
 					{"*", TokenType::OPERATOR},
 					{"%", TokenType::OPERATOR},
@@ -149,6 +149,7 @@ namespace MSLC
 					{"-=", TokenType::OPERATOR},
 					{"/=", TokenType::OPERATOR},
 					{"*=", TokenType::OPERATOR},
+					{"^=", TokenType::OPERATOR},
 					{"==", TokenType::OPERATOR},
 					{"!=", TokenType::OPERATOR},
 					{"!", TokenType::OPERATOR},     // 

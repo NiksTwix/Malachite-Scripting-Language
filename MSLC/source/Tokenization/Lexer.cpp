@@ -182,7 +182,7 @@ namespace MSLC
 			const Token& last = tokens.back();
 
 			// 1. Check: can it be postfix?
-			if (IsPostfixOperator(operator_str)) {
+			if (IsPostfixOperator(operator_str) || (TokensTypeTable::Get().GetTokenType("u" + operator_str) == TokenType::TYPE_MARKER)) {
 				bool last_is_expression =
 					last.type == TokenType::IDENTIFIER ||
 					last.type == TokenType::TYPE_MARKER ||
@@ -190,12 +190,6 @@ namespace MSLC
 					last.value.strVal == ")" ||
 					last.value.strVal == "]" ||
 					last.value.strVal == "}";
-				if (last_is_expression) {
-					// After expression * and & - always binary
-					if ((operator_str == "*") && last.type != TokenType::TYPE_MARKER) {
-						return UnaryType::None;
-					}
-				}
 				if (last_is_expression) {
 					return UnaryType::Postfix;
 				}

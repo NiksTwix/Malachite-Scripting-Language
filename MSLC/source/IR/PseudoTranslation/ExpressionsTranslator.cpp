@@ -16,13 +16,10 @@ namespace MSLC
 				else
 				{
 					if (gp.simple.type != TokenType::UNDEFINED) std::cout << gp.simple.value.ToString() << "\n";
-					depth += 1;
-					std::cout << "(" << '\n';
 					for (auto child : gp.complex)
 					{
 						print_recursive(child, depth);
 					}
-					std::cout << ")" << '\n';
 				}
 			}
 

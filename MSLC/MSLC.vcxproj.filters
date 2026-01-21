@@ -63,12 +63,6 @@
     <ClCompile Include="source\IR\PseudoTranslation\ExpressionsTranslator.cpp">
       <Filter>Исходные файлы\IR</Filter>
     </ClCompile>
-    <ClCompile Include="source\IR\PseudoTranslation\PostfixBuilder.cpp">
-      <Filter>Исходные файлы\IR</Filter>
-    </ClCompile>
-    <ClCompile Include="include\IR\PseudoTranslation\PostfixBuilder.hpp">
-      <Filter>Файлы заголовков\IR</Filter>
-    </ClCompile>
     <ClCompile Include="source\CompilationInfo\CompilationState.cpp">
       <Filter>Исходные файлы\Info</Filter>
     </ClCompile>
@@ -77,6 +71,12 @@
     </ClCompile>
     <ClCompile Include="source\Definitions\ValueContainer.cpp">
       <Filter>Исходные файлы\Info</Filter>
+    </ClCompile>
+    <ClCompile Include="source\IR\PseudoTranslation\Postfix\PostfixBuilder.cpp">
+      <Filter>Исходные файлы\IR</Filter>
+    </ClCompile>
+    <ClCompile Include="source\IR\PseudoTranslation\Postfix\APSTBuilder.cpp">
+      <Filter>Исходные файлы\IR</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -142,6 +142,15 @@
     </ClInclude>
     <ClInclude Include="include\Compiler.hpp">
       <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="include\IR\PseudoTranslation\Postfix\PostfixInfo.hpp">
+      <Filter>Файлы заголовков\IR</Filter>
+    </ClInclude>
+    <ClInclude Include="include\IR\PseudoTranslation\Postfix\PostfixBuilder.hpp">
+      <Filter>Файлы заголовков\IR</Filter>
+    </ClInclude>
+    <ClInclude Include="include\IR\PseudoTranslation\Postfix\APSTBuilder.hpp">
+      <Filter>Файлы заголовков\IR</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

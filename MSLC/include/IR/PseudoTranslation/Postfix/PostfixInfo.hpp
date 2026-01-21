@@ -1,5 +1,5 @@
 #pragma once
-#include "..\..\..\include\Tokenization\TokensInfo.hpp"
+#include "..\..\..\..\include\Tokenization\TokensInfo.hpp"
 
 namespace MSLC
 {
@@ -7,8 +7,9 @@ namespace MSLC
 	{
 		namespace Pseudo
 		{
-			enum class GroupType 
+			enum class GroupType
 			{
+				Empty,
 				Root,
 				Simple,		//alone token
 
@@ -18,10 +19,10 @@ namespace MSLC
 				AttributeUsing,	//simple - identificator, complex -arguments
 				Argument,
 
-				TypeConvertion,		//x to Vector	
+				Type,		//Vector or Vector* or Vector&
 			};
 
-			struct TokensGroup 
+			struct TokensGroup
 			{
 
 				Tokenization::Token simple;
@@ -33,7 +34,7 @@ namespace MSLC
 
 				bool IsSimple() const { return type == GroupType::Simple; }
 
-				TokensGroup() 
+				TokensGroup()
 				{
 					type = GroupType::Simple;
 				}
@@ -57,22 +58,6 @@ namespace MSLC
 
 
 
-
-
-			class PostfixBuilder 
-			{
-				std::unordered_map<std::string, int8_t> operators_priority;
-
-				GroupType IdentificateGroupType(const std::vector<Tokenization::Token>& tokens, size_t current_index);
-				TokensGroup HandleFuncCall(const std::vector<Tokenization::Token>& tokens, size_t& current_index);
-
-			public:
-
-				
-
-				PostfixBuilder();
-				TokensGroup BuildPostfix(const std::vector<Tokenization::Token>& tokens);
-			};
 		}
 	}
 }

@@ -1,4 +1,4 @@
-﻿#include "..\..\..\include\IR\PseudoTranslation\PostfixBuilder.hpp"
+﻿#include "..\..\..\..\include\IR\PseudoTranslation\Postfix\PostfixBuilder.hpp"
 
 namespace MSLC
 {
@@ -9,49 +9,7 @@ namespace MSLC
 		{
             PostfixBuilder::PostfixBuilder()
             {
-                operators_priority =
-                {
-                    // Level 10
-                    {std::string(Keywords::w_new), 10},
-                    // Level 9: branchs (separately handling)
-                    {"(", -1}, {")", -1},{"[", -1}, {"]", -1},  // special cases
-
-                    // Level 8: unary operators
-                    {"!u", 8}, {"~", 8}, {"+u", 8}, {"-u", 8},  // unary + and -, also bit NOT/ u-unary
-
-                    {"u*", 8},{"*u", 8},{"&u", 8},{"u&", 8},    //Work with pointers and links
-
-                    // Level 7: multiplicative
-                    {"*", 7}, {"/", 7}, {"%", 7},
-
-                    // Level 6: additive 
-                    {"+", 6}, {"-", 6},            // binary + and -
-
-                    // Level 5
-
-                    {std::string(Keywords::w_to), 5},
-                    // Level 4: bit offset
-
-                    {"<<", 4}, {">>", 4},
-
-                    // Level 3: comparings
-                    {"<", 3}, {"<=", 3}, {">", 3}, {">=", 3},
-
-                    // Level 2: equalities
-                    {"==", 2}, {"!=", 2},
-
-                    // Level 1: bit OR/XOR
-                    {"&", 1}, {"|", 1}, {"^", 1},
-
-                    // Level 0: logic AND/OR
-                    {"&&", 0}, {"||", 0},
-
-                    // Level -1: assignments (the lowest priority)
-                    {"=", -1}, {"+=", -1}, {"-=", -1}, {"*=", -1},
-                    {"/=", -1}, {"%=", -1}, {"&=", -1}, {"|=", -1},
-                    {"<<=", -1}, {">>=", -1}, {"&&=", -1}, {"||=", -1},
-                    {"~=", -1}
-                };
+             
             }
 
 
@@ -155,15 +113,15 @@ namespace MSLC
                     {
                         const Token& t = tokens[i];
                         //Main algorythm
-                        if (t.type == TokenType::IDENTIFIER || t.type == TokenType::LITERAL || t.type == TokenType::KEYWORD) {
+                        if (t.type == TokenType::IDENTIFIER || t.type == TokenType::LITERAL || (t.type == TokenType::KEYWORD && !OperatorsTable::Get().Has(t.value.strVal)) || t.type == TokenType::TYPE_MARKER) {
                             result.push_back(TokensGroup(t));
                         }
-                        else if ((t.type == TokenType::OPERATOR || t.type == TokenType::KEYWORD) && operators_priority.count(t.value.strVal)) {
+                        else if ((t.type == TokenType::OPERATOR || t.type == TokenType::KEYWORD) && OperatorsTable::Get().Has(t.value.strVal)) {
                             try 
                             {
                                 while (!operations.empty() && 
                                     operations.back().simple.value.strVal != "(" &&  // dont push out"("
-                                    (operators_priority.at(operations.back().simple.value.strVal) >= operators_priority.at(t.value.strVal))) {
+                                    (OperatorsTable::Get().GetInfo(operations.back().simple.value.strVal).priority >= OperatorsTable::Get().GetInfo(t.value.strVal).priority)) {
                                     result.push_back(operations.back());
                                     operations.pop_back();
                                 }
@@ -173,7 +131,7 @@ namespace MSLC
                             {
                                 for (auto tg : operations) 
                                 {
-                                    std::cout << tg.IsSimple() << tg.simple.value.ToString() << "\n";
+                                    std::cout << tg.IsSimple() << " " << tg.simple.value.ToString() << "\n";
                                 }
                                 int i = 0;
                             }

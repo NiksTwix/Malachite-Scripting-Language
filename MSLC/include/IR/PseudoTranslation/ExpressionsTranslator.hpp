@@ -1,6 +1,6 @@
 #pragma once
 #include "PseudoTranslationsInfo.hpp"
-#include "PostfixBuilder.hpp"
+#include "Postfix\PostfixBuilder.hpp"
 namespace MSLC
 {
 	namespace IntermediateRepresentation
