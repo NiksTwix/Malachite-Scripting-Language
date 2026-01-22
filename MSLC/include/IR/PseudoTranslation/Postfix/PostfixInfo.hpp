@@ -15,7 +15,9 @@ namespace MSLC
 
 				//Complex
 				FunctionCall,	//simple - identificator, complex -arguments
-				ArrayAccess,	//simple - identificator, complex -arguments
+				DataAccess,	//simple - identificator, complex -arguments
+				DataAccessChain,	//Chain of DataAccesses: DataAccess(identificator), DataAccess()
+
 				AttributeUsing,	//simple - identificator, complex -arguments
 				Argument,
 

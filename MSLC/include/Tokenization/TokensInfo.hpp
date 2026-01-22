@@ -123,7 +123,7 @@ namespace MSLC
 					{"]", TokenType::DELIMITER},
 					{":", TokenType::DELIMITER},    //delimiter for inheritance
 					{",", TokenType::DELIMITER},
-					{".", TokenType::DELIMITER},
+
 					{";",TokenType::DELIMITER},
 					{"+", TokenType::OPERATOR},
 					{"-", TokenType::OPERATOR},
@@ -140,6 +140,9 @@ namespace MSLC
 					//Pointers
 					{"&u", TokenType::OPERATOR},	//Get pointer
 					{"*u", TokenType::OPERATOR},	//Get value
+
+					{".", TokenType::OPERATOR},		//Get field of value
+					{"->",TokenType::OPERATOR},     //Get field by pointer/Operator of returned function's type
 					//Pointers end
 					{"^", TokenType::OPERATOR},
 					{"/", TokenType::OPERATOR},
@@ -159,7 +162,7 @@ namespace MSLC
 					{"<",TokenType::OPERATOR},
 					{">=",TokenType::OPERATOR},
 					{"<=",TokenType::OPERATOR},
-					{"->",TokenType::OPERATOR},     //Operator of returned function's type or implication (in the future)
+
 					{">>",TokenType::OPERATOR},
 					{"<<",TokenType::OPERATOR},
 					{">>=",TokenType::OPERATOR},

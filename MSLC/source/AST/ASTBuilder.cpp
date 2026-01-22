@@ -185,7 +185,7 @@ namespace MSLC
 					if (command_tokens.size() != 0)
 					{
 						ASTNode node;
-						command_tokens.push_back(t);
+						//command_tokens.push_back(t);
 						node.line = command_tokens.back().line;
 						node.type = DefineType(command_tokens);
 						node.tokens = std::move(command_tokens);

@@ -201,7 +201,26 @@ namespace MSLC
 					else 
 					{
 						group.complex = BuildAPST(group).complex;
-						stack.push_back(group);
+						if (group.type == GroupType::DataAccess)
+						{
+							if (stack.empty()) 
+							{
+								std::cout << "Error 10 (APSTBuilder::Complex::DataAccess)\n";
+								continue;
+							}
+							if (stack.back().type == GroupType::DataAccessChain) 
+							{
+								stack.back().complex.push_back(group);
+							}
+							else 
+							{
+								std::vector<TokensGroup> args = { stack.back(),group };
+								stack.pop_back();
+								TokensGroup group1 = TokensGroup(args, GroupType::DataAccessChain);
+								stack.push_back(group1);
+							}
+						}
+						else stack.push_back(group);
 					}
 				}
 

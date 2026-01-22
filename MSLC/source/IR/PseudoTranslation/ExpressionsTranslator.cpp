@@ -28,9 +28,10 @@ namespace MSLC
 			{
 				auto p = postfix_builder.BuildPostfix(tokens);
 				int depth = 0;
+				print_recursive(p, depth);
 				//print_recursive(p, depth);
 				auto p1 = apst_builder.BuildAPST(p);
-				print_recursive(p1, depth);
+				
 				
 
 				return Definitions::ChunkArray<PseudoOperation>();

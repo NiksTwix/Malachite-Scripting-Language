@@ -21,9 +21,12 @@ namespace MSLC
                     tokens[current_index + 1].type == TokenType::DELIMITER && 
                     tokens[current_index + 1].value.strVal == "(") return GroupType::FunctionCall;
 
-                if (t.type == TokenType::IDENTIFIER && current_index + 1 < tokens.size() &&
-                    tokens[current_index + 1].type == TokenType::DELIMITER &&
-                    tokens[current_index + 1].value.strVal == "[") return GroupType::ArrayAccess;
+
+                if (tokens[current_index].type == TokenType::DELIMITER && tokens[current_index].value.strVal == "[")
+                {
+                    return GroupType::DataAccess;
+                }
+
 
                 if (t.type == TokenType::ATTRIBUTE) return GroupType::AttributeUsing;
                 return GroupType::Simple;
@@ -97,6 +100,56 @@ namespace MSLC
                 //Logger::Get().PrintInfo("ToPostfix: discovered function's call \"" + func_call.tokens[0].token.value.strVal + "\" with " + std::to_string(func_call.tokens.size() - 2) + " arguments.");
                 return func_call;
             }
+
+            TokensGroup PostfixBuilder::HandleDataAccess(const std::vector<Tokenization::Token>& tokens, size_t& current_index)
+            {
+                // Found func call - create complex group
+                Token t = tokens[current_index];
+                TokensGroup data_access(GroupType::DataAccess);
+
+                if (t.type == TokenType::DELIMITER)
+                {
+                    current_index += 1; // skip [
+                }
+                std::vector<Token> args_tokens;
+                int depth = 1;
+
+                // Collect argument with recursion
+                while (current_index < tokens.size() && depth > 0) {
+                    if (tokens[current_index].value.strVal == "[") depth++;
+                    else if (tokens[current_index].value.strVal == "]") depth--;
+                    if (tokens[current_index].value.strVal == "]" && depth == 0) {
+                        if (!args_tokens.empty()) {
+                            TokensGroup arg(GroupType::Argument);
+                            auto arg_postfix = BuildPostfix(args_tokens);
+
+                            if (arg_postfix.IsSimple())
+                            {
+                                arg.complex.push_back(arg_postfix);
+                            }
+                            else if (arg_postfix.type == GroupType::Root)
+                            {
+                                arg.complex.insert(arg.complex.end(),
+                                    arg_postfix.complex.begin(), arg_postfix.complex.end());
+                                args_tokens.clear();
+                            }
+                            else
+                            {
+                                arg.complex.push_back(arg_postfix);
+                            }
+                            data_access.complex.push_back(arg);
+                        }
+                        break;
+                    }
+
+                    if (depth > 0) {
+                        args_tokens.push_back(tokens[current_index]);
+                    }
+                    current_index++;
+                }
+                //Logger::Get().PrintInfo("ToPostfix: discovered function's call \"" + func_call.tokens[0].token.value.strVal + "\" with " + std::to_string(func_call.tokens.size() - 2) + " arguments.");
+                return data_access;
+            }
             
             TokensGroup PostfixBuilder::BuildPostfix(const std::vector<Tokenization::Token>& tokens)
             {
@@ -151,7 +204,8 @@ namespace MSLC
                     case MSLC::IntermediateRepresentation::Pseudo::GroupType::FunctionCall:
                         result.push_back(HandleFuncCall(tokens, i));
                         break;
-                    case MSLC::IntermediateRepresentation::Pseudo::GroupType::ArrayAccess:
+                    case MSLC::IntermediateRepresentation::Pseudo::GroupType::DataAccess:
+                        result.push_back(HandleDataAccess(tokens, i));
                         break;
                     case MSLC::IntermediateRepresentation::Pseudo::GroupType::AttributeUsing:
                         break;

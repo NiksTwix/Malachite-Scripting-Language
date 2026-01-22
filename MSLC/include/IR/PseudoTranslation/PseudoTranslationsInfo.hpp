@@ -36,6 +36,10 @@ namespace MSLC
 				//Work with pointers
 				GetPointer,
 				GetValue,
+
+				GetFieldByValue,
+				GetFieldByPointer,
+
 				//Logic
 				
 				Greater,
@@ -92,6 +96,9 @@ namespace MSLC
 			{
 				std::unordered_map<std::string, OperatorInfo> m_operators = 
 				{
+					//Level 12: data access
+					{".", OperatorInfo(12,OperatorInfo::Type::Binary, PseudoOpCode::GetFieldByValue)}, {"->",OperatorInfo(12,OperatorInfo::Type::Binary, PseudoOpCode::GetFieldByPointer)},
+
 					// Level 11: Meta
 					{std::string(Keywords::w_new), OperatorInfo(11,OperatorInfo::Type::Meta)},
 					{std::string(Keywords::w_to),OperatorInfo(11,OperatorInfo::Type::Meta)},
