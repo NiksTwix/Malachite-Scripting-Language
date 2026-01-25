@@ -12,15 +12,19 @@ namespace MSLC
 
 			class PostfixBuilder 
 			{
-				GroupType IdentificateGroupType(const std::vector<Tokenization::Token>& tokens, size_t current_index);
-				TokensGroup HandleFuncCall(const std::vector<Tokenization::Token>& tokens, size_t& current_index);
-				TokensGroup HandleDataAccess(const std::vector<Tokenization::Token>& tokens, size_t& current_index);
+				GroupType IdentificateGroupType(const std::vector<TokensGroup>& tokens, size_t current_index);
+				TokensGroup HandleFuncCall(const std::vector<TokensGroup>& tokens, size_t& current_index);
+				TokensGroup HandleDataAccess(const std::vector<TokensGroup>& tokens, size_t& current_index);
+
+
+				std::vector<TokensGroup> Preprocess(const std::vector<Tokenization::Token>& tokens);
+				TokensGroup BuildPostfix(const std::vector<TokensGroup>& tokens);
 			public:
 
 				
 
 				PostfixBuilder();
-				TokensGroup BuildPostfix(const std::vector<Tokenization::Token>& tokens);
+				TokensGroup Build(const std::vector<Tokenization::Token>& tokens);
 			};
 		}
 	}

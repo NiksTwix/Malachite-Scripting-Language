@@ -125,7 +125,7 @@ namespace MSLC
 						ASTNodeType type = DefineType(command_tokens);
 						if (type == ASTNodeType::None) 
 						{
-							Diagnostics::Logger::Get().PrintToCmd(Diagnostics::InformationMessage("Incorrect code structure: " + line_print(command_tokens) + ".", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, t.line));
+							Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Incorrect code structure: " + line_print(command_tokens) + ".", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, t.line));
 							continue;
 						}
 						if (type != ASTNodeType::Expression)	//Multyline block
@@ -166,7 +166,7 @@ namespace MSLC
 				{
 					if (cn_stack.size() <= 1)
 					{
-						Diagnostics::Logger::Get().PrintToCmd(Diagnostics::InformationMessage("There are extra ones '}'.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, t.line));
+						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("There are extra ones '}'.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, t.line));
 						continue;
 					}
 
@@ -196,7 +196,7 @@ namespace MSLC
 
 				if (state.current_depth < 0)
 				{
-					Diagnostics::Logger::Get().PrintToCmd(Diagnostics::InformationMessage("There are extra ones '}'.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, t.line));
+					Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("There are extra ones '}'.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, t.line));
 					continue;
 				}
 				command_tokens.push_back(t);
@@ -213,12 +213,12 @@ namespace MSLC
 
 			if (state.current_depth > 0)
 			{
-				Diagnostics::Logger::Get().PrintToCmd(Diagnostics::InformationMessage("Expected '}'.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, state.last_line));
+				Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Expected '}'.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, state.last_line));
 			}
 
 			if (cn_stack.empty()) 
 			{
-				Diagnostics::Logger::Get().PrintToCmd(Diagnostics::InformationMessage("Developer Message:AST Stack underflow.", Diagnostics::MessageType::LogicError, Diagnostics::SourceType::SourceCode, state.last_line));
+				Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Developer Message:AST Stack underflow.", Diagnostics::MessageType::LogicError, Diagnostics::SourceType::SourceCode, state.last_line));
 				return root;
 			}
 			root = cn_stack.top();

@@ -4,6 +4,7 @@
 #include <vector>
 #include <typeinfo>
 #include <stack>
+#include <functional>
 
 namespace MSLC 
 {
@@ -21,6 +22,7 @@ namespace MSLC
 		constexpr std::string_view cmd_warning_style = "\033[33m";
 		constexpr std::string_view cmd_syntax_error_style = "\033[35m";
 		constexpr std::string_view cmd_success_style = "\033[32m";
+        constexpr std::string_view cmd_developer_error_style = "\033[3;36m";
 
 		enum MessageType
 		{
@@ -31,6 +33,7 @@ namespace MSLC
 			TypeError,
 			FileError,
 			LogicError,
+            DeveloperError
 		};
 
 		enum SourceType 
@@ -55,8 +58,16 @@ namespace MSLC
 			InformationMessage(const std::string& text) : text(text), m_type(MessageType::Info), s_type(SourceType::None), place(0) {}
 		};
 	
-		
 
+        using output_handler = std::function<void(InformationMessage message)>;
+        using output_handlerID = size_t;
+
+        enum class OutputType 
+        {
+            CMD,
+            External,
+            CMDAndExternal,
+        };
 
         class Logger
         {
@@ -97,6 +108,10 @@ namespace MSLC
                 return std::string(arg);
             }
 
+            OutputType output_type = OutputType::CMD;
+
+            std::vector<output_handler> handlers;
+
         public:
             // Singleton getter
             static Logger& Get()
@@ -105,7 +120,14 @@ namespace MSLC
                 return instance;
             }
  
-            void PrintToCmd(const InformationMessage& message) const;
+            void Print(const InformationMessage& message) const;
+
+            output_handlerID AddHandler(output_handler handler);
+
+            bool RemoveHandler(output_handlerID handler);
+
+            void SetOutputMode(OutputType output_type) { this->output_type = output_type; }
+
 
             // Main format function
             template<typename... Args>
@@ -121,13 +143,13 @@ namespace MSLC
                 message.text = result;
 
                 // Printing
-                PrintToCmd(message);
+                Print(message);
             }
 
         private:
             // Function of string's format
             std::string FormatString(const std::string& format, const std::vector<std::string>& args) const;
-           
+            void PrintToCmd(const InformationMessage& message) const;
         };
 
 	}

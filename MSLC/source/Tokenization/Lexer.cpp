@@ -33,7 +33,7 @@ namespace MSLC
 			}
 			catch (const std::out_of_range&) {
 				// If number is bigger than uint64_t's max value
-				Diagnostics::Logger::Get().PrintToCmd(Diagnostics::InformationMessage("Number value is greater(less) than max(min) permitted.", Diagnostics::MessageType::TypeError, Diagnostics::SourceCode, lex_state.current_line));
+				Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Number value is greater(less) than max(min) permitted.", Diagnostics::MessageType::TypeError, Diagnostics::SourceCode, lex_state.current_line));
 				return Definitions::ValueType::VOID;
 			}
 			return Definitions::ValueType::UINT;
@@ -88,7 +88,7 @@ namespace MSLC
 				case  Definitions::ValueType::UINT:
 					if (inv_copy) {
 						// Negative UINT? Its a error
-						Diagnostics::Logger::Get().PrintToCmd(Diagnostics::InformationMessage("Unsigned integer cannot be negative.", Diagnostics::MessageType::TypeError, Diagnostics::SourceCode, lex_state.current_line));
+						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Unsigned integer cannot be negative.", Diagnostics::MessageType::TypeError, Diagnostics::SourceCode, lex_state.current_line));
 						return 1.0;
 					}
 					return std::stoull(token);
@@ -123,7 +123,7 @@ namespace MSLC
 			int size = str.size();
 			if (size > 4 || size == 0)//Not escape and not char		//TODO Create Compiler Errors
 			{
-				Diagnostics::Logger::Get().PrintToCmd(Diagnostics::InformationMessage("Invalid char.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceCode, lex_state.current_line));
+				Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Invalid char.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceCode, lex_state.current_line));
 				return '\0';
 			}
 			if (size == 1) return str[0];
@@ -137,7 +137,7 @@ namespace MSLC
 				case '\\': return'\\';
 				}
 			}
-			Diagnostics::Logger::Get().PrintToCmd(Diagnostics::InformationMessage("Invalid char.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceCode, lex_state.current_line));
+			Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Invalid char.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceCode, lex_state.current_line));
 			return '\0';
 		}
 
@@ -297,7 +297,7 @@ namespace MSLC
 					// Unknown operator
 					Diagnostics::InformationMessage message("Unknown operator: '" + operator_ + "'.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, lex_state.current_line);
 
-					Diagnostics::Logger::Get().PrintToCmd(message);
+					Diagnostics::Logger::Get().Print(message);
 					return Token(TokenType::UNDEFINED, lex_state.current_line, lex_state.module_id);
 				}
 			}
@@ -368,7 +368,7 @@ namespace MSLC
 							prev = text[state.current_index];
 							state.current_index++;
 						}
-						if (!state.was_comment) Diagnostics::Logger::Get().PrintToCmd(Diagnostics::InformationMessage("Excepts \"*/\".", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceCode, state.current_line));
+						if (!state.was_comment) Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Excepts \"*/\".", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceCode, state.current_line));
 						continue;
 					}
 
@@ -414,7 +414,7 @@ namespace MSLC
 						state.current_index--;
 						if (t.type == TokenType::UNDEFINED)
 						{
-							Diagnostics::Logger::Get().PrintToCmd(Diagnostics::InformationMessage("Invalid operator \"" + t.value.strVal + "\".", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceCode, state.current_line));
+							Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Invalid operator \"" + t.value.strVal + "\".", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceCode, state.current_line));
 							continue;
 						}
 						result.push_back(t);

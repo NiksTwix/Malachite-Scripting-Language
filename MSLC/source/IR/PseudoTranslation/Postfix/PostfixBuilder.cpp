@@ -12,17 +12,24 @@ namespace MSLC
              
             }
 
-
-            GroupType PostfixBuilder::IdentificateGroupType(const std::vector<Tokenization::Token>& tokens, size_t current_index)
+            TokensGroup PostfixBuilder::Build(const std::vector<Tokenization::Token>& tokens)
             {
-                const Token& t = tokens[current_index];
+                auto r1 = Preprocess(tokens);
 
-                if (t.type == TokenType::IDENTIFIER && current_index + 1 < tokens.size() && 
-                    tokens[current_index + 1].type == TokenType::DELIMITER && 
-                    tokens[current_index + 1].value.strVal == "(") return GroupType::FunctionCall;
+                return BuildPostfix(r1);
+            }
 
 
-                if (tokens[current_index].type == TokenType::DELIMITER && tokens[current_index].value.strVal == "[")
+            GroupType PostfixBuilder::IdentificateGroupType(const std::vector<TokensGroup>& tokens, size_t current_index)
+            {
+                const Token& t = tokens[current_index].simple;
+
+                if ((t.type == TokenType::IDENTIFIER || tokens[current_index].type == GroupType::QualifiedName) && current_index + 1 < tokens.size() &&
+                    tokens[current_index + 1].simple.type == TokenType::DELIMITER && 
+                    tokens[current_index + 1].simple.value.strVal == "(") return GroupType::FunctionCall;
+
+
+                if (tokens[current_index].simple.type == TokenType::DELIMITER && tokens[current_index].simple.value.strVal == "[")
                 {
                     return GroupType::DataAccess;
                 }
@@ -32,23 +39,23 @@ namespace MSLC
                 return GroupType::Simple;
             }
 
-            TokensGroup PostfixBuilder::HandleFuncCall(const std::vector<Tokenization::Token>& tokens, size_t& current_index)
+            TokensGroup PostfixBuilder::HandleFuncCall(const std::vector<TokensGroup>& tokens, size_t& current_index)
             {
                 // Found func call - create complex group
-                Token t = tokens[current_index];
+                TokensGroup t = tokens[current_index];
                 TokensGroup func_call(GroupType::FunctionCall);
-                func_call.simple.line = t.line;	//for debugging
-                func_call.simple = t; // function identifier
+                func_call.line = t.line;	//for debugging
+                func_call.complex.push_back(t); // function identifier
 
                 current_index += 2; // skip name and (
-                std::vector<Token> args_tokens;
+                std::vector<TokensGroup> args_tokens;
                 int depth = 1;
 
                 // Collect argument with recursion
                 while (current_index < tokens.size() && depth > 0) {
-                    if (tokens[current_index].value.strVal == "(") depth++;
-                    else if (tokens[current_index].value.strVal == ")") depth--;
-                    else if (tokens[current_index].value.strVal == "," && depth == 1) {
+                    if (tokens[current_index].simple.value.strVal == "(") depth++;
+                    else if (tokens[current_index].simple.value.strVal == ")") depth--;
+                    else if (tokens[current_index].simple.value.strVal == "," && depth == 1) {
                         // Founded argument's separator
                         if (!args_tokens.empty()) {
                             TokensGroup arg(GroupType::Argument);
@@ -84,7 +91,7 @@ namespace MSLC
                     TokensGroup arg(GroupType::Argument);
                     auto arg_postfix = BuildPostfix(args_tokens);
 
-                    if (arg_postfix.IsSimple())
+                    if (arg_postfix.IsSimpleOrQN())
                     {
                         arg.complex.push_back(arg_postfix);
                     }
@@ -101,29 +108,29 @@ namespace MSLC
                 return func_call;
             }
 
-            TokensGroup PostfixBuilder::HandleDataAccess(const std::vector<Tokenization::Token>& tokens, size_t& current_index)
+            TokensGroup PostfixBuilder::HandleDataAccess(const std::vector<TokensGroup>& tokens, size_t& current_index)
             {
                 // Found func call - create complex group
-                Token t = tokens[current_index];
+                TokensGroup t = tokens[current_index];
                 TokensGroup data_access(GroupType::DataAccess);
-
-                if (t.type == TokenType::DELIMITER)
+                data_access.line = t.line;
+                if (t.simple.type == TokenType::DELIMITER)
                 {
                     current_index += 1; // skip [
                 }
-                std::vector<Token> args_tokens;
+                std::vector<TokensGroup> args_tokens;
                 int depth = 1;
 
                 // Collect argument with recursion
                 while (current_index < tokens.size() && depth > 0) {
-                    if (tokens[current_index].value.strVal == "[") depth++;
-                    else if (tokens[current_index].value.strVal == "]") depth--;
-                    if (tokens[current_index].value.strVal == "]" && depth == 0) {
+                    if (tokens[current_index].simple.value.strVal == "[") depth++;
+                    else if (tokens[current_index].simple.value.strVal == "]") depth--;
+                    if (tokens[current_index].simple.value.strVal == "]" && depth == 0) {
                         if (!args_tokens.empty()) {
                             TokensGroup arg(GroupType::Argument);
                             auto arg_postfix = BuildPostfix(args_tokens);
 
-                            if (arg_postfix.IsSimple())
+                            if (arg_postfix.IsSimpleOrQN())
                             {
                                 arg.complex.push_back(arg_postfix);
                             }
@@ -151,9 +158,50 @@ namespace MSLC
                 return data_access;
             }
             
-            TokensGroup PostfixBuilder::BuildPostfix(const std::vector<Tokenization::Token>& tokens)
+            std::vector<TokensGroup> PostfixBuilder::Preprocess(const std::vector<Tokenization::Token>& tokens)
             {
-                if (tokens.size() == 1) return TokensGroup(tokens.front());
+                std::vector<TokensGroup> result;
+
+                for (size_t i = 0; i < tokens.size(); i++)                
+                {
+                    auto token = tokens[i];
+                    if (token.type == Tokenization::TokenType::OPERATOR && token.value.strVal == "::" ) 
+                    {
+                        if (i > 0 && result.back().simple.type == TokenType::IDENTIFIER &&  i + 1 < tokens.size() && tokens[i+1].type == Tokenization::TokenType::IDENTIFIER)
+                        {
+                            auto back_token = result.back();
+                            result.pop_back();
+                            
+                            auto next_token = tokens[i + 1];
+
+                            std::vector<TokensGroup> args = { back_token,next_token };
+
+                            result.push_back(TokensGroup(args, GroupType::QualifiedName));
+                            i++;    //skip next
+                            continue;
+                        }
+                        else if (i > 0 && result.back().type == GroupType::QualifiedName && i + 1 < tokens.size() && tokens[i + 1].type == Tokenization::TokenType::IDENTIFIER)
+                        {
+                            result.back().complex.push_back(tokens[i + 1]);
+                            i++;    //skip next
+                            continue;
+                        }
+                        else 
+                        {
+                            Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Invalid access to field.", Diagnostics::SyntaxError, Diagnostics::SourceCode, token.line));
+                            continue;
+                        }
+                    }
+                    result.push_back(token);
+                }
+
+                return result;
+            }
+
+            TokensGroup PostfixBuilder::BuildPostfix(const std::vector<TokensGroup>& tokens)
+            {
+                if (tokens.size() == 1) return tokens.front();
+                //if (tokens.size() == 1 && (tokens.front().IsSimple() || tokens.front().type == GroupType::QualifiedName)) return tokens.front();
                 std::vector<TokensGroup> operations;		// i dont want use the stack, because it doesnt have index acception
                 std::vector<TokensGroup> result;		//identifiers and literals
                 for (size_t i = 0; i < tokens.size(); i++)
@@ -164,17 +212,40 @@ namespace MSLC
                     {
                     case MSLC::IntermediateRepresentation::Pseudo::GroupType::Simple:
                     {
-                        const Token& t = tokens[i];
+                        const TokensGroup& t = tokens[i];
                         //Main algorythm
-                        if (t.type == TokenType::IDENTIFIER || t.type == TokenType::LITERAL || (t.type == TokenType::KEYWORD && !OperatorsTable::Get().Has(t.value.strVal)) || t.type == TokenType::TYPE_MARKER) {
-                            result.push_back(TokensGroup(t));
+
+                        if (t.simple.type == TokenType::TYPE_MARKER)
+                        {
+                            std::vector<TokensGroup> type_modifiers;
+                            type_modifiers.push_back(t);
+                            i++;
+                            for (size_t j = i; j < tokens.size(); j++)      //take before first identirier
+                            {
+                                const TokensGroup& t1 = tokens[j];
+                                if (t1.simple.type == TokenType::TYPE_MARKER) type_modifiers.push_back(t1);        //ref,ptr,const and another
+                                if (t1.simple.type == TokenType::IDENTIFIER || t1.type == GroupType::QualifiedName)
+                                {
+                                    type_modifiers.push_back(t1);
+                                    auto type_group = TokensGroup(type_modifiers, GroupType::Type);
+                                    result.push_back(type_group);
+                                    i = j;
+                                    break;
+                                }
+                            }
+                            continue;   //  
+
                         }
-                        else if ((t.type == TokenType::OPERATOR || t.type == TokenType::KEYWORD) && OperatorsTable::Get().Has(t.value.strVal)) {
+
+                        if (t.simple.type == TokenType::IDENTIFIER || t.simple.type == TokenType::LITERAL || t.type == GroupType::QualifiedName) {
+                            result.push_back(t);
+                        }
+                        else if ((t.simple.type == TokenType::OPERATOR || t.simple.type == TokenType::KEYWORD) && OperatorsTable::Get().Has(t.simple.value.strVal)) {
                             try 
                             {
                                 while (!operations.empty() && 
                                     operations.back().simple.value.strVal != "(" &&  // dont push out"("
-                                    (OperatorsTable::Get().GetInfo(operations.back().simple.value.strVal).priority >= OperatorsTable::Get().GetInfo(t.value.strVal).priority)) {
+                                    (OperatorsTable::Get().GetInfo(operations.back().simple.value.strVal).priority >= OperatorsTable::Get().GetInfo(t.simple.value.strVal).priority)) {
                                     result.push_back(operations.back());
                                     operations.pop_back();
                                 }
@@ -189,10 +260,10 @@ namespace MSLC
                                 int i = 0;
                             }
                         }
-                        else if (t.value.strVal == "(") {  // ← Simple delimiter handling
+                        else if (t.simple.value.strVal == "(") {  // ← Simple delimiter handling
                             operations.push_back(TokensGroup(t));
                         }
-                        else if (t.value.strVal == ")") {
+                        else if (t.simple.value.strVal == ")") {
                             while (!operations.empty() && operations.back().simple.value.strVal != "(") {
                                 result.push_back(operations.back());
                                 operations.pop_back();
@@ -208,7 +279,6 @@ namespace MSLC
                         result.push_back(HandleDataAccess(tokens, i));
                         break;
                     case MSLC::IntermediateRepresentation::Pseudo::GroupType::AttributeUsing:
-                        break;
                         break;
                     default:
                         break;

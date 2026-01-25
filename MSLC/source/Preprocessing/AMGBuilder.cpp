@@ -156,7 +156,7 @@ namespace MSLC
 
             // Check handling's state of nodes
             if (order.size() != HO.files.size()) {
-                Diagnostics::Logger::Get().PrintToCmd(Diagnostics::InformationMessage("Circular dependencies detected in import graph.", Diagnostics::MessageType::FileError));
+                Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Circular dependencies detected in import graph.", Diagnostics::MessageType::FileError));
                 return {};
             }
 

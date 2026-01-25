@@ -24,7 +24,7 @@ namespace MSLC
             }
             if (args.size() < 3)
             {
-                Diagnostics::Logger::Get().PrintToCmd(Diagnostics::InformationMessage("Invalid arguments count of directive \"" + std::string(Directives::w_define_const) + "\".Expected NAME = VALUE/EXPRESSION.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceCode, state.current_line));
+                Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Invalid arguments count of directive \"" + std::string(Directives::w_define_const) + "\".Expected NAME = VALUE/EXPRESSION.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceCode, state.current_line));
                 return;
             }
             else if (args.size() == 3)   //Simple expression
@@ -37,12 +37,12 @@ namespace MSLC
 
                 if (name_token.type != TokenType::IDENTIFIER ||equals_token.value.strVal != "=")
                 {
-                    Diagnostics::Logger::Get().PrintToCmd({ "Invalid \"" + std::string(Directives::w_define_const) + "\" directive's identifier.",  Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, state.current_line });
+                    Diagnostics::Logger::Get().Print({ "Invalid \"" + std::string(Directives::w_define_const) + "\" directive's identifier.",  Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, state.current_line });
                     return;
                 }
                 if (equals_token.value.strVal != "=")
                 {
-                    Diagnostics::Logger::Get().PrintToCmd({ "Directive \"" + std::string(Directives::w_define_const) + "\" excepts = after identifier, but gets \""+ equals_token.value.strVal +"\".",  Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, state.current_line });
+                    Diagnostics::Logger::Get().Print({ "Directive \"" + std::string(Directives::w_define_const) + "\" excepts = after identifier, but gets \""+ equals_token.value.strVal +"\".",  Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, state.current_line });
                     return;
                 }
                 // Macro's registration
@@ -54,14 +54,14 @@ namespace MSLC
 
                     if (macro.type != MacroType::Constant) 
                     {
-                        Diagnostics::Logger::Get().PrintToCmd({ "Directive \"" + std::string(Directives::w_define_const) + "\" supports only constant macros in its arguments.",  Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, state.current_line });
+                        Diagnostics::Logger::Get().Print({ "Directive \"" + std::string(Directives::w_define_const) + "\" supports only constant macros in its arguments.",  Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, state.current_line });
                         return;
                     }
                     state.c_state->GetMacrosTable().DefineConstant(name, macro.constant_value, state.current_line);
                 }
                 else 
                 {
-                    Diagnostics::Logger::Get().PrintToCmd(Diagnostics::InformationMessage("Invalid arguments of directive \"" + std::string(Directives::w_define_const) + "\".", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceCode, state.current_line));
+                    Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Invalid arguments of directive \"" + std::string(Directives::w_define_const) + "\".", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceCode, state.current_line));
                     return;
                 }
             }
@@ -112,7 +112,7 @@ namespace MSLC
                         }
                         else 
                         {
-                            Diagnostics::Logger::Get().PrintToCmd(Diagnostics::InformationMessage("Invalid arguments count of directive \"" + std::string(Directives::w_import) + "\". Expected #import \"path to file\"", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceCode, state.current_line));
+                            Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Invalid arguments count of directive \"" + std::string(Directives::w_import) + "\". Expected #import \"path to file\"", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceCode, state.current_line));
                         }
 
                         state.current_index++;

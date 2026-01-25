@@ -8,6 +8,45 @@ namespace MSLC
 
 
 
+    void Logger::Print(const InformationMessage& message) const
+    {
+        switch (output_type)
+        {
+        case MSLC::Diagnostics::OutputType::CMD:
+            PrintToCmd(message);
+            break;
+        case MSLC::Diagnostics::OutputType::External:
+            for (auto handler : handlers) 
+            {
+                handler(message);
+            }
+            break;
+        case MSLC::Diagnostics::OutputType::CMDAndExternal:
+            PrintToCmd(message);
+            for (auto handler : handlers)
+            {
+                handler(message);
+            }
+            break;
+        default:
+            break;
+        }
+    }
+
+    output_handlerID Diagnostics::Logger::AddHandler(output_handler handler)
+    {
+        handlers.push_back(handler);
+
+        return handlers.size();
+    }
+
+    bool Diagnostics::Logger::RemoveHandler(output_handlerID handler)
+    {
+        if (handler >= handlers.size()) return false;
+        handlers.erase(handlers.begin() + handler);
+        return true;
+    }
+
     void Logger::PrintToCmd(const InformationMessage& message) const
     {
 
@@ -31,6 +70,8 @@ namespace MSLC
         case LogicError:
             color = cmd_error_style;
             break;
+        case DeveloperError:
+            color = cmd_developer_error_style;
         default:
             break;
         }
@@ -51,6 +92,7 @@ namespace MSLC
 
         std::cout << color << message.text << place << cmd_clear_style << "\n";
     }
+
 
     std::string Logger::FormatString(const std::string& format, const std::vector<std::string>& args) const
     {

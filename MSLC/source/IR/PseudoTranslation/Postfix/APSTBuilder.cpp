@@ -7,14 +7,13 @@ namespace MSLC
 	{
 		namespace Pseudo
 		{
-
+			namespace Dia = Diagnostics;
 			TokensGroup APSTBuilder::HandleOperator(std::vector<TokensGroup>& stack, TokensGroup& _operator)
 			{
 				if (!OperatorsTable::Get().Has(_operator.simple.value.strVal))
 				{
-					//InsertError(maybe with type Development)
-					std::cout << "Error 3 (APSTBuilder)\n";
-					return{};
+					Dia::Logger::Get().Print(Dia::InformationMessage("APSTBuilder: Undefined operator.", Dia::MessageType::DeveloperError, Dia::SourceCode, _operator.line));
+					return {};
 				}
 				OperatorInfo info = OperatorsTable::Get().GetInfo(_operator.simple.value.strVal);
 
@@ -22,8 +21,7 @@ namespace MSLC
 				{
 					if (stack.empty())
 					{
-						//InsertError
-						std::cout << "Error 4 (APSTBuilder)\n";
+						Dia::Logger::Get().Print(Dia::InformationMessage("Unary operator expects operand.", Dia::MessageType::SyntaxError, Dia::SourceCode, _operator.line));
 						return{};
 					}
 					auto left = stack.back(); stack.pop_back();
@@ -37,7 +35,7 @@ namespace MSLC
 					if (stack.size() < 2)
 					{
 						//InsertError
-						std::cout << "Error 5 (APSTBuilder)\n";
+						Dia::Logger::Get().Print(Dia::InformationMessage("Binary operator expects two operands.", Dia::MessageType::SyntaxError, Dia::SourceCode, _operator.line));
 						return{};
 					}
 					auto right = stack.back(); stack.pop_back();
@@ -46,33 +44,37 @@ namespace MSLC
 					TokensGroup new_group(_operator, group_children, GroupType::Operation);
 					return new_group;
 				}
+				if (info.type == OperatorInfo::Type::Declaration) 
+				{
+					if (stack.size() < 2)
+					{
+						//InsertError
+						Dia::Logger::Get().Print(Dia::InformationMessage("Declaration's operator expects left and right values.", Dia::MessageType::SyntaxError, Dia::SourceCode, _operator.line));
+						return {};
+					}
+					auto right = stack.back(); stack.pop_back();	//type value
+					auto left = stack.back(); stack.pop_back();		//identifier value
+					std::vector<TokensGroup> declaration_args = { left,right };
+					TokensGroup new_group(declaration_args, GroupType::Declaration);
+					return new_group;
+				}
 				if (info.type == OperatorInfo::Type::Assignment) //Maybe declaration they 
 				{
 					if (stack.size() < 2)
 					{
 						//InsertError
-						std::cout << "Error 6 (APSTBuilder)\n";
+						Dia::Logger::Get().Print(Dia::InformationMessage("Assignment's operator expects left and right values.", Dia::MessageType::SyntaxError, Dia::SourceCode, _operator.line));
 						return {};
 					}
-					auto right = stack.back(); stack.pop_back();	//saved value
-					if (stack.size() > 1) //TODO Check on arrays!
-					{
-						std::vector<TokensGroup> declaration_args = stack;
-						stack.clear();
-						TokensGroup new_group(declaration_args, GroupType::Declaration);
-						std::vector<TokensGroup> gp = { new_group,right };
-						TokensGroup assignment(_operator, gp, GroupType::Operation);
-						return assignment;
-					}
-					else 
-					{
-						auto left = stack.back(); stack.pop_back();
-						std::vector<TokensGroup> gp = { left,right };
-						TokensGroup assignment(_operator, gp, GroupType::Operation);
-						return assignment;
-					}
+					auto right = stack.back(); stack.pop_back();
+
+					auto left = stack.back(); stack.pop_back();
+					std::vector<TokensGroup> gp = { left,right };
+					TokensGroup assignment(_operator, gp, GroupType::Operation);
+					return assignment;
+
 				}
-				std::cout << "Error 7 (APSTBuilder::HandleOperator)\n";
+				Dia::Logger::Get().Print(Dia::InformationMessage("APSTBuilder: Operator hasnt be handled.", Dia::MessageType::DeveloperError, Dia::SourceCode, _operator.line));
 				return {};
 			}
 			TokensGroup APSTBuilder::HandleToOperator(std::vector<TokensGroup>& stack, TokensGroup& to_op)
@@ -80,7 +82,7 @@ namespace MSLC
 				// Needed: [expression] to [type]
 				if (stack.size() < 2)
 				{
-					std::cout << "Error 8 (APSTBuilder::HandleToOperator)\n";
+					Dia::Logger::Get().Print(Dia::InformationMessage("Type casting operator expects two operands.", Dia::MessageType::SyntaxError, Dia::SourceCode, to_op.line));
 					return TokensGroup();
 				}
 				TokensGroup target_type = stack.back(); stack.pop_back();
@@ -94,7 +96,7 @@ namespace MSLC
 			{
 				// Нужно: new тип [аргументы/размер]
 				if (stack.empty()) {
-					std::cout << "Error 9 (APSTBuilder::HandleNewOperator)\n";
+					Dia::Logger::Get().Print(Dia::InformationMessage("Object's creation operator expects one operand.", Dia::MessageType::SyntaxError, Dia::SourceCode, new_op.line));
 					return TokensGroup();
 				}
 
@@ -121,40 +123,6 @@ namespace MSLC
 							{
 								stack.push_back(group);
 								continue;
-							}
-							else {
-								std::stack<TokensGroup> modifiers_stack = {};
-								
-								while (!stack.empty()) 
-								{
-									auto gp = stack.back();
-									if (gp.IsSimple() && gp.simple.type == TokenType::UNDEFINED) 
-									{
-										stack.pop_back();
-										continue;
-									}
-									if (gp.IsSimple() && gp.simple.type == TokenType::TYPE_MARKER)
-									{		
-										modifiers_stack.push(gp);
-										stack.pop_back();
-									}
-									else break;
-
-								}
-								if (modifiers_stack.empty())
-								{
-									stack.push_back(group);
-									continue;
-								}
-								std::vector<TokensGroup> modifiers = {};
-								while (!modifiers_stack.empty())
-								{
-									modifiers.push_back(modifiers_stack.top());
-									modifiers_stack.pop();
-								}
-								TokensGroup new_group(group, modifiers, GroupType::Type);
-								stack.push_back(new_group);
-								break;
 							}
 						}
 							
@@ -205,7 +173,7 @@ namespace MSLC
 						{
 							if (stack.empty()) 
 							{
-								std::cout << "Error 10 (APSTBuilder::Complex::DataAccess)\n";
+								Dia::Logger::Get().Print(Dia::InformationMessage("Operator [] expects one argument.", Dia::MessageType::SyntaxError, Dia::SourceCode, group.line));
 								continue;
 							}
 							if (stack.back().type == GroupType::DataAccessChain) 
@@ -229,7 +197,7 @@ namespace MSLC
 					TokensGroup(stack, GroupType::Root);
 					return TokensGroup(stack, GroupType::Root);
 				}
-
+				Dia::Logger::Get().Print(Dia::InformationMessage("APSTBuilder: ", Dia::MessageType::DeveloperError, Dia::SourceCode, 0));
 				return TokensGroup();
 			}
 		}

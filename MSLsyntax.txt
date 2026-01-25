@@ -1,17 +1,17 @@
 // Malachite Scripting Language syntax example
 
 //Basic
-int x = 100;	//; is optional
+x:int = 100;	//; is optional
 
-const real y = 200.0
+y: const real = 200.0
 
-float* y_pointer = &y
-real y_value = *y_pointer
+y_pointer:ptr real = &y
+y_value: ref real = *y_pointer
 
-real x_to_y = x to real
+x_to_y:real = x to real
 
-int size = 10
-int* array = new int[size]	
+size:int  = 10
+array: ptr int = new int[size]	
 x = *(array + 5)
 delete array	
 
@@ -43,18 +43,18 @@ while (x==y)
 	}
 }
 
-func f1(int x, int y, int z) -> int
+func f1(x:int, y:int, z:int) -> int
 {
 	return x*y*z;
 }
-func f1_1(int& x, int& y, int& z) -> int		//link
+func f1_1(x: ref int, y:ref int, z:ref int) -> int		//link
 {
 	return x*y*z;
 }
 
 
 @finherit f2 (x,y,z) //new names of parameters; copies code from f1 and inserts here
-func f3(int x,int y, int z) -> int
+func f3(x:int,y:int,z:int) -> int
 {
 	//code before result_calculating
 	@foverride_block result_calculating
@@ -90,7 +90,7 @@ op_code	lite/kernel
 object_template INT
 {
 	@access_mode(private)
-	int x;
+	x:int;
 	@access_mode(public)
 	INT();
 }
@@ -99,28 +99,28 @@ object_template Vector: INT
 	//code
 	@access_mode(public)
 	@property(get:public, set:protected)
-	int field1;
+	field1:int;
 
 	_constructor(){}	
 
-	_coping(const Vector& v)
+	_coping(const ref Vector v)
 	{
 
 	}
-	_coping_assing(const Vector& v)
+	_coping_assing(const ref Vector v)
 	{
 
 	}
 } 
 
-Vector* k = new Vector();	//Pointer!
+k:ptr Vector = new Vector();	//Pointer!
 k->y = 0;			//Pointer + y_offset
 delete k
 
-gc Vector* k = new Vector();	//GC mode
+k: gc ptr Vector = new Vector();	//GC mode
 
 
-Vector k = Vector();	//in stack
+k:Vector = Vector();	//in stack
 
 //deletes automatically
  
@@ -130,15 +130,15 @@ alias meter: int
 namespace MalachiteTest	
 {
 	@access_mode(private) 
-	int test = 0		//label "private" - another symbols are automatically public
+	test:int = 0		
 	object_template Vector1
 	{
 		
 	}
-	int c = 0;
+	c:int = 0;
 	@access_mode(public)
 	func K()-> int:return 10
 
 
 }
-int c = MalachiteTest::K();
+c:int = MalachiteTest::K();

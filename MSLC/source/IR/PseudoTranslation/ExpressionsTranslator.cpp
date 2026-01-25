@@ -24,9 +24,15 @@ namespace MSLC
 			}
 
 
+			Definitions::ChunkArray<PseudoOperation> ExpressionsTranslator::AnalyzeAPST(TokensGroup& node, PseudoTranslationState& pts)
+			{
+
+				return Definitions::ChunkArray<PseudoOperation>();
+			}
+
 			Definitions::ChunkArray<PseudoOperation> ExpressionsTranslator::AnalyzeExpression(std::vector<Tokenization::Token> tokens, PseudoTranslationState& pts)
 			{
-				auto p = postfix_builder.BuildPostfix(tokens);
+				auto p = postfix_builder.Build(tokens);
 				int depth = 0;
 				print_recursive(p, depth);
 				//print_recursive(p, depth);
@@ -34,8 +40,8 @@ namespace MSLC
 				
 				
 
-				return Definitions::ChunkArray<PseudoOperation>();
+				return AnalyzeAPST(p1, pts);;
 			}
 		}
 	}
-}
+} 

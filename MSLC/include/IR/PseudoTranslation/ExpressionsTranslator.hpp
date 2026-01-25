@@ -13,9 +13,15 @@ namespace MSLC
 			private:
 				PostfixBuilder postfix_builder;
 				APSTBuilder apst_builder;
+
+
+				Definitions::ChunkArray<PseudoOperation> AnalyzeAPST(TokensGroup& node, PseudoTranslationState& pts);
+
 			public:
 
 				Definitions::ChunkArray<PseudoOperation> AnalyzeExpression(std::vector<Tokenization::Token> tokens, PseudoTranslationState& pts);
+
+
 
 			};
 		}

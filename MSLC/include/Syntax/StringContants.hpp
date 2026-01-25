@@ -40,6 +40,7 @@ namespace MSLC
 		constexpr std::string_view 	w_gc = "gc";
 		constexpr std::string_view 	w_ptr = "ptr";
 		constexpr std::string_view 	w_ref = "ref";
+		constexpr std::string_view 	w_var = "var";
 	}
 	namespace Literals
 	{

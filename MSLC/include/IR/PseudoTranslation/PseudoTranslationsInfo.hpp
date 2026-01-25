@@ -83,7 +83,7 @@ namespace MSLC
 
 			struct OperatorInfo 
 			{
-				enum class Type { Undefined, Unary,Binary,Meta, Assignment };
+				enum class Type { Undefined, Unary,Binary,Meta, Assignment,Declaration };
 				int8_t priority;
 				Type type;
 				PseudoOpCode op_code;
@@ -96,7 +96,11 @@ namespace MSLC
 			{
 				std::unordered_map<std::string, OperatorInfo> m_operators = 
 				{
-					//Level 12: data access
+					//Level 12: data access and declaration
+					{"::", OperatorInfo(12,OperatorInfo::Type::Binary, PseudoOpCode::Nop)},//Access to the namespace/static field/method
+					
+					{":", OperatorInfo(12,OperatorInfo::Type::Declaration, PseudoOpCode::Nop)},//Declaration of variable
+
 					{".", OperatorInfo(12,OperatorInfo::Type::Binary, PseudoOpCode::GetFieldByValue)}, {"->",OperatorInfo(12,OperatorInfo::Type::Binary, PseudoOpCode::GetFieldByPointer)},
 
 					// Level 11: Meta

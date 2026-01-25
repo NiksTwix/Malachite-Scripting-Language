@@ -121,8 +121,11 @@ namespace MSLC
 					{"}", TokenType::DELIMITER},
 					{"[", TokenType::DELIMITER},
 					{"]", TokenType::DELIMITER},
-					{":", TokenType::DELIMITER},    //delimiter for inheritance
+
+					{":", TokenType::OPERATOR},    //Operator of declaration (variable) and object's itheriance 
+					{"::", TokenType::OPERATOR},	//Access to static field and namespaces
 					{",", TokenType::DELIMITER},
+
 
 					{";",TokenType::DELIMITER},
 					{"+", TokenType::OPERATOR},

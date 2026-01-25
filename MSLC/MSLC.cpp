@@ -7,16 +7,19 @@
 
 using namespace MSLC;
 
+
 int main()
 {
     Diagnostics::Logger::Get().PrintWithFormat(Diagnostics::InformationMessage("Hello world, %s!", Diagnostics::MessageType::TypeError, 0 == -1 ? Diagnostics::None : Diagnostics::SourceCode, 0), "Nirinis");
+
+    Diagnostics::Logger::Get().SetOutputMode(Diagnostics::OutputType::CMD);
 
     std::string b_path = "D:\\Games\\MSLCTests\\AST\\first.msl";//C:\\Users\\korsi\\OneDrive\\Рабочий стол\\MSLCTests\\ImportChainTests\\p1.txt
 
     Compiler comp;
 
     comp.TestCompile(b_path);
-}
+} 
 
 // Запуск программы: CTRL+F5 или меню "Отладка" > "Запуск без отладки"
 // Отладка программы: F5 или меню "Отладка" > "Запустить отладку"
