@@ -171,18 +171,20 @@ namespace MSLC
 						group.complex = BuildAPST(group).complex;
 						if (group.type == GroupType::DataAccess)
 						{
-							if (stack.empty()) 
+							if (group.complex.size() == 0)
 							{
 								Dia::Logger::Get().Print(Dia::InformationMessage("Operator [] expects one argument.", Dia::MessageType::SyntaxError, Dia::SourceCode, group.line));
 								continue;
 							}
-							if (stack.back().type == GroupType::DataAccessChain) 
+
+							else if (auto& back = stack.back(); back.type == GroupType::DataAccessChain)
 							{
-								stack.back().complex.push_back(group);
+								back.complex.push_back(group);
 							}
-							else 
+							
+							else //Creates new chain
 							{
-								std::vector<TokensGroup> args = { stack.back(),group };
+								std::vector<TokensGroup> args = { back,group };
 								stack.pop_back();
 								TokensGroup group1 = TokensGroup(args, GroupType::DataAccessChain);
 								stack.push_back(group1);
@@ -197,7 +199,7 @@ namespace MSLC
 					TokensGroup(stack, GroupType::Root);
 					return TokensGroup(stack, GroupType::Root);
 				}
-				Dia::Logger::Get().Print(Dia::InformationMessage("APSTBuilder: ", Dia::MessageType::DeveloperError, Dia::SourceCode, 0));
+				//Dia::Logger::Get().Print(Dia::InformationMessage("APSTBuilder: stack is empty", Dia::MessageType::DeveloperError, Dia::SourceCode, 0));
 				return TokensGroup();
 			}
 		}

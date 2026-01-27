@@ -14,7 +14,7 @@ namespace MSLC
 			{
 				GroupType IdentificateGroupType(const std::vector<TokensGroup>& tokens, size_t current_index);
 				TokensGroup HandleFuncCall(const std::vector<TokensGroup>& tokens, size_t& current_index);
-				TokensGroup HandleDataAccess(const std::vector<TokensGroup>& tokens, size_t& current_index);
+				TokensGroup HandleDataAccessOrArrayLiteral(const std::vector<TokensGroup>& tokens, size_t& current_index, GroupType gtype);
 
 
 				std::vector<TokensGroup> Preprocess(const std::vector<Tokenization::Token>& tokens);

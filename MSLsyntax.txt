@@ -12,6 +12,7 @@ x_to_y:real = x to real
 
 size:int  = 10
 array: ptr int = new int[size]	
+array1: ptr int = [10,20,304]	
 x = *(array + 5)
 delete array	
 

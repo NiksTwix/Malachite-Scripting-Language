@@ -18,6 +18,9 @@ namespace MSLC
 				DataAccess,	//simple - identificator, complex -arguments
 				DataAccessChain,	//Chain of DataAccesses: DataAccess(identificator), DataAccess()
 
+				ArrayLiteral,	//[10,10,20]
+
+
 				AttributeUsing,	//simple - identificator, complex -arguments
 				Argument,
 
@@ -42,7 +45,7 @@ namespace MSLC
 				size_t line = 0;
 
 				bool IsSimple() const { return type == GroupType::Simple; }
-				bool IsSimpleOrQN() const { return type == GroupType::QualifiedName || simple.type == Tokenization::TokenType::IDENTIFIER; }
+				bool IsSimpleOrQN() const { return type == GroupType::QualifiedName || simple.type == Tokenization::TokenType::IDENTIFIER || simple.type == Tokenization::TokenType::LITERAL || type == GroupType::ArrayLiteral;}
 				TokensGroup()
 				{
 					type = GroupType::Simple;

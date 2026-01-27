@@ -1,4 +1,5 @@
 ﻿#include "..\..\..\..\include\IR\PseudoTranslation\Postfix\PostfixBuilder.hpp"
+#include <unordered_set>
 
 namespace MSLC
 {
@@ -24,11 +25,19 @@ namespace MSLC
             {
                 const Token& t = tokens[current_index].simple;
 
+                static std::unordered_set<std::string> array_literal_exceptions = { "]",")","}" };
+
                 if ((t.type == TokenType::IDENTIFIER || tokens[current_index].type == GroupType::QualifiedName) && current_index + 1 < tokens.size() &&
                     tokens[current_index + 1].simple.type == TokenType::DELIMITER && 
                     tokens[current_index + 1].simple.value.strVal == "(") return GroupType::FunctionCall;
 
-
+                if (tokens[current_index].simple.type == TokenType::DELIMITER && tokens[current_index].simple.value.strVal 
+                    == "[" && ((current_index > 0 && (tokens[current_index-1].simple.type == TokenType::OPERATOR 
+                    || (tokens[current_index - 1].simple.type == TokenType::DELIMITER && !array_literal_exceptions.count(tokens[current_index - 1].simple.value.strVal)))) 
+                    || current_index == 0) )
+                {
+                    return GroupType::ArrayLiteral;
+                }
                 if (tokens[current_index].simple.type == TokenType::DELIMITER && tokens[current_index].simple.value.strVal == "[")
                 {
                     return GroupType::DataAccess;
@@ -77,6 +86,12 @@ namespace MSLC
                             }
                             func_call.complex.push_back(arg);
                         }
+                        else
+                        {
+                            Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Invalid argument.", Diagnostics::SyntaxError, Diagnostics::SourceCode, t.line));
+                            current_index++;
+                            break;
+                        }
                         current_index++;
                         continue;
                     }
@@ -108,11 +123,11 @@ namespace MSLC
                 return func_call;
             }
 
-            TokensGroup PostfixBuilder::HandleDataAccess(const std::vector<TokensGroup>& tokens, size_t& current_index)
+            TokensGroup PostfixBuilder::HandleDataAccessOrArrayLiteral(const std::vector<TokensGroup>& tokens, size_t& current_index, GroupType gtype)
             {
                 // Found func call - create complex group
                 TokensGroup t = tokens[current_index];
-                TokensGroup data_access(GroupType::DataAccess);
+                TokensGroup data_access(gtype);
                 data_access.line = t.line;
                 if (t.simple.type == TokenType::DELIMITER)
                 {
@@ -125,7 +140,7 @@ namespace MSLC
                 while (current_index < tokens.size() && depth > 0) {
                     if (tokens[current_index].simple.value.strVal == "[") depth++;
                     else if (tokens[current_index].simple.value.strVal == "]") depth--;
-                    if (tokens[current_index].simple.value.strVal == "]" && depth == 0) {
+                    if ((tokens[current_index].simple.value.strVal == "," && depth == 1) || (tokens[current_index].simple.value.strVal == "]" && depth == 0)) {
                         if (!args_tokens.empty()) {
                             TokensGroup arg(GroupType::Argument);
                             auto arg_postfix = BuildPostfix(args_tokens);
@@ -138,15 +153,17 @@ namespace MSLC
                             {
                                 arg.complex.insert(arg.complex.end(),
                                     arg_postfix.complex.begin(), arg_postfix.complex.end());
-                                args_tokens.clear();
+                                
                             }
                             else
                             {
                                 arg.complex.push_back(arg_postfix);
                             }
                             data_access.complex.push_back(arg);
+                            args_tokens.clear();
                         }
-                        break;
+                        current_index++;
+                        continue;
                     }
 
                     if (depth > 0) {
@@ -154,6 +171,7 @@ namespace MSLC
                     }
                     current_index++;
                 }
+                current_index--; // compinsation
                 //Logger::Get().PrintInfo("ToPostfix: discovered function's call \"" + func_call.tokens[0].token.value.strVal + "\" with " + std::to_string(func_call.tokens.size() - 2) + " arguments.");
                 return data_access;
             }
@@ -275,8 +293,9 @@ namespace MSLC
                     case MSLC::IntermediateRepresentation::Pseudo::GroupType::FunctionCall:
                         result.push_back(HandleFuncCall(tokens, i));
                         break;
+                    case MSLC::IntermediateRepresentation::Pseudo::GroupType::ArrayLiteral:
                     case MSLC::IntermediateRepresentation::Pseudo::GroupType::DataAccess:
-                        result.push_back(HandleDataAccess(tokens, i));
+                        result.push_back(HandleDataAccessOrArrayLiteral(tokens, i,gtype));
                         break;
                     case MSLC::IntermediateRepresentation::Pseudo::GroupType::AttributeUsing:
                         break;
