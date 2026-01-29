@@ -14,8 +14,9 @@ namespace MSLC
 				PostfixBuilder postfix_builder;
 				APSTBuilder apst_builder;
 
+				void AnalyzeAPST(TokensGroup& node, PseudoTranslationState& pts);
 
-				Definitions::ChunkArray<PseudoOperation> AnalyzeAPST(TokensGroup& node, PseudoTranslationState& pts);
+				void HandleSimple(TokensGroup& node, PseudoTranslationState& pts);
 
 			public:
 

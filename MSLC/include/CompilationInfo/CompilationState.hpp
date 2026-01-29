@@ -36,6 +36,9 @@ namespace MSLC
 			std::unordered_map<std::string, Symbol> symbols{};
 		public:
 
+			bool Has(const std::string& identifier) const { return symbols.count(identifier); }
+			Symbol& Get(const std::string& identifier) { return symbols.at(identifier); }
+			void Add(const std::string& identifier,Symbol symbol) { symbols[identifier] = symbol;}
 			//access and another methods
 		};
 
@@ -56,11 +59,16 @@ namespace MSLC
 
 			std::vector<Definitions::ValueContainer> constants_pool{};
 
-			std::unordered_map<NamespaceID, LocalSymbolTable> namespaces{};		//just contains lsl as namespace
+			std::unordered_map<NamespaceID, std::shared_ptr<VisibleFrame>> namespaces{};		//just contains lsl as namespace
 
 		public:
 
-			//access and another methods
+			NamespaceID AddNamespace(std::shared_ptr<VisibleFrame> frame);
+			std::shared_ptr<VisibleFrame> GetNamespace(NamespaceID id);
+
+			Types::TypeID AddType(Types::TypeDescription type_description);
+			Types::TypeDescription* GetType(Types::TypeID id);
+
 		};
 
 		enum class VisibleFrameType 
@@ -83,7 +91,7 @@ namespace MSLC
 			Values::ImmediateConstantsTable ict;
 
 			//vf stack
-			std::vector<VisibleFrame> frames_stack;
+			std::vector<std::shared_ptr<VisibleFrame>> frames_stack;
 
 
 			Preprocessing::MacrosTable macros_table;
@@ -95,6 +103,19 @@ namespace MSLC
 			GlobalSymbolTable& GetGST();
 			Values::ImmediateConstantsTable& GetICT();
 
+			Symbol* FindSymbolLocal(const std::string& identifier);
+			Values::ConstantID FindOrCreateConstant(const Definitions::ValueContainer& vcontainer);
+
+			void PushNewFrame(const std::string& namespace_name);
+			void PushNewFrame();	//pushes common frame
+
+			void PopFrame();		
+
+			//Registration
+
+			Symbol* RegisterVariable(Variables::VariableDescription description);
+			Symbol* RegisterFunction(Functions::FunctionDescription description);
+			Symbol* RegisterType(Types::TypeDescription description);
 		};
 
 

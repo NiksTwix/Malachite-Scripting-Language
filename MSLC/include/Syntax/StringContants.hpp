@@ -24,7 +24,11 @@ namespace MSLC
 		constexpr std::string_view 	w_new       = "new";
 		constexpr std::string_view 	w_delete    = "delete";
 		constexpr std::string_view 	w_namespace = "namespace";
-		
+
+		constexpr std::string_view 	w_constructor = "constructor";
+		constexpr std::string_view 	w_destructor = "destructor";
+		constexpr std::string_view 	w_operator = "operator";
+
 		constexpr std::string_view 	w_to = "to";
 	}
 	namespace TypeMarkers

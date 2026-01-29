@@ -102,15 +102,17 @@ object_template Vector: INT
 	@property(get:public, set:protected)
 	field1:int;
 
-	_constructor(){}	
+	constructor[]() -> Vector {}	//basic
+	destructor[]() ->void {}
 
-	_coping(const ref Vector v)
+
+	operator[+=](another: Vector) -> void
 	{
-
+		this->field1 += another.field1
 	}
-	_coping_assing(const ref Vector v)
+	operator[=](another: const ref Vector ) -> void
 	{
-
+	
 	}
 } 
 

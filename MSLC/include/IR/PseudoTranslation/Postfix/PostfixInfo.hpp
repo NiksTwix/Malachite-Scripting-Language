@@ -14,8 +14,8 @@ namespace MSLC
 				Simple,		//alone token
 
 				//Complex
-				FunctionCall,	//simple - identificator, complex -arguments
-				DataAccess,	//simple - identificator, complex -arguments
+				FunctionCall,	//first in complex is identifier another are arguments
+				DataAccess,	//first in complex is identifier another are arguments
 				DataAccessChain,	//Chain of DataAccesses: DataAccess(identificator), DataAccess()
 
 				ArrayLiteral,	//[10,10,20]

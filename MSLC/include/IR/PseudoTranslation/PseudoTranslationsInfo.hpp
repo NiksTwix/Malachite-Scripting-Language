@@ -28,14 +28,26 @@ namespace MSLC
 				Mod,
 				Negative,
 
+				PrefixIncrement,
+				PrefixDecrement,
+				PostfixDecrement,
+				PostfixIncrement,
+
+
 				Exponentiate,
 
 				BitOffsetRight,
 				BitOffsetLeft,
 
+
+				STORE,
+				LOAD,
+				Push,
+
+
 				//Work with pointers
 				GetPointer,
-				GetValue,
+				Dereference,
 
 				GetFieldByValue,
 				GetFieldByPointer,
@@ -56,6 +68,14 @@ namespace MSLC
 				BitOr,
 				BitNot,
 				
+				//
+				DefineVariable,	//arg - symbol
+				DefineFunction,
+				
+				Use,			//variable
+				UseConstant,	//constant_id
+				Call,
+				CreateArray,	//count of previous elements in stack
 			};
 
 			struct PseudoOperation
@@ -63,9 +83,25 @@ namespace MSLC
 				size_t arg_0;
 				size_t arg_1;
 				size_t arg_2;
-				int debug_line;
+				uint32_t debug_line;
 				PseudoOpCode op_code;
 				uint8_t flags;
+
+				PseudoOperation(PseudoOpCode code, size_t arg0, size_t arg1, size_t arg2, uint32_t line, uint8_t flags) : arg_0(arg0), arg_1(arg1), arg_2(arg2), debug_line(line), op_code(code), flags(flags)
+				{
+				}
+				PseudoOperation(PseudoOpCode code, size_t arg0, size_t arg1, size_t arg2, uint32_t line) : arg_0(arg0), arg_1(arg1), arg_2(arg2), debug_line(line), op_code(code), flags(0)
+				{
+				}
+				PseudoOperation(PseudoOpCode code, size_t arg0, size_t arg1,  uint32_t line) : arg_0(arg0), arg_1(arg1), arg_2(0), debug_line(line), op_code(code), flags(0)
+				{
+				}
+				PseudoOperation(PseudoOpCode code, size_t arg0, uint32_t line) : arg_0(arg0), arg_1(0), arg_2(0), debug_line(line), op_code(code), flags(0)
+				{
+				}
+				PseudoOperation(PseudoOpCode code, uint32_t line) : arg_0(0), arg_1(0), arg_2(0), debug_line(line), op_code(code), flags(0)
+				{
+				}
 			};
 
 			using POperationArray = Definitions::ChunkArray<PseudoOperation>;
@@ -113,9 +149,11 @@ namespace MSLC
 					// Level 9: unary operators
 					{"!u", OperatorInfo(9,OperatorInfo::Type::Unary, PseudoOpCode::Not)}, {"~u",OperatorInfo(9,OperatorInfo::Type::Unary, PseudoOpCode::BitNot)},  {"-u",OperatorInfo(9,OperatorInfo::Type::Unary, PseudoOpCode::Negative)},  // unary + and -, also bit NOT/ u-unary {"+u", OperatorInfo(8,OperatorInfo::Type::Unary, PseudoOpCode::Not)},
 
-					{"*u", OperatorInfo(9,OperatorInfo::Type::Unary, PseudoOpCode::GetValue)},{"&u",OperatorInfo(9,OperatorInfo::Type::Unary, PseudoOpCode::GetPointer)},   //Work with pointers
-					
-					
+					{"*u", OperatorInfo(9,OperatorInfo::Type::Unary, PseudoOpCode::Dereference)},{"&u",OperatorInfo(9,OperatorInfo::Type::Unary, PseudoOpCode::GetPointer)},   //Work with pointers
+					{"--u", OperatorInfo(9,OperatorInfo::Type::Unary, PseudoOpCode::PrefixDecrement)},
+					{"++u", OperatorInfo(9,OperatorInfo::Type::Unary, PseudoOpCode::PrefixIncrement)},
+					{"u++", OperatorInfo(9,OperatorInfo::Type::Unary, PseudoOpCode::PostfixIncrement)},
+					{"u--", OperatorInfo(9,OperatorInfo::Type::Unary, PseudoOpCode::PostfixDecrement)},
 					// Level 9: Exponetiate
 
 					{"^", OperatorInfo(8,OperatorInfo::Type::Binary,PseudoOpCode::Exponentiate)},
