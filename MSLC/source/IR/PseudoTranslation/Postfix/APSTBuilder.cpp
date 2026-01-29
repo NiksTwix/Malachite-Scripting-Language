@@ -196,7 +196,6 @@ namespace MSLC
 
 				if (!stack.empty()) 
 				{
-					TokensGroup(stack, GroupType::Root);
 					return TokensGroup(stack, GroupType::Root);
 				}
 				//Dia::Logger::Get().Print(Dia::InformationMessage("APSTBuilder: stack is empty", Dia::MessageType::DeveloperError, Dia::SourceCode, 0));

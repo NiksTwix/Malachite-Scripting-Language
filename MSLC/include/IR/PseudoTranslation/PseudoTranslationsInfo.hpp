@@ -74,6 +74,7 @@ namespace MSLC
 				
 				Use,			//variable
 				UseConstant,	//constant_id
+				UseType,
 				Call,
 				CreateArray,	//count of previous elements in stack
 			};
@@ -102,6 +103,7 @@ namespace MSLC
 				PseudoOperation(PseudoOpCode code, uint32_t line) : arg_0(0), arg_1(0), arg_2(0), debug_line(line), op_code(code), flags(0)
 				{
 				}
+				PseudoOperation() = default;
 			};
 
 			using POperationArray = Definitions::ChunkArray<PseudoOperation>;

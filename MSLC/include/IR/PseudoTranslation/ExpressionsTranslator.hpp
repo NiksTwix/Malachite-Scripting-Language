@@ -18,6 +18,8 @@ namespace MSLC
 
 				void HandleSimple(TokensGroup& node, PseudoTranslationState& pts);
 
+				void HandleType(TokensGroup& node, PseudoTranslationState& pts);
+
 			public:
 
 				Definitions::ChunkArray<PseudoOperation> AnalyzeExpression(std::vector<Tokenization::Token> tokens, PseudoTranslationState& pts);

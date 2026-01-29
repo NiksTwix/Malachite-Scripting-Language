@@ -242,12 +242,17 @@ namespace MSLC
                             {
                                 const TokensGroup& t1 = tokens[j];
                                 if (t1.simple.type == TokenType::TYPE_MARKER) type_modifiers.push_back(t1);        //ref,ptr,const and another
-                                if (t1.simple.type == TokenType::IDENTIFIER || t1.type == GroupType::QualifiedName)
+                                else if (t1.simple.type == TokenType::IDENTIFIER || t1.type == GroupType::QualifiedName)
                                 {
                                     type_modifiers.push_back(t1);
                                     auto type_group = TokensGroup(type_modifiers, GroupType::Type);
                                     result.push_back(type_group);
                                     i = j;
+                                    break;
+                                }
+                                else 
+                                {
+                                    Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Invalid type identifier.", Diagnostics::SyntaxError, Diagnostics::SourceCode, t.line));
                                     break;
                                 }
                             }

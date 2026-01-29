@@ -68,7 +68,7 @@ namespace MSLC
 
 			Types::TypeID AddType(Types::TypeDescription type_description);
 			Types::TypeDescription* GetType(Types::TypeID id);
-
+			bool HasType(Types::TypeID id);
 		};
 
 		enum class VisibleFrameType 

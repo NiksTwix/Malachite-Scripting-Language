@@ -32,16 +32,28 @@ namespace MSLC
 
 		namespace Values 
 		{
-			enum ValueFlags
+			enum class ValueFlags: uint8_t
 			{
 				None = 0,
 				ConstValue = 1 << 0,
 				ConstPointer = 1 << 1,
 				Immediate = 1 << 2,		//100,true/false and another
 				Pointer = 1 << 3,
-				Link = 1 << 4,
+				Reference = 1 << 4,
+				//GC = 1 << 5,		//Garbage Collection
 			};
-
+			inline ValueFlags operator|(ValueFlags a, ValueFlags b) {
+				return static_cast<ValueFlags>(
+					static_cast<uint8_t>(a) |
+					static_cast<uint8_t>(b)
+					);
+			}
+			inline bool operator&(ValueFlags a, ValueFlags b) {
+				return static_cast<bool>(
+					static_cast<uint8_t>(a) &
+					static_cast<uint8_t>(b)
+					);
+			}
 			using ConstantID = size_t;
 
 			struct ValueInfo
@@ -51,11 +63,11 @@ namespace MSLC
 				ValueFlags flags;
 				uint16_t pointers_depth = 0;
 
-				inline bool isPointer() const { return flags & Pointer; }
-				inline bool isLink() const { return flags & Link; }
-				inline bool isConstPointer() const { return flags & ConstPointer; }
-				inline bool isConstValue() const { return flags & ConstValue; }
-				inline bool isImmediate() const { return flags & Immediate; }
+				inline bool isPointer() const { return flags & ValueFlags::Pointer; }
+				inline bool isLink() const { return flags & ValueFlags::Reference; }
+				inline bool isConstPointer() const { return flags & ValueFlags::ConstPointer; }
+				inline bool isConstValue() const { return flags & ValueFlags::ConstValue; }
+				inline bool isImmediate() const { return flags & ValueFlags::Immediate; }
 			};
 
 

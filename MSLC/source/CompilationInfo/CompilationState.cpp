@@ -77,5 +77,9 @@ namespace MSLC
 			auto it = types_descriptions.find(id);
 			return it == types_descriptions.end() ? nullptr : &it->second;
 		}
+		bool GlobalSymbolTable::HasType(Types::TypeID id)
+		{
+			return types_descriptions.count(id);
+		}
 	}
 }
