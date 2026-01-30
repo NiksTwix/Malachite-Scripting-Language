@@ -28,7 +28,7 @@ namespace MSLC
 			{
 				if (node.IsSimpleOrQN()) {
 					//Node handling
-
+					HandleSimple(node, pts);
 				}
 				
 				//for (size_t i = 0; i < node.complex.size(); i++) {
@@ -41,6 +41,10 @@ namespace MSLC
 				case GroupType::Empty:
 					break;
 				case GroupType::Root:
+					for (auto& child : node.complex) 
+					{
+						AnalyzeAPST(child,pts);
+					}
 					break;
 				case GroupType::FunctionCall:
 					break; 
@@ -53,17 +57,57 @@ namespace MSLC
 				case GroupType::Argument:
 					break;
 				case GroupType::Operation:
-					break;
-				case GroupType::Declaration:
 				{
-					auto& identifier = node.complex.front();
-					auto& type = node.complex.front();
-					AnalyzeAPST(type,pts);
+					auto operator_info = OperatorsTable::Get().GetInfo(node.simple.value.strVal);
+					
+					if (operator_info.type == OperatorInfo::Type::Unary)
+					{
+						AnalyzeAPST(node.complex.front(),pts);
+						pts.pseudo_code.Pushback(PseudoOperation(operator_info.op_code,0,0,0,PseudoOperationFlags::Unary));
+					}
+					else if (operator_info.type == OperatorInfo::Type::Binary)
+					{
+						AnalyzeAPST(node.complex.front(), pts);	//left
+						AnalyzeAPST(node.complex.back(), pts);	//right
+						pts.pseudo_code.Pushback(PseudoOperation(operator_info.op_code, 0, 0, 0, PseudoOperationFlags::Binary));
+					}
+					else if (operator_info.type == OperatorInfo::Type::Assignment) 
+					{
+						if (node.complex.front().type == GroupType::Operation) 
+						{
 
+							auto operator_info_left = OperatorsTable::Get().GetInfo(node.complex.front().simple.value.strVal);
+							if (operator_info_left.op_code != PseudoOpCode::GetFieldByPointer && operator_info_left.op_code != PseudoOpCode::GetFieldByValue && operator_info_left.op_code != PseudoOpCode::Dereference) 
+							{
+								Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Invalid operation as left operand of assignment.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceCode, node.line));
+								return;
+							}
+						}
+						AnalyzeAPST(node.complex.front(), pts);	//left
+						AnalyzeAPST(node.complex.back(), pts);	//right
+						pts.pseudo_code.Pushback(PseudoOperation(operator_info.op_code, 0, 0, 0, (uint32_t)node.line, PseudoOperationFlags::Binary | PseudoOperationFlags::Assignment));
+					}
 				}
 					break;
-				case GroupType::Type:	//[variable]:[modifiers][type's identifier]
-					HandleType(node, pts);
+				case GroupType::Declaration://[variable]:[modifiers][type's identifier]
+				{
+					auto& identifier = node.complex.front();
+					auto& type = node.complex.back();
+					auto type_info = GetValueInfoFromType(type, pts);
+
+					auto symbol = pts.cs_observer->FindSymbolLocal(identifier.simple.value.strVal, false);	//finds in only current scope
+					if (symbol != nullptr) 
+					{
+						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Variable \"" + identifier.simple.value.strVal +  "\" has already declared.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceCode, identifier.line));
+						return;
+					}
+					CompilationInfo::Variables::VariableDescription _desc;
+					_desc.name = identifier.simple.value.strVal;
+					_desc.vinfo = type_info;
+					
+					symbol = pts.cs_observer->RegisterVariable(_desc);
+					pts.pseudo_code.Pushback(PseudoOperation(PseudoOpCode::DeclareVariable, symbol->description_id));
+				}
 					break;
 				case GroupType::TypeCast:
 					break;
@@ -151,10 +195,37 @@ namespace MSLC
 				}
 			}
 
-			void ExpressionsTranslator::HandleType(TokensGroup& node, PseudoTranslationState& pts)
+			CompilationInfo::Values::ValueInfo  ExpressionsTranslator::GetValueInfoFromType(TokensGroup& node, PseudoTranslationState& pts)
 			{
-				using VF = CompilationInfo::Values::ValueFlags;
-				VF flags = VF::None;
+				
+				using namespace CompilationInfo::Values;
+
+				ValueInfo info = ValueInfo();
+				if (node.type == GroupType::Simple || node.type == GroupType::QualifiedName)
+				{ 
+					size_t before = pts.pseudo_code.Size();
+					HandleSimple(node, pts);
+					bool added_one_use = (pts.pseudo_code.Size() - before == 1) && (pts.pseudo_code.Back().op_code == PseudoOpCode::Use);
+					if (added_one_use)
+					{
+						if (!pts.cs_observer->GetGST().HasType(pts.pseudo_code.Back().arg_0))
+						{
+							Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Undefined type identifier \"" + node.simple.value.ToString() + "\".", Diagnostics::SyntaxError, Diagnostics::SourceCode, node.line));
+							return {};
+						}
+						info.type_id = pts.pseudo_code.Back().arg_0;	//type_description
+						pts.pseudo_code.Popback();
+					}
+					else
+					{
+						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Invalid type identifier.", Diagnostics::SyntaxError, Diagnostics::SourceCode, node.line));
+						return {};
+					}
+					return info;
+				}
+
+				//Type identifier with modificators
+
 				bool was_const = false;
 				for (size_t i = 0; i < node.complex.size() - 1; i++) // checks identificators
 				{
@@ -165,12 +236,13 @@ namespace MSLC
 						auto str_val = child.simple.value.strVal;
 						if (str_val == TypeMarkers::w_ptr) 
 						{
-							flags = flags | VF::Pointer;
-							if (was_const) { flags = flags | VF::ConstPointer; was_const = false; }
+							info.flags = info.flags | ValueFlags::Pointer;
+							if (was_const) { info.flags = info.flags | ValueFlags::ConstPointer; was_const = false; }
+							info.pointers_depth += 1;
 						}
 						if (str_val == TypeMarkers::w_ref) { 
-							flags = flags | VF::Reference;
-							if (was_const) { flags = flags | VF::ConstValue; was_const = false; }
+							info.flags = info.flags | ValueFlags::Reference;
+							if (was_const) { info.flags = info.flags | ValueFlags::ConstValue; was_const = false; }
 						}
 						if (str_val == TypeMarkers::w_const)was_const = true;
 						//if (str_val == TypeMarkers::w_gc)flags = flags | VF::GC;
@@ -181,46 +253,57 @@ namespace MSLC
 					else 
 					{
 						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Type's identifier must be one and after modifiers.", Diagnostics::SyntaxError, Diagnostics::SourceCode, node.line));
-						return;
+						return {};
 					}
 				}
-				if (was_const) flags = flags | VF::ConstValue;
+				if (was_const) info.flags = info.flags | ValueFlags::ConstValue;
 
 				auto& identifier = node.complex.back();
 
 				if (identifier.simple.type != TokenType::IDENTIFIER && identifier.type != GroupType::QualifiedName) 
 				{
 					Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Invalid type identifier.", Diagnostics::SyntaxError, Diagnostics::SourceCode, node.line));
-					return;
+					return {};
 				}
 				size_t first = pts.pseudo_code.Size();
 				HandleSimple(identifier,pts);
-				bool is_all_normal = pts.pseudo_code.Size() - first == 1;	//Use command is added
-				if (is_all_normal && pts.pseudo_code.Back().op_code == PseudoOpCode::Use)
+				bool added_one_use = (pts.pseudo_code.Size() - first == 1) && (pts.pseudo_code.Back().op_code == PseudoOpCode::Use);
+				if (added_one_use)
 				{
-					//Change previous's op_code on UseType
 					if (!pts.cs_observer->GetGST().HasType(pts.pseudo_code.Back().arg_0)) 
 					{
 						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Undefined type identifier \"" + identifier.simple.value.ToString() + "\".", Diagnostics::SyntaxError, Diagnostics::SourceCode, node.line));
-						return;
+						return {};
 					}
-					pts.pseudo_code.Back().flags = static_cast<uint8_t>(flags);	//ValueFlags to command flags (uint8_t)
-					pts.pseudo_code.Back().op_code = PseudoOpCode::UseType;
+					info.type_id = pts.pseudo_code.Back().arg_0;	//type_description
+					pts.pseudo_code.Popback();
 				}
 				else Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Invalid type identifier.", Diagnostics::SyntaxError, Diagnostics::SourceCode, node.line));
+				
+				if (info.flags & (ValueFlags::Pointer | ValueFlags::Reference)) 
+				{
+					Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("References cannot be combined with pointer modifier.", Diagnostics::SyntaxError, Diagnostics::SourceCode, node.line));
+					return {};
+				}
+				
+				return info;
 			}
 
-			Definitions::ChunkArray<PseudoOperation> ExpressionsTranslator::AnalyzeExpression(std::vector<Tokenization::Token> tokens, PseudoTranslationState& pts)
+			void ExpressionsTranslator::AnalyzeExpression(std::vector<Tokenization::Token> tokens, PseudoTranslationState& pts)
 			{
 				auto p = postfix_builder.Build(tokens);
 				int depth = 0;
-				print_recursive(p, depth);
 				//print_recursive(p, depth);
 				auto p1 = apst_builder.BuildAPST(p);
 				
 				
 				AnalyzeAPST(p1, pts);
-				return pts.pseudo_code;
+
+				for (int i = 0; i < pts.pseudo_code.Size(); i++) 
+				{
+					PseudoOperation& oper = pts.pseudo_code.Get(i);
+					std::cout << (int)oper.op_code << "|" << oper.arg_0 << "|" << oper.arg_1 << "\n";
+				}
 			}
 		}
 	}

@@ -4,6 +4,44 @@ namespace MSLC
 {
 	namespace CompilationInfo
 	{
+		void CompilationState::InitBasics()
+		{
+			//Creates first global frame;
+			frames_stack.push_back(std::make_shared<VisibleFrame>());
+
+			//basic types
+			Symbol symbol;
+			symbol.type = SymbolType::Type;
+			//real
+			Types::TypeDescription real_desc;
+			real_desc.category = Types::TypeCategory::Primitive;
+			real_desc.name = std::string(TypeMarkers::w_real);
+			real_desc.primitive_analog = Types::Double;
+			real_desc.size = 8;		
+			symbol.description_id = gst.AddType(real_desc);
+			frames_stack.back()->lsl.Add(real_desc.name, symbol);
+			//int
+			Types::TypeDescription int_desc;
+			int_desc.category = Types::TypeCategory::Primitive;
+			int_desc.name = std::string(TypeMarkers::w_integer);
+			int_desc.primitive_analog = Types::Int;
+			int_desc.size = 8;
+			symbol.description_id = gst.AddType(int_desc);
+			frames_stack.back()->lsl.Add(int_desc.name, symbol);
+
+			//uint
+			Types::TypeDescription uint_desc;
+			uint_desc.category = Types::TypeCategory::Primitive;
+			uint_desc.name = std::string(TypeMarkers::w_unsigned);
+			uint_desc.primitive_analog = Types::UInt;
+			uint_desc.size = 8;
+			symbol.description_id = gst.AddType(uint_desc);
+			frames_stack.back()->lsl.Add(uint_desc.name, symbol);
+		}
+		CompilationState::CompilationState()
+		{
+			InitBasics();
+		}
 		Preprocessing::MacrosTable& CompilationState::GetMacrosTable()
 		{
 			return macros_table;
@@ -16,14 +54,22 @@ namespace MSLC
 		{
 			return ict;
 		}
-		Symbol* CompilationState::FindSymbolLocal(const std::string& identifier)
+		Symbol* CompilationState::FindSymbolLocal(const std::string& identifier, bool check_parent)
 		{
 			if (frames_stack.empty()) return nullptr;
 
-			for (size_t i = frames_stack.size() - 1; i >= 0; i--) 
+			if (check_parent) 
 			{
-				VisibleFrame& frame = *frames_stack[i].get();
-				if (frame.lsl.Has(identifier)) return &frame.lsl.Get(identifier);
+				for (size_t i = frames_stack.size() - 1; i >= 0; i--)
+				{
+					VisibleFrame& frame = *frames_stack[i].get();
+					if (frame.lsl.Has(identifier)) return &frame.lsl.Get(identifier);
+				}
+			}
+			else 
+			{
+				auto frame = frames_stack.back();
+				return frame->lsl.GetSafe(identifier);
 			}
 
 
@@ -52,6 +98,19 @@ namespace MSLC
 			frames_stack.push_back(frame);
 		}
 
+		Symbol* CompilationState::RegisterVariable(Variables::VariableDescription description)
+		{
+			Symbol symbol;
+			symbol.type = SymbolType::Variable;
+			symbol.description_id = GetGST().AddVariable(description);
+			if (!frames_stack.empty())
+			{
+				frames_stack.back()->lsl.Add(description.name, symbol);
+				return frames_stack.back()->lsl.GetSafe(description.name);
+			}
+			else return nullptr;
+		}
+
 
 		//GST
 		NamespaceID GlobalSymbolTable::AddNamespace(std::shared_ptr<VisibleFrame> frame)
@@ -69,6 +128,7 @@ namespace MSLC
 		Types::TypeID GlobalSymbolTable::AddType(Types::TypeDescription type_description)
 		{
 			size_t type_id = global_type_id++;
+			type_description.id = type_id;
 			types_descriptions[type_id] = type_description;
 			return type_id;
 		}
@@ -80,6 +140,22 @@ namespace MSLC
 		bool GlobalSymbolTable::HasType(Types::TypeID id)
 		{
 			return types_descriptions.count(id);
+		}
+		Variables::VariableID GlobalSymbolTable::AddVariable(Variables::VariableDescription var_description)
+		{
+			size_t var_id = global_variable_id++;
+			var_description.id = var_id;
+			variables_descriptions[var_id] = var_description;
+			return var_id;
+		}
+		Variables::VariableDescription* GlobalSymbolTable::GetVariable(Variables::VariableID id)
+		{
+			auto it = variables_descriptions.find(id);
+			return it == variables_descriptions.end() ? nullptr : &it->second;
+		}
+		bool GlobalSymbolTable::HasVariable(Variables::VariableID id)
+		{
+			return variables_descriptions.count(id);
 		}
 	}
 }

@@ -75,11 +75,12 @@ namespace MSLC
         };
 
         template<typename T>
-        class ChunkArray {
+        class alignas (8) ChunkArray {
             std::vector<Chunk<T>> chunks;
             size_t size_ = 0;
 
         public:
+            
             ~ChunkArray() 
             {
                 Clear();
@@ -125,7 +126,11 @@ namespace MSLC
                 }
                 return *this;
             }
-            ChunkArray() = default;
+            ChunkArray() 
+            {
+                size_ = 0;
+                chunks = std::vector<Chunk<T>>();
+            }
 
             explicit ChunkArray(const std::vector<T>& vec) {
                 Reserve(vec.size());
@@ -386,10 +391,12 @@ namespace MSLC
             }
 
             // Additional methods
-            inline size_t Size() const { return size_; }
+            inline size_t Size() const { 
+                return this->size_; 
+            }
             inline bool Empty() const 
             { 
-                return size_ == 0; 
+                return this->size_ == 0;
             }
 
             size_t Capacity() const {

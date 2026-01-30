@@ -42,7 +42,12 @@ namespace MSLC
 				Definitions::AccessMode write_access_mode = Definitions::AccessMode::Public;
 			};
 
-
+			enum PrimitiveAnalogs //with priority 0 - 2
+			{
+				UInt,
+				Int,
+				Double,
+			};
 
 			struct TypeDescription 
 			{
@@ -55,7 +60,7 @@ namespace MSLC
 				TypeID inheriting_id = INVALID_ID;
 				TypeFlags flags;
 				TypeCategory category;
-
+				PrimitiveAnalogs primitive_analog;
 				//Meta
 				size_t definition_line = 0;
 				size_t module_id = 0;

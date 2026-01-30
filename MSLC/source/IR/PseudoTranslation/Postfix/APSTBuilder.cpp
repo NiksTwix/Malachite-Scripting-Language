@@ -54,6 +54,11 @@ namespace MSLC
 					}
 					auto right = stack.back(); stack.pop_back();	//type value
 					auto left = stack.back(); stack.pop_back();		//identifier value
+					if (left.simple.type != TokenType::IDENTIFIER) 
+					{
+						Dia::Logger::Get().Print(Dia::InformationMessage("Declaration of variable is impossible because identifier is invalid.", Dia::MessageType::SyntaxError, Dia::SourceCode, _operator.line));
+						return {};
+					}
 					std::vector<TokensGroup> declaration_args = { left,right };
 					TokensGroup new_group(declaration_args, GroupType::Declaration);
 					return new_group;

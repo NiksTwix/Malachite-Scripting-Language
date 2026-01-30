@@ -38,6 +38,14 @@ namespace MSLC
 
 			bool Has(const std::string& identifier) const { return symbols.count(identifier); }
 			Symbol& Get(const std::string& identifier) { return symbols.at(identifier); }
+
+			Symbol* GetSafe(const std::string& identifier) 
+			{
+				auto it = symbols.find(identifier);
+				return it != symbols.end() ? &it->second : nullptr;
+			}
+
+
 			void Add(const std::string& identifier,Symbol symbol) { symbols[identifier] = symbol;}
 			//access and another methods
 		};
@@ -69,6 +77,9 @@ namespace MSLC
 			Types::TypeID AddType(Types::TypeDescription type_description);
 			Types::TypeDescription* GetType(Types::TypeID id);
 			bool HasType(Types::TypeID id);
+			Variables::VariableID AddVariable(Variables::VariableDescription var_description);
+			Variables::VariableDescription* GetVariable(Variables::VariableID id);
+			bool HasVariable(Variables::VariableID id);
 		};
 
 		enum class VisibleFrameType 
@@ -96,14 +107,15 @@ namespace MSLC
 
 			Preprocessing::MacrosTable macros_table;
 
-			
+			void InitBasics();
 
 		public:
+			CompilationState();
 			Preprocessing::MacrosTable& GetMacrosTable();
 			GlobalSymbolTable& GetGST();
 			Values::ImmediateConstantsTable& GetICT();
 
-			Symbol* FindSymbolLocal(const std::string& identifier);
+			Symbol* FindSymbolLocal(const std::string& identifier, bool check_parent = true);
 			Values::ConstantID FindOrCreateConstant(const Definitions::ValueContainer& vcontainer);
 
 			void PushNewFrame(const std::string& namespace_name);

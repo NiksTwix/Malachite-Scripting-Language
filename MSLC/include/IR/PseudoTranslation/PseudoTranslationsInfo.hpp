@@ -40,8 +40,8 @@ namespace MSLC
 				BitOffsetLeft,
 
 
-				STORE,
-				LOAD,
+				Store,
+				Load,
 				Push,
 
 
@@ -69,7 +69,7 @@ namespace MSLC
 				BitNot,
 				
 				//
-				DefineVariable,	//arg - symbol
+				DeclareVariable,	//arg - symbol
 				DefineFunction,
 				
 				Use,			//variable
@@ -77,6 +77,18 @@ namespace MSLC
 				UseType,
 				Call,
 				CreateArray,	//count of previous elements in stack
+
+				PushFrame,
+				PopFrame,
+			};
+
+
+			enum PseudoOperationFlags : uint8_t
+			{
+				None = 0,
+				Binary = 1 << 0,
+				Unary = 1 << 1,
+				Assignment = 1 << 2,
 			};
 
 			struct PseudoOperation
@@ -91,16 +103,16 @@ namespace MSLC
 				PseudoOperation(PseudoOpCode code, size_t arg0, size_t arg1, size_t arg2, uint32_t line, uint8_t flags) : arg_0(arg0), arg_1(arg1), arg_2(arg2), debug_line(line), op_code(code), flags(flags)
 				{
 				}
-				PseudoOperation(PseudoOpCode code, size_t arg0, size_t arg1, size_t arg2, uint32_t line) : arg_0(arg0), arg_1(arg1), arg_2(arg2), debug_line(line), op_code(code), flags(0)
+				PseudoOperation(PseudoOpCode code, size_t arg0, size_t arg1, size_t arg2, uint32_t line) : arg_0(arg0), arg_1(arg1), arg_2(arg2), debug_line(line), op_code(code), flags(PseudoOperationFlags::None)
 				{
 				}
-				PseudoOperation(PseudoOpCode code, size_t arg0, size_t arg1,  uint32_t line) : arg_0(arg0), arg_1(arg1), arg_2(0), debug_line(line), op_code(code), flags(0)
+				PseudoOperation(PseudoOpCode code, size_t arg0, size_t arg1,  uint32_t line) : arg_0(arg0), arg_1(arg1), arg_2(0), debug_line(line), op_code(code), flags(PseudoOperationFlags::None)
 				{
 				}
-				PseudoOperation(PseudoOpCode code, size_t arg0, uint32_t line) : arg_0(arg0), arg_1(0), arg_2(0), debug_line(line), op_code(code), flags(0)
+				PseudoOperation(PseudoOpCode code, size_t arg0, uint32_t line) : arg_0(arg0), arg_1(0), arg_2(0), debug_line(line), op_code(code), flags(PseudoOperationFlags::None)
 				{
 				}
-				PseudoOperation(PseudoOpCode code, uint32_t line) : arg_0(0), arg_1(0), arg_2(0), debug_line(line), op_code(code), flags(0)
+				PseudoOperation(PseudoOpCode code, uint32_t line) : arg_0(0), arg_1(0), arg_2(0), debug_line(line), op_code(code), flags(PseudoOperationFlags::None)
 				{
 				}
 				PseudoOperation() = default;
@@ -112,7 +124,7 @@ namespace MSLC
 
 			struct PseudoTranslationState 
 			{
-				POperationArray pseudo_code{};
+				POperationArray pseudo_code = POperationArray();
 				CompilationInfo::CompilationState* cs_observer = nullptr;
 			};
 
@@ -121,7 +133,7 @@ namespace MSLC
 
 			struct OperatorInfo 
 			{
-				enum class Type { Undefined, Unary,Binary,Meta, Assignment,Declaration };
+				enum class Type { Undefined, Unary,Binary,Meta, Assignment,Declaration, FieldAccess };
 				int8_t priority;
 				Type type;
 				PseudoOpCode op_code;
