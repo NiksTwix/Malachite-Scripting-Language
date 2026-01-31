@@ -187,6 +187,7 @@ namespace MSLC
 					last.type == TokenType::IDENTIFIER ||
 					last.type == TokenType::TYPE_MARKER ||
 					last.type == TokenType::LITERAL ||
+					last.type == TokenType::COMPILATION_LABEL ||
 					last.value.strVal == ")" ||
 					last.value.strVal == "]" ||
 					last.value.strVal == "}";
@@ -200,6 +201,7 @@ namespace MSLC
 				// Standard checking for another prefix operators?
 				bool last_is_not_expression =
 					last.type == TokenType::OPERATOR ||
+					last.type == TokenType::COMPILATION_LABEL ||
 					last.value.strVal == "(" ||
 					last.value.strVal == "[" ||
 					last.value.strVal == "{" ||

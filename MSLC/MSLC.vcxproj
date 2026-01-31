@@ -136,6 +136,7 @@
     <ClCompile Include="source\IR\PseudoTranslation\ExpressionsTranslator.cpp" />
     <ClCompile Include="source\IR\PseudoTranslation\Postfix\PostfixBuilder.cpp" />
     <ClCompile Include="source\IR\PseudoTranslation\Postfix\APSTBuilder.cpp" />
+    <ClCompile Include="source\IR\PseudoTranslation\PseudoDebugInfo.cpp" />
     <ClCompile Include="source\IR\PseudoTranslation\PseudoTranslator.cpp" />
     <ClCompile Include="source\Preprocessing\AMGBuilder.cpp" />
     <ClCompile Include="source\Preprocessing\MacrosInfo.cpp" />
@@ -159,6 +160,7 @@
     <ClInclude Include="include\IR\PseudoTranslation\Postfix\PostfixBuilder.hpp" />
     <ClInclude Include="include\IR\PseudoTranslation\Postfix\PostfixInfo.hpp" />
     <ClInclude Include="include\IR\PseudoTranslation\Postfix\APSTBuilder.hpp" />
+    <ClInclude Include="include\IR\PseudoTranslation\PseudoDebugInfo.hpp" />
     <ClInclude Include="include\IR\PseudoTranslation\PseudoTranslationsInfo.hpp" />
     <ClInclude Include="include\IR\PseudoTranslation\PseudoTranslator.hpp" />
     <ClInclude Include="include\Preprocessing\AMGBuilder.hpp" />

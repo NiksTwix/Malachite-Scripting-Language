@@ -73,19 +73,9 @@ namespace MSLC
 					}
 					else if (operator_info.type == OperatorInfo::Type::Assignment) 
 					{
-						if (node.complex.front().type == GroupType::Operation) 
-						{
-
-							auto operator_info_left = OperatorsTable::Get().GetInfo(node.complex.front().simple.value.strVal);
-							if (operator_info_left.op_code != PseudoOpCode::GetFieldByPointer && operator_info_left.op_code != PseudoOpCode::GetFieldByValue && operator_info_left.op_code != PseudoOpCode::Dereference) 
-							{
-								Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Invalid operation as left operand of assignment.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceCode, node.line));
-								return;
-							}
-						}
 						AnalyzeAPST(node.complex.front(), pts);	//left
 						AnalyzeAPST(node.complex.back(), pts);	//right
-						pts.pseudo_code.Pushback(PseudoOperation(operator_info.op_code, 0, 0, 0, (uint32_t)node.line, PseudoOperationFlags::Binary | PseudoOperationFlags::Assignment));
+						pts.pseudo_code.Pushback(PseudoOperation(PseudoOpCode::Assign, (size_t)operator_info.op_code, 0, 0, (uint32_t)node.line, PseudoOperationFlags::Binary));
 					}
 				}
 					break;
@@ -106,7 +96,7 @@ namespace MSLC
 					_desc.vinfo = type_info;
 					
 					symbol = pts.cs_observer->RegisterVariable(_desc);
-					pts.pseudo_code.Pushback(PseudoOperation(PseudoOpCode::DeclareVariable, symbol->description_id));
+					pts.pseudo_code.Pushback(PseudoOperation(PseudoOpCode::DeclareVariable, symbol->description_id, node.line));
 				}
 					break;
 				case GroupType::TypeCast:
@@ -280,7 +270,7 @@ namespace MSLC
 				}
 				else Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Invalid type identifier.", Diagnostics::SyntaxError, Diagnostics::SourceCode, node.line));
 				
-				if (info.flags & (ValueFlags::Pointer | ValueFlags::Reference)) 
+				if ((info.flags & ValueFlags::Pointer) && (info.flags & ValueFlags::Reference))
 				{
 					Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("References cannot be combined with pointer modifier.", Diagnostics::SyntaxError, Diagnostics::SourceCode, node.line));
 					return {};
@@ -299,11 +289,8 @@ namespace MSLC
 				
 				AnalyzeAPST(p1, pts);
 
-				for (int i = 0; i < pts.pseudo_code.Size(); i++) 
-				{
-					PseudoOperation& oper = pts.pseudo_code.Get(i);
-					std::cout << (int)oper.op_code << "|" << oper.arg_0 << "|" << oper.arg_1 << "\n";
-				}
+
+				
 			}
 		}
 	}

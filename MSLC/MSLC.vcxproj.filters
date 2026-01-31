@@ -78,6 +78,9 @@
     <ClCompile Include="source\IR\PseudoTranslation\Postfix\APSTBuilder.cpp">
       <Filter>Исходные файлы\IR</Filter>
     </ClCompile>
+    <ClCompile Include="source\IR\PseudoTranslation\PseudoDebugInfo.cpp">
+      <Filter>Исходные файлы\IR</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Preprocessing\AMGBuilder.hpp">
@@ -150,6 +153,9 @@
       <Filter>Файлы заголовков\IR</Filter>
     </ClInclude>
     <ClInclude Include="include\IR\PseudoTranslation\Postfix\APSTBuilder.hpp">
+      <Filter>Файлы заголовков\IR</Filter>
+    </ClInclude>
+    <ClInclude Include="include\IR\PseudoTranslation\PseudoDebugInfo.hpp">
       <Filter>Файлы заголовков\IR</Filter>
     </ClInclude>
   </ItemGroup>

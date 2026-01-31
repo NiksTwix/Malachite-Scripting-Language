@@ -1,5 +1,5 @@
 #include "..\..\..\include\IR\PseudoTranslation\PseudoTranslator.hpp"
-
+#include  "..\..\..\include\IR\PseudoTranslation\PseudoDebugInfo.hpp"
 
 
 namespace MSLC
@@ -10,6 +10,18 @@ namespace MSLC
 		{
 			void PseudoTranslator::AnalyzeRecursive(AST::ASTNode& node, PseudoTranslationState& pts)
 			{
+				if (node.tokens.size() == 1 && node.tokens.front().type == Tokenization::TokenType::COMPILATION_LABEL) 
+				{
+					if (node.tokens.front().value.uintVal == (uint8_t)Tokenization::CompilationLabel::OPEN_VISIBLE_SCOPE) 
+					{
+						pts.pseudo_code.Pushback(PseudoOperation(PseudoOpCode::PushFrame,0,0,0,node.tokens.front().line));
+					}
+					else if (node.tokens.front().value.uintVal == (uint8_t)Tokenization::CompilationLabel::CLOSE_VISIBLE_SCOPE)
+					{
+						pts.pseudo_code.Pushback(PseudoOperation(PseudoOpCode::PopFrame, 0, 0, 0, node.tokens.front().line));
+					}
+					return;	//Compilation labels are simple tokens: they dont have children
+				}
 				size_t children_count = node.children.size();
 
 				if (children_count && node.tokens.size())	//MSL syntax construction
@@ -39,6 +51,11 @@ namespace MSLC
 				{
 					AnalyzeRecursive(node, pts);
 				}
+				CompilationStateStringSerializator csss;
+				PseudoOperationsStringSerializator poss;
+				std::cout << csss.Serialize(*pts.cs_observer);
+
+				std::cout << poss.Serialize(pts.pseudo_code);
 
 
 				return pts.pseudo_code;

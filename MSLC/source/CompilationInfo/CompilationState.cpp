@@ -60,7 +60,7 @@ namespace MSLC
 
 			if (check_parent) 
 			{
-				for (size_t i = frames_stack.size() - 1; i >= 0; i--)
+				for (int i = frames_stack.size() - 1; i >= 0; i--)
 				{
 					VisibleFrame& frame = *frames_stack[i].get();
 					if (frame.lsl.Has(identifier)) return &frame.lsl.Get(identifier);

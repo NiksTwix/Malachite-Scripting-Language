@@ -25,12 +25,12 @@ namespace MSLC
 
 			preprocessor.Preprocess(comp_state, tokens);
 
-			Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Stage: AST Building."));
+			Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Stage: AST building."));
 
 			AST::ASTNode tree = ast_builder.BuildAbsractScopeTree(tokens);
 			ast_builder.Postprocess(tree);
 
-
+			Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Stage: Pseudo building."));
 			preudo_translator.AnalyzeTree(tree, comp_state);
 
 		}

@@ -40,10 +40,8 @@ namespace MSLC
 				BitOffsetLeft,
 
 
-				Store,
-				Load,
+				Assign,		//arg0 = op_code of complex assignment (as example += - Add)
 				Push,
-
 
 				//Work with pointers
 				GetPointer,

@@ -32,7 +32,7 @@ namespace MSLC
 
 		namespace Values 
 		{
-			enum class ValueFlags: uint8_t
+			enum ValueFlags: uint8_t
 			{
 				None = 0,
 				ConstValue = 1 << 0,
@@ -42,25 +42,13 @@ namespace MSLC
 				Reference = 1 << 4,
 				//GC = 1 << 5,		//Garbage Collection
 			};
-			inline ValueFlags operator|(ValueFlags a, ValueFlags b) {
-				return static_cast<ValueFlags>(
-					static_cast<uint8_t>(a) |
-					static_cast<uint8_t>(b)
-					);
-			}
-			inline bool operator&(ValueFlags a, ValueFlags b) {
-				return static_cast<bool>(
-					static_cast<uint8_t>(a) &
-					static_cast<uint8_t>(b)
-					);
-			}
 			using ConstantID = size_t;
 
 			struct ValueInfo
 			{
 				Types::TypeID type_id = INVALID_ID;
 				ConstantID immediate_const_id = INVALID_ID;	//in the constants table
-				ValueFlags flags;
+				uint8_t flags;
 				uint16_t pointers_depth = 0;
 
 				inline bool isPointer() const { return flags & ValueFlags::Pointer; }

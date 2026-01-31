@@ -80,6 +80,13 @@ namespace MSLC
 			Variables::VariableID AddVariable(Variables::VariableDescription var_description);
 			Variables::VariableDescription* GetVariable(Variables::VariableID id);
 			bool HasVariable(Variables::VariableID id);
+
+
+			//
+			Types::TypeID GetLastTypeID() { return global_type_id - 1; }
+			Variables::VariableID GetLastVariableID() { return global_variable_id - 1; }
+			Functions::FunctionID GetLastFunctionID() { return global_function_id - 1; }
+			NamespaceID GetLastNamespaceID() { return global_namespace_id - 1; }
 		};
 
 		enum class VisibleFrameType 
