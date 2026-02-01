@@ -98,6 +98,16 @@ namespace MSLC
 			frames_stack.push_back(frame);
 		}
 
+		void CompilationState::PopFrame()
+		{
+			if (frames_stack.empty()) 
+			{
+				Diagnostics::Logger::Get().Print({ "PopFrame cannot be applied for empty frames stack.", Diagnostics::MessageType::DeveloperError, Diagnostics::SourceType::None });
+				return;
+			}
+			frames_stack.pop_back();
+		}
+
 		Symbol* CompilationState::RegisterVariable(Variables::VariableDescription description)
 		{
 			Symbol symbol;

@@ -86,8 +86,9 @@ namespace MSLC
 					{PseudoOpCode::BitOffsetLeft, "BitOffsetLeft"},
 
 					{PseudoOpCode::Assign, "Assign"},
+					{PseudoOpCode::AssignR, "AssignR"},
 					{PseudoOpCode::Push, "Push"},
-
+					{PseudoOpCode::Pop, "Pop"},
 					// Work with pointers
 					{PseudoOpCode::GetPointer, "GetPointer"},
 					{PseudoOpCode::Dereference, "Dereference"},

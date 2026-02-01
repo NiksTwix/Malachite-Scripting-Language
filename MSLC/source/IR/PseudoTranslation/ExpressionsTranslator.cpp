@@ -73,8 +73,14 @@ namespace MSLC
 					}
 					else if (operator_info.type == OperatorInfo::Type::Assignment) 
 					{
+
 						AnalyzeAPST(node.complex.front(), pts);	//left
+						if (pts.pseudo_code.Back().op_code == PseudoOpCode::DeclareVariable)
+						{
+							pts.pseudo_code.Pushback(PseudoOperation(PseudoOpCode::Use, pts.pseudo_code.Back().arg_0, 0, 0, (uint32_t)node.line));
+						}
 						AnalyzeAPST(node.complex.back(), pts);	//right
+						if (pts.pseudo_code.Back().op_code == PseudoOpCode::Assign) pts.pseudo_code.Back().op_code = PseudoOpCode::AssignR;	//Check info in note in telegram group
 						pts.pseudo_code.Pushback(PseudoOperation(PseudoOpCode::Assign, (size_t)operator_info.op_code, 0, 0, (uint32_t)node.line, PseudoOperationFlags::Binary));
 					}
 				}
@@ -84,7 +90,6 @@ namespace MSLC
 					auto& identifier = node.complex.front();
 					auto& type = node.complex.back();
 					auto type_info = GetValueInfoFromType(type, pts);
-
 					auto symbol = pts.cs_observer->FindSymbolLocal(identifier.simple.value.strVal, false);	//finds in only current scope
 					if (symbol != nullptr) 
 					{

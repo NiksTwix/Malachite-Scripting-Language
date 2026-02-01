@@ -41,8 +41,10 @@ namespace MSLC
 
 
 				Assign,		//arg0 = op_code of complex assignment (as example += - Add)
+				AssignR,	//R - returns. Accumulate value of assignment in register, also pushs in value_stack (of ByteTranslationState) Value(OperationResult,reg_number)
+				
 				Push,
-
+				Pop,
 				//Work with pointers
 				GetPointer,
 				Dereference,
@@ -132,11 +134,18 @@ namespace MSLC
 			struct OperatorInfo 
 			{
 				enum class Type { Undefined, Unary,Binary,Meta, Assignment,Declaration, FieldAccess };
+				enum class Associativity 
+				{
+					LeftRight,	// +,/,*, and etc
+					RightLeft	//assignments
+				};	
 				int8_t priority;
 				Type type;
 				PseudoOpCode op_code;
+				Associativity associativity = Associativity::LeftRight;
 				OperatorInfo() : priority(-128), type(Type::Undefined), op_code(PseudoOpCode::Nop) {}
 				OperatorInfo(int8_t priority, Type type, PseudoOpCode op_code) : priority(priority), type(type), op_code(op_code) {}
+				OperatorInfo(int8_t priority, Type type, PseudoOpCode op_code, Associativity associativity) : priority(priority), type(type), op_code(op_code), associativity(associativity){}
 				OperatorInfo(int8_t priority, Type type) : priority(priority), type(type), op_code(PseudoOpCode::Nop) {}
 			};
 
@@ -197,11 +206,20 @@ namespace MSLC
 					{"&&", OperatorInfo(0,OperatorInfo::Type::Binary,PseudoOpCode::And)}, {"||", OperatorInfo(0,OperatorInfo::Type::Binary,PseudoOpCode::Or)},
 
 					// Level -1: assignments (the lowest priority)
-					{"=", OperatorInfo(-1,OperatorInfo::Type::Assignment,PseudoOpCode::Nop)}, {"+=", OperatorInfo(-1,OperatorInfo::Type::Assignment,PseudoOpCode::Add)}, {"-=", OperatorInfo(-1,OperatorInfo::Type::Assignment,PseudoOpCode::Subtract)}, 
-					{"*=",OperatorInfo(-1,OperatorInfo::Type::Assignment,PseudoOpCode::Multiply)},
-					{"/=", OperatorInfo(-1,OperatorInfo::Type::Assignment,PseudoOpCode::Divide)}, {"%=",OperatorInfo(-1,OperatorInfo::Type::Assignment,PseudoOpCode::Mod)}, {"&=", OperatorInfo(-1,OperatorInfo::Type::Assignment,PseudoOpCode::BitAnd)}, {"|=", OperatorInfo(-1,OperatorInfo::Type::Assignment,PseudoOpCode::BitOr)},
-					{"<<=", OperatorInfo(-1,OperatorInfo::Type::Assignment,PseudoOpCode::BitOffsetLeft)}, {">>=", OperatorInfo(-1,OperatorInfo::Type::Assignment,PseudoOpCode::BitOffsetRight)}, {"&&=", OperatorInfo(-1,OperatorInfo::Type::Assignment,PseudoOpCode::And)}, {"||=", OperatorInfo(-1,OperatorInfo::Type::Assignment,PseudoOpCode::Or)},
-					{"~=", OperatorInfo(-1,OperatorInfo::Type::Assignment,PseudoOpCode::BitNot)},{"^=", OperatorInfo(-1,OperatorInfo::Type::Assignment,PseudoOpCode::Exponentiate)}
+					{"=", OperatorInfo(-1,OperatorInfo::Type::Assignment,PseudoOpCode::Nop, OperatorInfo::Associativity::RightLeft)}, 
+					{"+=", OperatorInfo(-1,OperatorInfo::Type::Assignment,PseudoOpCode::Add, OperatorInfo::Associativity::RightLeft)},
+					{"-=", OperatorInfo(-1,OperatorInfo::Type::Assignment,PseudoOpCode::Subtract, OperatorInfo::Associativity::RightLeft)},
+					{"*=",OperatorInfo(-1,OperatorInfo::Type::Assignment,PseudoOpCode::Multiply, OperatorInfo::Associativity::RightLeft)},
+					{"/=", OperatorInfo(-1,OperatorInfo::Type::Assignment,PseudoOpCode::Divide, OperatorInfo::Associativity::RightLeft)}, 
+					{"%=",OperatorInfo(-1,OperatorInfo::Type::Assignment,PseudoOpCode::Mod, OperatorInfo::Associativity::RightLeft)},
+					{"&=", OperatorInfo(-1,OperatorInfo::Type::Assignment,PseudoOpCode::BitAnd, OperatorInfo::Associativity::RightLeft)},
+					{"|=", OperatorInfo(-1,OperatorInfo::Type::Assignment,PseudoOpCode::BitOr, OperatorInfo::Associativity::RightLeft)},
+					{"<<=", OperatorInfo(-1,OperatorInfo::Type::Assignment,PseudoOpCode::BitOffsetLeft, OperatorInfo::Associativity::RightLeft)},
+					{">>=", OperatorInfo(-1,OperatorInfo::Type::Assignment,PseudoOpCode::BitOffsetRight, OperatorInfo::Associativity::RightLeft)},
+					{"&&=", OperatorInfo(-1,OperatorInfo::Type::Assignment,PseudoOpCode::And, OperatorInfo::Associativity::RightLeft)},
+					{"||=", OperatorInfo(-1,OperatorInfo::Type::Assignment,PseudoOpCode::Or, OperatorInfo::Associativity::RightLeft)},
+					{"~=", OperatorInfo(-1,OperatorInfo::Type::Assignment,PseudoOpCode::BitNot, OperatorInfo::Associativity::RightLeft)},
+					{"^=", OperatorInfo(-1,OperatorInfo::Type::Assignment,PseudoOpCode::Exponentiate, OperatorInfo::Associativity::RightLeft)}
 				
 				};
 

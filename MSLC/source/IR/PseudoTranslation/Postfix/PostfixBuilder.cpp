@@ -266,9 +266,14 @@ namespace MSLC
                         else if ((t.simple.type == TokenType::OPERATOR || t.simple.type == TokenType::KEYWORD) && OperatorsTable::Get().Has(t.simple.value.strVal)) {
                             try 
                             {
-                                while (!operations.empty() && 
-                                    operations.back().simple.value.strVal != "(" &&  // dont push out"("
-                                    (OperatorsTable::Get().GetInfo(operations.back().simple.value.strVal).priority >= OperatorsTable::Get().GetInfo(t.simple.value.strVal).priority)) {
+                                while (!operations.empty() &&
+                                    operations.back().simple.value.strVal != "(" &&
+                                    (OperatorsTable::Get().GetInfo(operations.back().simple.value.strVal).priority >
+                                        OperatorsTable::Get().GetInfo(t.simple.value.strVal).priority ||
+                                        (OperatorsTable::Get().GetInfo(operations.back().simple.value.strVal).priority ==
+                                            OperatorsTable::Get().GetInfo(t.simple.value.strVal).priority &&
+                                            OperatorsTable::Get().GetInfo(t.simple.value.strVal).associativity == OperatorInfo::Associativity::LeftRight))) {
+                                    // Only if priority is greater OR pririties are equal and associativity is LeftRight
                                     result.push_back(operations.back());
                                     operations.pop_back();
                                 }
