@@ -40,7 +40,7 @@ namespace MSLC
 		{
             None,
 			SourceCode,
-			ByteCode
+			IRCode,
 		};
 
 

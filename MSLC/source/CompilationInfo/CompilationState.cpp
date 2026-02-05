@@ -121,6 +121,25 @@ namespace MSLC
 			else return nullptr;
 		}
 
+		size_t CompilationState::AddUnhandledSymbol(SymbolType type, size_t desc_id)
+		{
+			UnhandledSymbol symbol;
+			symbol.desc_id = desc_id;
+			
+			symbol.global_id = global_us_id++;
+			symbol.symbol_type = type;
+			unhandled_symbols[symbol.global_id] = symbol;
+			return symbol.global_id;
+		}
+
+		UnhandledSymbol* CompilationState::GetUnhandledSymbol(size_t global_id)
+		{
+			auto it = unhandled_symbols.find(global_id);
+			if (it == unhandled_symbols.end()) return nullptr;
+			
+			return &it->second;
+		}
+
 
 		//GST
 		NamespaceID GlobalSymbolTable::AddNamespace(std::shared_ptr<VisibleFrame> frame)

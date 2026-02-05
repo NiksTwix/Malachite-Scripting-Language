@@ -28,11 +28,23 @@
     <Filter Include="Исходные файлы\IR">
       <UniqueIdentifier>{a5122ebe-85cd-49cc-acd9-5ae3da4dedf0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Исходные файлы\Info">
+      <UniqueIdentifier>{00627044-c00b-449f-9b4d-30126ea702a4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы заголовков\IR\Pseudo">
+      <UniqueIdentifier>{9f2cbeec-a771-4e9e-9c43-8864fdf627b4}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Файлы заголовков\Info">
       <UniqueIdentifier>{4fec9a16-d6fe-495c-8fea-ed200c5e9f4b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Исходные файлы\Info">
-      <UniqueIdentifier>{00627044-c00b-449f-9b4d-30126ea702a4}</UniqueIdentifier>
+    <Filter Include="Файлы заголовков\IR\Byte">
+      <UniqueIdentifier>{79c2cefb-79ae-4d2f-8a7f-a9d633b708ae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Исходные файлы\IR\Pseudo">
+      <UniqueIdentifier>{a6d8a5d0-a6fe-4ac8-bba7-3f2f738cd0ea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Исходные файлы\IR\Byte">
+      <UniqueIdentifier>{c0e57add-0c95-4d9a-9834-ae8fcdf49b06}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -57,12 +69,6 @@
     <ClCompile Include="source\Preprocessing\Preprocessor.cpp">
       <Filter>Исходные файлы\Frontend</Filter>
     </ClCompile>
-    <ClCompile Include="source\IR\PseudoTranslation\PseudoTranslator.cpp">
-      <Filter>Исходные файлы\IR</Filter>
-    </ClCompile>
-    <ClCompile Include="source\IR\PseudoTranslation\ExpressionsTranslator.cpp">
-      <Filter>Исходные файлы\IR</Filter>
-    </ClCompile>
     <ClCompile Include="source\CompilationInfo\CompilationState.cpp">
       <Filter>Исходные файлы\Info</Filter>
     </ClCompile>
@@ -72,14 +78,23 @@
     <ClCompile Include="source\Definitions\ValueContainer.cpp">
       <Filter>Исходные файлы\Info</Filter>
     </ClCompile>
-    <ClCompile Include="source\IR\PseudoTranslation\Postfix\PostfixBuilder.cpp">
-      <Filter>Исходные файлы\IR</Filter>
-    </ClCompile>
     <ClCompile Include="source\IR\PseudoTranslation\Postfix\APSTBuilder.cpp">
-      <Filter>Исходные файлы\IR</Filter>
+      <Filter>Исходные файлы\IR\Pseudo</Filter>
+    </ClCompile>
+    <ClCompile Include="source\IR\PseudoTranslation\ExpressionsTranslator.cpp">
+      <Filter>Исходные файлы\IR\Pseudo</Filter>
+    </ClCompile>
+    <ClCompile Include="source\IR\PseudoTranslation\Postfix\PostfixBuilder.cpp">
+      <Filter>Исходные файлы\IR\Pseudo</Filter>
     </ClCompile>
     <ClCompile Include="source\IR\PseudoTranslation\PseudoDebugInfo.cpp">
-      <Filter>Исходные файлы\IR</Filter>
+      <Filter>Исходные файлы\IR\Pseudo</Filter>
+    </ClCompile>
+    <ClCompile Include="source\IR\PseudoTranslation\PseudoTranslator.cpp">
+      <Filter>Исходные файлы\IR\Pseudo</Filter>
+    </ClCompile>
+    <ClCompile Include="source\IR\ByteTranslation\ByteTranslator.cpp">
+      <Filter>Исходные файлы\IR\Byte</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -122,15 +137,6 @@
     <ClInclude Include="include\CompilationInfo\Variables.hpp">
       <Filter>Файлы заголовков\CompilationInfo</Filter>
     </ClInclude>
-    <ClInclude Include="include\IR\PseudoTranslation\PseudoTranslationsInfo.hpp">
-      <Filter>Файлы заголовков\IR</Filter>
-    </ClInclude>
-    <ClInclude Include="include\IR\PseudoTranslation\PseudoTranslator.hpp">
-      <Filter>Файлы заголовков\IR</Filter>
-    </ClInclude>
-    <ClInclude Include="include\IR\PseudoTranslation\ExpressionsTranslator.hpp">
-      <Filter>Файлы заголовков\IR</Filter>
-    </ClInclude>
     <ClInclude Include="include\Definitions\ChunkArray.hpp">
       <Filter>Файлы заголовков\Info</Filter>
     </ClInclude>
@@ -146,17 +152,32 @@
     <ClInclude Include="include\Compiler.hpp">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="include\IR\PseudoTranslation\Postfix\PostfixInfo.hpp">
-      <Filter>Файлы заголовков\IR</Filter>
+    <ClInclude Include="include\IR\PseudoTranslation\Postfix\APSTBuilder.hpp">
+      <Filter>Файлы заголовков\IR\Pseudo</Filter>
+    </ClInclude>
+    <ClInclude Include="include\IR\PseudoTranslation\ExpressionsTranslator.hpp">
+      <Filter>Файлы заголовков\IR\Pseudo</Filter>
     </ClInclude>
     <ClInclude Include="include\IR\PseudoTranslation\Postfix\PostfixBuilder.hpp">
-      <Filter>Файлы заголовков\IR</Filter>
+      <Filter>Файлы заголовков\IR\Pseudo</Filter>
     </ClInclude>
-    <ClInclude Include="include\IR\PseudoTranslation\Postfix\APSTBuilder.hpp">
-      <Filter>Файлы заголовков\IR</Filter>
+    <ClInclude Include="include\IR\PseudoTranslation\Postfix\PostfixInfo.hpp">
+      <Filter>Файлы заголовков\IR\Pseudo</Filter>
     </ClInclude>
     <ClInclude Include="include\IR\PseudoTranslation\PseudoDebugInfo.hpp">
-      <Filter>Файлы заголовков\IR</Filter>
+      <Filter>Файлы заголовков\IR\Pseudo</Filter>
+    </ClInclude>
+    <ClInclude Include="include\IR\PseudoTranslation\PseudoTranslationsInfo.hpp">
+      <Filter>Файлы заголовков\IR\Pseudo</Filter>
+    </ClInclude>
+    <ClInclude Include="include\IR\PseudoTranslation\PseudoTranslator.hpp">
+      <Filter>Файлы заголовков\IR\Pseudo</Filter>
+    </ClInclude>
+    <ClInclude Include="include\IR\ByteTranslation\ByteTranslationInfo.hpp">
+      <Filter>Файлы заголовков\IR\Byte</Filter>
+    </ClInclude>
+    <ClInclude Include="include\IR\ByteTranslation\ByteTranslator.hpp">
+      <Filter>Файлы заголовков\IR\Byte</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

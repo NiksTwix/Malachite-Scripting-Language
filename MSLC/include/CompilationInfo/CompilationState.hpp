@@ -102,9 +102,19 @@ namespace MSLC
 			VisibleFrameType type;	//If namespace - after handling lsl will be copied in global table
 		};
 
+		struct UnhandledSymbol
+		{
+			size_t global_id = 0;
+			SymbolType symbol_type = SymbolType::Undefined;
+			size_t desc_id = 0;
+		};
+
+
 		class CompilationState 
 		{
 			GlobalSymbolTable gst;
+
+			size_t global_us_id = 0;
 
 			Values::ImmediateConstantsTable ict;
 
@@ -115,7 +125,7 @@ namespace MSLC
 			Preprocessing::MacrosTable macros_table;
 
 			void InitBasics();
-
+			std::unordered_map<size_t, UnhandledSymbol> unhandled_symbols;
 		public:
 			CompilationState();
 			Preprocessing::MacrosTable& GetMacrosTable();
@@ -135,6 +145,9 @@ namespace MSLC
 			Symbol* RegisterVariable(Variables::VariableDescription description);
 			Symbol* RegisterFunction(Functions::FunctionDescription description);
 			Symbol* RegisterType(Types::TypeDescription description);
+
+			size_t AddUnhandledSymbol(SymbolType type, size_t desc_id);
+			UnhandledSymbol* GetUnhandledSymbol(size_t global_id);
 		};
 
 

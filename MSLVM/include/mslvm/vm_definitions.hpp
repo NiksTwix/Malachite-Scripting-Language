@@ -104,9 +104,9 @@ namespace MSLVM
 		BIT_OFFSET_LEFT_RRR,
 		BIT_OFFSET_RIGHT_RRR,
 
-		CMP_RR_INTEGER,          //arg0 - null, arg1 - first, arg2 - second
-		CMP_RR_UNSIGNED,          //arg0 - null, arg1 - first, arg2 - second
-		CMP_RR_REAL,     //arg0 - null, arg1 - first, arg2 - second; For double with nan checking
+		CMP_RR_INTEGER,          //arg0 - first, arg1 - second, arg2 - null
+		CMP_RR_UNSIGNED,          //arg0 - first, arg1 - first, arg2 - null
+		CMP_RR_REAL,     //arg0 - first, arg1 - second, arg2 - null; For double with nan checking
 		//Memory
 
 		//LOAD_RM,    //register-arg0,             address loading from - arg1, size [1-8 bytes] - arg2

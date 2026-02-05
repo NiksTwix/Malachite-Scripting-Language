@@ -133,6 +133,7 @@
     <ClCompile Include="source\CompilationInfo\CompilationState.cpp" />
     <ClCompile Include="source\Compiler.cpp" />
     <ClCompile Include="source\Definitions\ValueContainer.cpp" />
+    <ClCompile Include="source\IR\ByteTranslation\ByteTranslator.cpp" />
     <ClCompile Include="source\IR\PseudoTranslation\ExpressionsTranslator.cpp" />
     <ClCompile Include="source\IR\PseudoTranslation\Postfix\PostfixBuilder.cpp" />
     <ClCompile Include="source\IR\PseudoTranslation\Postfix\APSTBuilder.cpp" />
@@ -156,6 +157,8 @@
     <ClInclude Include="include\Definitions\ChunkArray.hpp" />
     <ClInclude Include="include\Definitions\CommonEnums.hpp" />
     <ClInclude Include="include\Definitions\ValueContainer.hpp" />
+    <ClInclude Include="include\IR\ByteTranslation\ByteTranslationInfo.hpp" />
+    <ClInclude Include="include\IR\ByteTranslation\ByteTranslator.hpp" />
     <ClInclude Include="include\IR\PseudoTranslation\ExpressionsTranslator.hpp" />
     <ClInclude Include="include\IR\PseudoTranslation\Postfix\PostfixBuilder.hpp" />
     <ClInclude Include="include\IR\PseudoTranslation\Postfix\PostfixInfo.hpp" />

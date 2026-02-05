@@ -83,7 +83,7 @@ namespace MSLC
         case SourceCode:
             place = "Line:" + std::to_string(message.place);
             break;
-        case ByteCode:
+        case IRCode:
             place = "Instruction pointer:" + std::to_string(message.place);
             break;
         default:
