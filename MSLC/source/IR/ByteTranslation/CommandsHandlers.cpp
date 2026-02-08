@@ -7,76 +7,14 @@ namespace MSLC
 		namespace Byte
 		{
 #pragma region Handlers
-			void CommandsHandler::HandleArithmetic(Pseudo::POperationArray& p_array, std::shared_ptr<ByteTranslationState> b_state)
-			{
-				Pseudo::PseudoOperation& operation = p_array[b_state->pseudo_ip];
 
-				auto main_ari_handler = [&]() -> void
-					{
-						//Use secondly register of the one operand
-						if (b_state->value_stack.size() < 2 )
-						{
-							//Logger::Get().PrintTypeError(SyntaxInfo::GetPseudoString(cmd.op_code) + " is binary operation, but gets only one.", current_BDS.ip);
-							return;
-						}
-						ValueFrame right = b_state->value_stack.top(); b_state->value_stack.pop();
-						ValueFrame left = b_state->value_stack.top(); b_state->value_stack.pop();
-
-						CommandArgument converted_reg = left.source_arg;
-						ValueFrame::ValueNativeType common_type = left.native_type;
-						auto conv_cmd = GetTypeConvertionCommand(
-							left.native_type, left.source_arg,
-							right.native_type, right.source_arg,
-							converted_reg, common_type
-						);
-						if (conv_cmd.code != ByteOpCode::NOP) {
-							b_state->result.Pushback(conv_cmd);
-						}
-
-						b_state->result.Pushback(ByteCommand(
-							GetTypedArithmeticCommandCode(operation.op_code, common_type),
-							left.source_arg,
-							left.source_arg,
-							right.source_arg
-						));
-
-						b_state->registers_table.SetFree(right.source_arg.reg_index);
-						b_state->value_stack.push(ValueFrame(left.source_arg, common_type));
-					};
-
-				switch (operation.op_code)
-				{
-				case Pseudo::PseudoOpCode::Add:
-				case Pseudo::PseudoOpCode::Subtract:
-				case Pseudo::PseudoOpCode::Divide:
-				case Pseudo::PseudoOpCode::Exponentiate:
-				case Pseudo::PseudoOpCode::Multiply:
-					main_ari_handler();
-					break;
-				case Pseudo::PseudoOpCode::Mod:
-					break;
-				case Pseudo::PseudoOpCode::Negative:
-					break;
-				case Pseudo::PseudoOpCode::PrefixIncrement:
-					break;
-				case Pseudo::PseudoOpCode::PrefixDecrement:
-					break;
-				case Pseudo::PseudoOpCode::PostfixDecrement:
-					break;
-				case Pseudo::PseudoOpCode::PostfixIncrement:
-					break;
-				default:
-					break;
-				}
-
-			}
 
 #pragma endregion
 
 
-			ByteOpCode CommandsHandler::GetTypedArithmeticCommandCode(Pseudo::PseudoOpCode code, ValueFrame::ValueNativeType type)
+			ByteOpCode CommandsHandler::GetTypedArithmeticCommandCode(Pseudo::PseudoOpCode code, PrimitiveAnalogs type)
 			{
-				if (type == ValueFrame::ValueNativeType::Int)
+				if (type == PrimitiveAnalogs::Int)
 				{
 					switch (code)
 					{
@@ -96,7 +34,7 @@ namespace MSLC
 						return ByteOpCode::EXPI;
 					}
 				}
-				if (type == ValueFrame::ValueNativeType::UInt)
+				if (type == PrimitiveAnalogs::UInt)
 				{
 					switch (code)
 					{
@@ -114,7 +52,7 @@ namespace MSLC
 						return ByteOpCode::EXPU;
 					}
 				}
-				if (type == ValueFrame::ValueNativeType::Real)
+				if (type == PrimitiveAnalogs::Real)
 				{
 					switch (code)
 					{
@@ -135,25 +73,25 @@ namespace MSLC
 				return ByteOpCode::NOP;
 			}
 
-			ByteCommand CommandsHandler::GetConversionCommand(ValueFrame::ValueNativeType from, ValueFrame::ValueNativeType to, CommandArgument reg) {
+			ByteCommand CommandsHandler::GetConversionCommand(PrimitiveAnalogs from, PrimitiveAnalogs to, CommandArgument reg) {
 				if (from == to) return ByteCommand(ByteOpCode::NOP);
 
-				if (to == ValueFrame::ValueNativeType::Real) {
-					if (from == ValueFrame::ValueNativeType::UInt) return ByteCommand(ByteOpCode::TC_UTR, reg);
-					if (from == ValueFrame::ValueNativeType::Int) return  ByteCommand(ByteOpCode::TC_ITR, reg);
+				if (to == PrimitiveAnalogs::Real) {
+					if (from == PrimitiveAnalogs::UInt) return ByteCommand(ByteOpCode::TC_UTR, reg);
+					if (from == PrimitiveAnalogs::Int) return  ByteCommand(ByteOpCode::TC_ITR, reg);
 				}
-				if (to == ValueFrame::ValueNativeType::Int) {
-					if (from == ValueFrame::ValueNativeType::UInt) return ByteCommand(ByteOpCode::TC_UTI, reg);
+				if (to == PrimitiveAnalogs::Int) {
+					if (from == PrimitiveAnalogs::UInt) return ByteCommand(ByteOpCode::TC_UTI, reg);
 				}
-				if (to == ValueFrame::ValueNativeType::UInt) {
-					if (from == ValueFrame::ValueNativeType::Int) return ByteCommand(ByteOpCode::TC_ITU, reg);
+				if (to == PrimitiveAnalogs::UInt) {
+					if (from == PrimitiveAnalogs::Int) return ByteCommand(ByteOpCode::TC_ITU, reg);
 				}
 				return ByteCommand(ByteOpCode::NOP);
 			}
 
-			ByteCommand CommandsHandler::GetTypeConvertionCommand(ValueFrame::ValueNativeType first, CommandArgument first_register, ValueFrame::ValueNativeType second, CommandArgument second_register, CommandArgument& converted_register, ValueFrame::ValueNativeType& result_type)
+			ByteCommand CommandsHandler::GetTypeConvertionCommand(PrimitiveAnalogs first, CommandArgument first_register, PrimitiveAnalogs second, CommandArgument second_register, CommandArgument& converted_register, PrimitiveAnalogs& result_type)
 			{
-				ValueFrame::ValueNativeType  target_type = (first > second) ? first : second;	//Define target type
+				PrimitiveAnalogs target_type = (first > second) ? first : second;	//Define target type
 				if (first != target_type) {
 					converted_register = first_register;
 					result_type = target_type;
@@ -164,6 +102,34 @@ namespace MSLC
 					result_type = target_type;
 					return GetConversionCommand(second, target_type, second_register);
 				}
+			}
+
+			PrimitiveAnalogs CommandsHandler::ValueContainerTypeToPrimitive(Definitions::ValueType type)
+			{
+				switch (type)
+				{
+				case MSLC::Definitions::ValueType::VOID:
+				case MSLC::Definitions::ValueType::UINT:
+				case MSLC::Definitions::ValueType::BOOL:
+					return PrimitiveAnalogs::UInt;
+				case MSLC::Definitions::ValueType::INT:
+				case MSLC::Definitions::ValueType::CHAR:
+					return PrimitiveAnalogs::Int;
+				case MSLC::Definitions::ValueType::REAL:
+					return PrimitiveAnalogs::Real;
+				case MSLC::Definitions::ValueType::STRING:
+					break;
+				default:
+					break;
+				}
+				return PrimitiveAnalogs::UInt;
+			}
+
+			void CommandsHandler::PushCommand(std::shared_ptr<ByteTranslationState> b_state, ByteCommand&& command, size_t line)
+			{
+				b_state->result.Pushback(std::move(command));
+				b_state->result.Back().source_line = line;
+				b_state->result.Back().pseudo_op_index = b_state->pseudo_ip;
 			}
 
 			void CommandsHandler::HandleCommand(Pseudo::POperationArray& p_array, std::shared_ptr<ByteTranslationState> b_state)

@@ -85,6 +85,24 @@ namespace MSLC
                 return *this;
             }
 
+            size_t GetDataSize() 
+            {
+                switch (type)
+                {
+                case MSLC::Definitions::ValueType::VOID:return 0;
+                case MSLC::Definitions::ValueType::UINT: return sizeof(uint64_t);
+                case MSLC::Definitions::ValueType::INT:return sizeof(int64_t);
+                case MSLC::Definitions::ValueType::CHAR:return sizeof(char);
+                case MSLC::Definitions::ValueType::BOOL:return sizeof(bool);
+                case MSLC::Definitions::ValueType::REAL:return sizeof(double);
+                case MSLC::Definitions::ValueType::STRING:
+                    return strVal.size() * sizeof(char);
+                default:
+                    return 0;
+                }
+            }
+
+
             std::string ToString() const
             {
                 switch (type)

@@ -9,17 +9,16 @@ namespace MSLC
 	{
 		namespace Byte
 		{
+
+			using PrimitiveAnalogs = CompilationInfo::Types::PrimitiveAnalogs;
 			#pragma region CommandsInfo
 			//can be copied to linker's header
 			enum CommandSource : uint8_t {
-				RGeneral,      // General register (0-119)
-				RSpecific,     // Specific register (SP, FP, IP...)
-				RAccumulator,  // Accumulated (for immediate/often used)
-				Address,       // Relative from start address 
-				Immediate,     // Immediate value 
+				Register,		//Register (General + Accumulator + Special)
+				Pointer,       // Pointer in register
+				MemoryAddress,		//static memory address 
 				Constant,      // Reference in constant pool
 				Symbol,        // Symbol link (for linking)
-				TypeID         // ID of type (for typed operations)
 			};
 
 			enum SpecialRegisterID : uint8_t
@@ -132,11 +131,11 @@ namespace MSLC
 				MOVRI,
 				PUSH,              
 				POP,               
-				LOAD_LOCAL,     
-				STORE_LOCAL,    
+				LOAD_STATIC,	//from to size
+				STORE_STATIC,    //from to size
 
-				LOAD_CONST,
-				COPY_CONST,	//size > 8 bytes
+				LOAD_CONST,		//constant_id, register, size
+				COPY_CONST,		//constant_id, address_to, size > 8 bytes
 
 				MEMCP,		//Memory copy
 
@@ -204,6 +203,9 @@ namespace MSLC
 				}
 				ByteCommand(ByteOpCode c, CommandArgument a0, CommandArgument a1, CommandArgument a2)
 					: code(c), arg0(a0), arg1(a1), arg2(a2) {
+				}
+				ByteCommand(ByteOpCode c, CommandArgument a0, CommandArgument a1, CommandArgument a2, uint32_t flags)
+					: code(c), arg0(a0), arg1(a1), arg2(a2),flags(flags) {
 				}
 				ByteCommand(): code(ByteOpCode::NOP){}
 			};
@@ -292,15 +294,14 @@ namespace MSLC
 				}
 			};
 
-
+			using PrimitiveAnalogs = CompilationInfo::Types::PrimitiveAnalogs;
 			struct ValueFrame
-			{
-				//In priority order
-				enum ValueNativeType { UInt, Int, Real };	
+			{	
 				//ValueType value_type = ValueType::Pointer;
 				CommandArgument source_arg;	//used_registers, address and etc
-				ValueNativeType native_type = ValueNativeType::UInt;
-				ValueFrame(CommandArgument source, ValueNativeType type) : source_arg(source), native_type(type) {}
+				PrimitiveAnalogs native_type = PrimitiveAnalogs::UInt;
+				size_t data_size = 0;
+				ValueFrame(CommandArgument source, PrimitiveAnalogs type,size_t size) : source_arg(source), native_type(type), data_size(size) {}
 			};
 
 			using BCommandsArray = Definitions::ChunkArray<ByteCommand>;
@@ -310,13 +311,13 @@ namespace MSLC
 				size_t start_address = 0;
 				size_t size = 0;
 				StackFrame(size_t start_address): start_address(start_address) {}
+				size_t LastAddress() { return start_address + size; }
 			};
 
 
 			struct ByteTranslationState
 			{
-			private:
-				size_t global_us_id = 0;
+
 			public:
 				uint64_t pseudo_ip = 0;
 				RegistersTable registers_table;
@@ -330,6 +331,9 @@ namespace MSLC
 
 				
 				CompilationInfo::CompilationState* cs_observer;
+
+
+				std::unordered_map<size_t, bool> declared_variables_in_current_module;
 
 				ByteTranslationState(ByteTranslationConfig& config, CompilationInfo::CompilationState* c_state) : registers_table(config.general_registers_count,config.accumulation_registers_count),cs_observer(c_state)
 				{

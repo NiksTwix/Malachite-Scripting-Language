@@ -16,15 +16,16 @@ namespace MSLC
 			Types::TypeDescription real_desc;
 			real_desc.category = Types::TypeCategory::Primitive;
 			real_desc.name = std::string(TypeMarkers::w_real);
-			real_desc.primitive_analog = Types::Double;
+			real_desc.primitive_analog = Types::PrimitiveAnalogs::Real;
 			real_desc.size = 8;		
+
 			symbol.description_id = gst.AddType(real_desc);
 			frames_stack.back()->lsl.Add(real_desc.name, symbol);
 			//int
 			Types::TypeDescription int_desc;
 			int_desc.category = Types::TypeCategory::Primitive;
 			int_desc.name = std::string(TypeMarkers::w_integer);
-			int_desc.primitive_analog = Types::Int;
+			int_desc.primitive_analog = Types::PrimitiveAnalogs::Int;
 			int_desc.size = 8;
 			symbol.description_id = gst.AddType(int_desc);
 			frames_stack.back()->lsl.Add(int_desc.name, symbol);
@@ -33,7 +34,7 @@ namespace MSLC
 			Types::TypeDescription uint_desc;
 			uint_desc.category = Types::TypeCategory::Primitive;
 			uint_desc.name = std::string(TypeMarkers::w_unsigned);
-			uint_desc.primitive_analog = Types::UInt;
+			uint_desc.primitive_analog = Types::PrimitiveAnalogs::UInt;
 			uint_desc.size = 8;
 			symbol.description_id = gst.AddType(uint_desc);
 			frames_stack.back()->lsl.Add(uint_desc.name, symbol);

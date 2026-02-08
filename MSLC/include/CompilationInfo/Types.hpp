@@ -8,6 +8,8 @@ namespace MSLC
 	{
 		namespace Types 
 		{
+			constexpr size_t STANDART_ALIGNMENT = 8;
+
 
 			enum TypeFlags : uint32_t {
 				None = 0,
@@ -46,7 +48,7 @@ namespace MSLC
 			{
 				UInt,
 				Int,
-				Double,
+				Real,
 			};
 
 			struct TypeDescription 
@@ -61,6 +63,7 @@ namespace MSLC
 				TypeFlags flags;
 				TypeCategory category;
 				PrimitiveAnalogs primitive_analog;
+				size_t alignment = STANDART_ALIGNMENT;
 				//Meta
 				size_t definition_line = 0;
 				size_t module_id = 0;
