@@ -43,10 +43,7 @@ namespace MSLC
 					uint32_t const_index;  // For Constant
 					uint32_t symbol_id;    // For Symbol
 					uint32_t type_id;      // For TypeID
-					struct {
-						uint16_t reg_index;
-						uint8_t reg_type;  // 0=general, 1=specific, 2=accumulator
-					};
+					uint16_t reg_index;
 				};
 
 				CommandSource type;
@@ -57,6 +54,9 @@ namespace MSLC
 				}
 				bool is_memory() const { return type == Address; }
 				bool is_immediate() const { return type == Immediate; }
+
+				CommandArgument() = default;
+				CommandArgument(size_t data, CommandSource source) : memory_addr(data), type(source) {}
 			};
 
 			struct ByteTranslationConfig {	//In the declaring time used standart values
@@ -85,13 +85,16 @@ namespace MSLC
 				} target = MSLVM_V1;
 			};
 
-			enum ByteOpCode : uint8_t
+			enum class ByteOpCode : uint8_t
 			{
+				NOP,
+				SECTION_ARITHMETIC_ST,
 				ADDR,
 				SUBR,
 				DIVR,
 				MULR,
 				NEGR,
+				EXPR,
 
 				ADDI,
 				SUBI,
@@ -99,15 +102,17 @@ namespace MSLC
 				MULI,
 				NEGI,
 				MODI,
+				EXPI,
 
 				ADDU,
 				SUBU,
 				DIVU,
 				MULU,
 				MODU,
-
+				EXPU,
+				SECTION_ARITHMETIC_ED,
 				//Logic
-
+				SECTION_LOGIC_ST,
 				AND,
 				OR,
 				NOT,
@@ -120,7 +125,9 @@ namespace MSLC
 				CMPI,         
 				CMPU,         
 				CMPR,   
-
+				SECTION_LOGIC_ED,
+				//Memory
+				SECTION_MEMORY_ST,
 				MOVRR,
 				MOVRI,
 				PUSH,              
@@ -129,6 +136,8 @@ namespace MSLC
 				STORE_LOCAL,    
 
 				LOAD_CONST,
+				COPY_CONST,	//size > 8 bytes
+
 				MEMCP,		//Memory copy
 
 				
@@ -138,14 +147,18 @@ namespace MSLC
 				ALLOCATE_MEMORY,		//arg0[register of address's saving], arg1[register with size of memory's interval]
 				FREE_MEMORY,			//arg0[register with address], arg1[register with size of memory's interval]
 				GRAB_FRAME,				//arg0[bytes] If bytes < 0 => grab to up, else - grab to down 
+				SECTION_MEMORY_ED,
 				// Control flow arg0 = where
+				SECTION_CONTROL_FLOW_ST,
 				JMP,
 				JMPCV,      //CV- Condition Valid - arg0[where], arg1[condition register]
 				JMPCNV,     //CNV - Condition Not Valid - arg0[where], arg1[condition register]
 				CALL,
 				RET,
 				EXT,	//EXIT
+				SECTION_CONTROL_FLOW_ED,
 
+				SECTION_SPECIAL_ST,
 				// Type Convertion
 				TC_ITR,    //Type Convertion Integer To Real
 				TC_RTI,    //Type Convertion Real To Integer
@@ -192,6 +205,7 @@ namespace MSLC
 				ByteCommand(ByteOpCode c, CommandArgument a0, CommandArgument a1, CommandArgument a2)
 					: code(c), arg0(a0), arg1(a1), arg2(a2) {
 				}
+				ByteCommand(): code(ByteOpCode::NOP){}
 			};
 
 			#pragma endregion
@@ -281,15 +295,12 @@ namespace MSLC
 
 			struct ValueFrame
 			{
-				//enum ValueType { Pointer, };
+				//In priority order
 				enum ValueNativeType { UInt, Int, Real };	
-				union 
-				{
-					size_t used_register;
-					size_t pointer;
-				};
 				//ValueType value_type = ValueType::Pointer;
+				CommandArgument source_arg;	//used_registers, address and etc
 				ValueNativeType native_type = ValueNativeType::UInt;
+				ValueFrame(CommandArgument source, ValueNativeType type) : source_arg(source), native_type(type) {}
 			};
 
 			using BCommandsArray = Definitions::ChunkArray<ByteCommand>;
@@ -317,6 +328,7 @@ namespace MSLC
 
 				ByteTranslationConfig config;
 
+				
 				CompilationInfo::CompilationState* cs_observer;
 
 				ByteTranslationState(ByteTranslationConfig& config, CompilationInfo::CompilationState* c_state) : registers_table(config.general_registers_count,config.accumulation_registers_count),cs_observer(c_state)

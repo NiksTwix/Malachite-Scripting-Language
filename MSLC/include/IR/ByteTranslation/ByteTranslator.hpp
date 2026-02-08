@@ -1,5 +1,5 @@
 #pragma once
-#include "ByteTranslationInfo.hpp"
+#include "CommandsHandlers.hpp"
 
 namespace MSLC
 {
@@ -10,7 +10,10 @@ namespace MSLC
 			
 			class ByteTranslator 
 			{
-				void HandleCommand(Pseudo::POperationArray& p_array, std::shared_ptr<ByteTranslationState>  b_state);
+				CommandsHandler commands_handler;
+
+				
+
 			public:
 				std::shared_ptr<ByteTranslationState> Translate(Pseudo::POperationArray& p_array, CompilationInfo::CompilationState* c_state, ByteTranslationConfig config);
 			};

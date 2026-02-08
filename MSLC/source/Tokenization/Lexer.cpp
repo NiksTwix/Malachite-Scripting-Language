@@ -401,6 +401,11 @@ namespace MSLC
 					if (GetTokenType(state,std::string(1, c)) == TokenType::OPERATOR)
 					{
 						std::string operator_ = std::string({ c });
+						if (c == '.' && (state.undefined_token.size() == 0 || Strings::StringOperations::IsNumber(state.undefined_token))) //.1 = 0.1
+						{
+							state.undefined_token += c;
+							continue;
+						}
 						if (!state.undefined_token.empty())	//Сразу добавляем токен перед ним, если есть
 						{
 							result.push_back(CreateToken(state,state.undefined_token));

@@ -109,6 +109,11 @@ namespace MSLC
 			size_t desc_id = 0;
 		};
 
+		struct ConstantInfo 
+		{
+			size_t stack_offset;
+			size_t using_count;
+		};
 
 		class CompilationState 
 		{
@@ -126,6 +131,7 @@ namespace MSLC
 
 			void InitBasics();
 			std::unordered_map<size_t, UnhandledSymbol> unhandled_symbols;
+			std::unordered_map<Values::ConstantID, ConstantInfo> constants_info;
 		public:
 			CompilationState();
 			Preprocessing::MacrosTable& GetMacrosTable();
@@ -148,6 +154,8 @@ namespace MSLC
 
 			size_t AddUnhandledSymbol(SymbolType type, size_t desc_id);
 			UnhandledSymbol* GetUnhandledSymbol(size_t global_id);
+
+			std::unordered_map<Values::ConstantID, ConstantInfo>& ConstantInfoTable() { return constants_info; }
 		};
 
 

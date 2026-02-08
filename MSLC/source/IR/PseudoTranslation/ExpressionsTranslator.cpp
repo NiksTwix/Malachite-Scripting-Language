@@ -73,13 +73,19 @@ namespace MSLC
 					}
 					else if (operator_info.type == OperatorInfo::Type::Assignment) 
 					{
+						PseudoTranslationState temp_pts;
+						temp_pts.cs_observer = pts.cs_observer;
+
+						AnalyzeAPST(node.complex.back(), temp_pts);	//right | First
 
 						AnalyzeAPST(node.complex.front(), pts);	//left
 						if (pts.pseudo_code.Back().op_code == PseudoOpCode::DeclareVariable)
 						{
 							pts.pseudo_code.Pushback(PseudoOperation(PseudoOpCode::Use, pts.pseudo_code.Back().arg_0, 0, 0, (uint32_t)node.line));
 						}
-						AnalyzeAPST(node.complex.back(), pts);	//right
+
+						pts.pseudo_code.Pushback(temp_pts.pseudo_code);	//Merging
+
 						if (pts.pseudo_code.Back().op_code == PseudoOpCode::Assign) pts.pseudo_code.Back().op_code = PseudoOpCode::AssignR;	//Check info in note in telegram group
 						pts.pseudo_code.Pushback(PseudoOperation(PseudoOpCode::Assign, (size_t)operator_info.op_code, 0, 0, (uint32_t)node.line, PseudoOperationFlags::Binary));
 					}

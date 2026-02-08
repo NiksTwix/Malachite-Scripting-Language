@@ -96,6 +96,9 @@
     <ClCompile Include="source\IR\ByteTranslation\ByteTranslator.cpp">
       <Filter>Исходные файлы\IR\Byte</Filter>
     </ClCompile>
+    <ClCompile Include="source\IR\ByteTranslation\CommandsHandlers.cpp">
+      <Filter>Исходные файлы\IR\Byte</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Preprocessing\AMGBuilder.hpp">
@@ -177,6 +180,9 @@
       <Filter>Файлы заголовков\IR\Byte</Filter>
     </ClInclude>
     <ClInclude Include="include\IR\ByteTranslation\ByteTranslator.hpp">
+      <Filter>Файлы заголовков\IR\Byte</Filter>
+    </ClInclude>
+    <ClInclude Include="include\IR\ByteTranslation\CommandsHandlers.hpp">
       <Filter>Файлы заголовков\IR\Byte</Filter>
     </ClInclude>
   </ItemGroup>
