@@ -14,11 +14,10 @@ namespace MSLC
 			#pragma region CommandsInfo
 			//can be copied to linker's header
 			enum CommandSource : uint8_t {
-				Register,		//Register (General + Accumulator + Special)
-				Pointer,       // Pointer in register
-				MemoryAddress,		//static memory address 
-				Constant,      // Reference in constant pool
-				Symbol,        // Symbol link (for linking)
+				Register,        // register (index)
+				MemoryAddress,   // address in memory (offset)
+				Immediate,       // immediated value
+				Constant         // index in the constants poop
 			};
 
 			enum SpecialRegisterID : uint8_t
@@ -37,22 +36,18 @@ namespace MSLC
 
 			struct CommandArgument {
 				union {
-					size_t memory_addr;    // For Address
-					uint64_t immediate;    // For Immediate
-					uint32_t const_index;  // For Constant
-					uint32_t symbol_id;    // For Symbol
-					uint32_t type_id;      // For TypeID
-					uint16_t reg_index;
+					size_t memory_addr;		// For Address
+					uint32_t const_index;	// For Constant
+					uint32_t symbol_id;		// For Symbol  
+					uint16_t reg_index;		// For Register
 				};
 
 				CommandSource type;
 
 				// For comfort
 				bool is_register() const {
-					return type == RGeneral || type == RSpecific || type == RAccumulator;
+					return type == Register;
 				}
-				bool is_memory() const { return type == Address; }
-				bool is_immediate() const { return type == Immediate; }
 
 				CommandArgument() = default;
 				CommandArgument(size_t data, CommandSource source) : memory_addr(data), type(source) {}
@@ -77,16 +72,26 @@ namespace MSLC
 				// Target platform
 				enum Target {
 					MSLVM_V1,      // Basic VM (32-byte commands)
-					MSLVM_COMPACT, // Little VM (8-byte)
-					MSLVM_FAST,    // Fase VM (optimized)
+					MSLVM_COMPACT, // Little VM (8-byte) (in the future)
+					MSLVM_FAST,    // Fast VM (optimized) (in the future)
 					WASM,          // WebAssembly for browser (in the future)
 					NATIVE_X64,    // Native code x86_64  (in the future)
 				} target = MSLVM_V1;
 			};
 
+			enum CompilationFlag: uint16_t
+			{
+				None,
+				LocalOffsetsStart,
+				LocalOffsetsEnd,
+			};
+
 			enum class ByteOpCode : uint8_t
 			{
 				NOP,
+
+				COMP_FLG,	//CompilationFlag arg0  - CompilationFlag. In functions declarations
+
 				SECTION_ARITHMETIC_ST,
 				ADDR,
 				SUBR,
@@ -130,22 +135,20 @@ namespace MSLC
 				MOVRR,
 				MOVRI,
 				PUSH,              
-				POP,               
-				LOAD_STATIC,	//from to size
-				STORE_STATIC,    //from to size
+				POP,    
 
-				LOAD_CONST,		//constant_id, register, size
-				COPY_CONST,		//constant_id, address_to, size > 8 bytes
+				LEA_STATIC,		// Static address calculating: MemoryAddress (static) -> reg 
+				LEA_DYNAMIC,	// Dynamic address calculating: register (with address) -> register_dest
 
-				MEMCP,		//Memory copy
+				LOAD_DYNAMIC,	//Loading by address in register
+				STORE_DYNAMIC,	//Storing by address in register
 
-				
-				LOAD_BY_ADDRESS,			// register(ARG0), register - address(ARG1), size(ARG2)
-				STORE_BY_ADDRESS,			// register(ARG0), register - address(ARG1), size(ARG2)
+				LOAD_CONST_STATIC,	//load constant value to register. Linker will replace id on offset
+				LOAD_CONST_DYNAMIC,	//load constant offset to register. Linker will replace id on offset
 
-				ALLOCATE_MEMORY,		//arg0[register of address's saving], arg1[register with size of memory's interval]
-				FREE_MEMORY,			//arg0[register with address], arg1[register with size of memory's interval]
-				GRAB_FRAME,				//arg0[bytes] If bytes < 0 => grab to up, else - grab to down 
+				LOAD_STATIC,	//Loading by address in register
+				STORE_STATIC,	//Storing by address in register
+
 				SECTION_MEMORY_ED,
 				// Control flow arg0 = where
 				SECTION_CONTROL_FLOW_ST,
@@ -287,21 +290,41 @@ namespace MSLC
 					return InvalidRegister;
 				}
 
-				CommandSource GetRegType(size_t index) const {
-					if (index < general_count) return RGeneral;
-					if (index < general_count + accum_count) return RAccumulator;
-					return RSpecific;  
-				}
+				//CommandSource GetRegType(size_t index) const {
+				//	if (index < general_count) return RGeneral;
+				//	if (index < general_count + accum_count) return RAccumulator;
+				//	return RSpecific;  
+				//}
 			};
 
 			using PrimitiveAnalogs = CompilationInfo::Types::PrimitiveAnalogs;
+
+			enum class ValueSource {
+				Register,		//Register (General + Accumulator + Special)
+				Pointer,       // Pointer in register
+				StaticAddress,		//static memory address 
+				DynamicAddress,		//address got by dereference
+				Constant,      // Reference in constant pool
+				Symbol,        // Symbol link (for linking)
+				Immediate,		//Immediate value (e.g size)
+			};
+
 			struct ValueFrame
 			{	
 				//ValueType value_type = ValueType::Pointer;
-				CommandArgument source_arg;	//used_registers, address and etc
+				ValueSource source;
+				size_t data;
+
+
 				PrimitiveAnalogs native_type = PrimitiveAnalogs::UInt;
 				size_t data_size = 0;
-				ValueFrame(CommandArgument source, PrimitiveAnalogs type,size_t size) : source_arg(source), native_type(type), data_size(size) {}
+				ValueFrame(ValueSource source,size_t data, PrimitiveAnalogs type,size_t size) : source(source), data(data), native_type(type), data_size(size) {}
+
+
+				static ValueFrame Invalid()
+				{
+					return ValueFrame(ValueSource::Immediate,0, PrimitiveAnalogs::UInt, 0);
+				}
 			};
 
 			using BCommandsArray = Definitions::ChunkArray<ByteCommand>;
@@ -310,6 +333,7 @@ namespace MSLC
 			{
 				size_t start_address = 0;
 				size_t size = 0;
+				bool local_offsets = false;
 				StackFrame(size_t start_address): start_address(start_address) {}
 				size_t LastAddress() { return start_address + size; }
 			};
@@ -319,6 +343,7 @@ namespace MSLC
 			{
 
 			public:
+
 				uint64_t pseudo_ip = 0;
 				RegistersTable registers_table;
 				int64_t current_depth = 0; //Program starts by OpenVisibleScope and ends by CloseVisibleScope, but we need start depth = 0
@@ -331,7 +356,6 @@ namespace MSLC
 
 				
 				CompilationInfo::CompilationState* cs_observer;
-
 
 				std::unordered_map<size_t, bool> declared_variables_in_current_module;
 
@@ -349,6 +373,11 @@ namespace MSLC
 						auto& frame = frame_stack.top();
 						frame_stack.push(StackFrame(frame.start_address + frame.size));
 					}
+				}
+				inline void PushFrame(StackFrame frame)
+				{
+					frame_stack.push(frame);
+
 				}
 				inline bool PopFrame() 
 				{

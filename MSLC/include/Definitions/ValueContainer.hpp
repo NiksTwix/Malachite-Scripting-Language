@@ -85,7 +85,7 @@ namespace MSLC
                 return *this;
             }
 
-            size_t GetDataSize() 
+            size_t GetDataSize() const
             {
                 switch (type)
                 {

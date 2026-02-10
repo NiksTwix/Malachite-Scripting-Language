@@ -67,6 +67,12 @@ namespace MSLC
 				//Meta
 				size_t definition_line = 0;
 				size_t module_id = 0;
+
+				size_t GetAlignedSize() 
+				{
+					return ((size / alignment) + 1) * alignment;
+				}
+
 			};
 
 		}
