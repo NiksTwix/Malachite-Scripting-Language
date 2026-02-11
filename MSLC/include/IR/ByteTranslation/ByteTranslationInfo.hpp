@@ -126,9 +126,9 @@ namespace MSLC
 				BIT_OFFSET_LEFT,
 				BIT_OFFSET_RIGHT,
 
-				CMPI,         
-				CMPU,         
-				CMPR,   
+				CMPI,       // destination|source0|source1 If VM using flag system destination can be ignored by linker  
+				CMPU,       // destination|source0|source1 If VM using flag system destination can be ignored by linker  
+				CMPR,   	// destination|source0|source1 If VM using flag system destination can be ignored by linker
 				SECTION_LOGIC_ED,
 				//Memory
 				SECTION_MEMORY_ST,

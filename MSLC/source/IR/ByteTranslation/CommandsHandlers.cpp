@@ -123,6 +123,151 @@ namespace MSLC
 				return frame;
 			}
 
+			void CommandsHandler::HandleAL(Pseudo::POperationArray& p_array, std::shared_ptr<ByteTranslationState> b_state)
+			{
+				auto operation = p_array[b_state->pseudo_ip];
+
+				auto main_ari_handler = [&]() -> void
+					{
+						//Use secondly register of the one operand
+						if (b_state->value_stack.size() < 2)
+						{
+							Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Binary operation gets less than two operands.", Diagnostics::MessageType::DeveloperError, Diagnostics::SourceType::IRCode, b_state->pseudo_ip));
+							return;
+						}
+						ValueFrame right = GenerateLoadCommand(p_array,b_state);
+						ValueFrame left = GenerateLoadCommand(p_array, b_state);
+
+						size_t converted_reg = left.data;
+						PrimitiveAnalogs common_type = left.native_type;
+						size_t size = left.data_size;
+						auto conv_cmd = GetTypeConvertionCommand(
+							left.native_type, left.data,
+							right.native_type, right.data,
+							converted_reg, common_type
+						);
+						if (conv_cmd.code != ByteOpCode::NOP) {
+							PushCommand(b_state, conv_cmd, operation.debug_line);	//reference becomes invalid
+						}
+
+						PushCommand(b_state, ByteCommand(
+							GetTypedArithmeticCommandCode(operation.op_code, common_type),
+							CommandArgument(left.data, CommandSource::Register),
+							CommandArgument(left.data, CommandSource::Register),
+							CommandArgument(right.data, CommandSource::Register)
+						), operation.debug_line);
+						b_state->registers_table.SetFree(right.data);
+						//ValueFrame(left.source_arg, common_type, converted_reg.reg_index == left.source_arg.reg_index ? left.data_size : right.data_size)
+
+						b_state->value_stack.push(ValueFrame(ValueSource::Register,left.data,common_type, converted_reg == left.data ? left.data_size : right.data_size));
+					};
+				auto main_logic_handler = [&]() -> void
+					{
+						if (b_state->value_stack.size() < 2)
+						{
+							Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Binary operation gets less than two operands.", Diagnostics::MessageType::DeveloperError, Diagnostics::SourceType::IRCode, b_state->pseudo_ip));
+							return;
+						}
+						ValueFrame right = GenerateLoadCommand(p_array, b_state);
+						ValueFrame left = GenerateLoadCommand(p_array, b_state);
+
+						PushCommand(b_state, 
+							ByteCommand(GetLogicCommand(operation.op_code, PrimitiveAnalogs::UInt), CommandArgument(left.data, CommandSource::Register), 
+								CommandArgument(left.data, CommandSource::Register), CommandArgument(right.data, CommandSource::Register)), operation.debug_line);
+
+						b_state->registers_table.SetFree(right.data);
+						b_state->value_stack.push(ValueFrame(ValueSource::Register, left.data, PrimitiveAnalogs::UInt,left.data_size));
+					};
+				auto main_cmp_handler = [&]() -> void
+					{
+						if (b_state->value_stack.size() < 2)
+						{
+							Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Binary operation gets less than two operands.", Diagnostics::MessageType::DeveloperError, Diagnostics::SourceType::IRCode, b_state->pseudo_ip));
+							return;
+						}
+						ValueFrame right = GenerateLoadCommand(p_array, b_state);
+						ValueFrame left = GenerateLoadCommand(p_array, b_state);
+
+						size_t converted_reg;
+						PrimitiveAnalogs common_type;
+						auto conv_cmd = GetTypeConvertionCommand(
+							left.native_type, left.data,
+							right.native_type, right.data,
+							converted_reg, common_type
+						);
+						if (conv_cmd.code != ByteOpCode::NOP) {
+							PushCommand(b_state, conv_cmd, operation.debug_line);	//reference becomes invalid
+						}
+
+						PushCommand(b_state,
+							ByteCommand(GetLogicCommand(operation.op_code, PrimitiveAnalogs::UInt), CommandArgument(left.data, CommandSource::Register),
+								CommandArgument(left.data, CommandSource::Register), CommandArgument(right.data, CommandSource::Register)), operation.debug_line);
+
+						b_state->registers_table.SetFree(right.data);
+						b_state->value_stack.push(ValueFrame(ValueSource::Register, left.data, PrimitiveAnalogs::UInt, left.data_size));
+					};
+				switch (operation.op_code)
+				{
+				case Pseudo::PseudoOpCode::Add:
+				case Pseudo::PseudoOpCode::Subtract:
+				case Pseudo::PseudoOpCode::Divide:
+				case Pseudo::PseudoOpCode::Exponentiate:
+				case Pseudo::PseudoOpCode::Multiply:
+					main_ari_handler();
+					break;
+				
+				case Pseudo::PseudoOpCode::And:
+					main_logic_handler();
+					break;
+				case Pseudo::PseudoOpCode::Or:
+					main_logic_handler();
+					break;
+				case Pseudo::PseudoOpCode::Not:
+					break;
+				case Pseudo::PseudoOpCode::Mod:
+					break;
+				case Pseudo::PseudoOpCode::Negative:
+					break;
+				case Pseudo::PseudoOpCode::PrefixIncrement:
+					break;
+				case Pseudo::PseudoOpCode::PrefixDecrement:
+					break;
+				case Pseudo::PseudoOpCode::PostfixDecrement:
+					break;
+				case Pseudo::PseudoOpCode::PostfixIncrement:
+					break;
+				case Pseudo::PseudoOpCode::BitNot:
+					break;
+				case Pseudo::PseudoOpCode::BitOr:
+					main_logic_handler();
+					break;
+				
+				break;
+				case Pseudo::PseudoOpCode::BitAnd:
+					main_logic_handler();
+					break;
+				case Pseudo::PseudoOpCode::BitOffsetLeft:
+					main_logic_handler();
+					break;
+				case Pseudo::PseudoOpCode::BitOffsetRight:
+					main_logic_handler();
+					break;
+
+					//Comparings
+
+				case Pseudo::PseudoOpCode::Equal:
+				case Pseudo::PseudoOpCode::NotEqual:
+				case Pseudo::PseudoOpCode::Greater:
+				case Pseudo::PseudoOpCode::Less:
+				case Pseudo::PseudoOpCode::GreaterEqual:
+				case Pseudo::PseudoOpCode::LessEqual:
+					main_cmp_handler();
+					break;
+				default:
+					break;
+				}
+			}
+
 #pragma endregion
 
 
@@ -189,23 +334,23 @@ namespace MSLC
 				return ByteOpCode::NOP;
 			}
 
-			ByteCommand CommandsHandler::GetConversionCommand(PrimitiveAnalogs from, PrimitiveAnalogs to, CommandArgument reg) {
+			ByteCommand CommandsHandler::GetConversionCommand(PrimitiveAnalogs from, PrimitiveAnalogs to, size_t reg) {
 				if (from == to) return ByteCommand(ByteOpCode::NOP);
 
 				if (to == PrimitiveAnalogs::Real) {
-					if (from == PrimitiveAnalogs::UInt) return ByteCommand(ByteOpCode::TC_UTR, reg);
-					if (from == PrimitiveAnalogs::Int) return  ByteCommand(ByteOpCode::TC_ITR, reg);
+					if (from == PrimitiveAnalogs::UInt) return ByteCommand(ByteOpCode::TC_UTR, CommandArgument(reg,CommandSource::Register));
+					if (from == PrimitiveAnalogs::Int) return  ByteCommand(ByteOpCode::TC_ITR, CommandArgument(reg, CommandSource::Register));
 				}
 				if (to == PrimitiveAnalogs::Int) {
-					if (from == PrimitiveAnalogs::UInt) return ByteCommand(ByteOpCode::TC_UTI, reg);
+					if (from == PrimitiveAnalogs::UInt) return ByteCommand(ByteOpCode::TC_UTI, CommandArgument(reg, CommandSource::Register));
 				}
 				if (to == PrimitiveAnalogs::UInt) {
-					if (from == PrimitiveAnalogs::Int) return ByteCommand(ByteOpCode::TC_ITU, reg);
+					if (from == PrimitiveAnalogs::Int) return ByteCommand(ByteOpCode::TC_ITU, CommandArgument(reg, CommandSource::Register));
 				}
 				return ByteCommand(ByteOpCode::NOP);
 			}
 
-			ByteCommand CommandsHandler::GetTypeConvertionCommand(PrimitiveAnalogs first, CommandArgument first_register, PrimitiveAnalogs second, CommandArgument second_register, CommandArgument& converted_register, PrimitiveAnalogs& result_type)
+			ByteCommand CommandsHandler::GetTypeConvertionCommand(PrimitiveAnalogs first, size_t first_register, PrimitiveAnalogs second, size_t second_register, size_t& converted_register, PrimitiveAnalogs& result_type)
 			{
 				PrimitiveAnalogs target_type = (first > second) ? first : second;	//Define target type
 				if (first != target_type) {
@@ -241,13 +386,54 @@ namespace MSLC
 				return PrimitiveAnalogs::UInt;
 			}
 
+			ByteOpCode CommandsHandler::GetLogicCommand(Pseudo::PseudoOpCode code, PrimitiveAnalogs type)
+			{
+				switch (code)
+				{
+				case Pseudo::PseudoOpCode::And:
+					return ByteOpCode::AND;
+				case Pseudo::PseudoOpCode::Or:
+					return ByteOpCode::OR;
+				case Pseudo::PseudoOpCode::Not:
+					return ByteOpCode::NOT;
+				case Pseudo::PseudoOpCode::BitOr:
+					return ByteOpCode::BIT_OR;
+				case Pseudo::PseudoOpCode::BitNot:
+					return ByteOpCode::BIT_NOT;
+				case Pseudo::PseudoOpCode::BitAnd:
+					return ByteOpCode::BIT_AND;
+				case Pseudo::PseudoOpCode::BitOffsetLeft:
+					return ByteOpCode::BIT_OFFSET_LEFT;
+				case Pseudo::PseudoOpCode::BitOffsetRight:
+					return ByteOpCode::BIT_OFFSET_RIGHT;
+				case Pseudo::PseudoOpCode::Equal:
+				case Pseudo::PseudoOpCode::NotEqual:
+				case Pseudo::PseudoOpCode::Greater:
+				case Pseudo::PseudoOpCode::Less:
+				case Pseudo::PseudoOpCode::GreaterEqual:
+				case Pseudo::PseudoOpCode::LessEqual:
+					if (type == PrimitiveAnalogs::Int)return ByteOpCode::CMPI;
+					if (type == PrimitiveAnalogs::UInt)return ByteOpCode::CMPU;
+					if (type == PrimitiveAnalogs::Real)return ByteOpCode::CMPR;
+					break;
+				default:
+					break;
+				}
+				return ByteOpCode::NOP;
+			}
+
 			void CommandsHandler::PushCommand(std::shared_ptr<ByteTranslationState> b_state, ByteCommand&& command, size_t line)
 			{
 				b_state->result.Pushback(std::move(command));
 				b_state->result.Back().source_line = line;
 				b_state->result.Back().pseudo_op_index = b_state->pseudo_ip;
 			}
-
+			void CommandsHandler::PushCommand(std::shared_ptr<ByteTranslationState> b_state, ByteCommand& command, size_t line)
+			{
+				b_state->result.Pushback(std::move(command));
+				b_state->result.Back().source_line = line;
+				b_state->result.Back().pseudo_op_index = b_state->pseudo_ip;
+			}
 			bool CommandsHandler::CheckRegister(std::shared_ptr<ByteTranslationState> b_state, size_t register_)
 			{
 				if (register_ == InvalidRegister) 
