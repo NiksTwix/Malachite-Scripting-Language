@@ -24,7 +24,6 @@ namespace MSLC
 
 
 				void PushCommand(std::shared_ptr<ByteTranslationState> b_state, ByteCommand&& command, size_t line);
-				void PushCommand(std::shared_ptr<ByteTranslationState> b_state, ByteCommand& command, size_t line);
 				bool CheckRegister(std::shared_ptr<ByteTranslationState> b_state, size_t register_);
 
 			public:

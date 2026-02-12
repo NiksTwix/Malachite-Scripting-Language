@@ -206,7 +206,7 @@ namespace MSLC
 							converted_reg, common_type
 						);
 						if (conv_cmd.code != ByteOpCode::NOP) {
-							PushCommand(b_state, conv_cmd, operation.debug_line);	//reference becomes invalid
+							PushCommand(b_state, ByteCommand(conv_cmd), operation.debug_line);	//reference becomes invalid
 						}
 
 						PushCommand(b_state, ByteCommand(
@@ -251,8 +251,6 @@ namespace MSLC
 							return;
 						}
 
-						size_t correct_size = left.dynamic_data_size > right.dynamic_data_size ? left.dynamic_data_size : right.dynamic_data_size;
-
 						PushCommand(b_state, ByteCommand(
 							GetLogicCommand(operation.op_code, PrimitiveAnalogs::UInt),
 							CommandArgument(left.data, CommandSource::Register),
@@ -261,12 +259,7 @@ namespace MSLC
 						), operation.debug_line);
 
 						b_state->registers_table.SetFree(right.data);
-						if (p_array[b_state->pseudo_ip].op_code == Pseudo::PseudoOpCode::BitOffsetLeft || p_array[b_state->pseudo_ip].op_code == Pseudo::PseudoOpCode::BitOffsetRight)
-						{
-							b_state->value_stack.push(ValueFrame(ValueSource::Register, left.data, PrimitiveAnalogs::UInt,left.dynamic_data_size));
-						}
-						else b_state->value_stack.push(ValueFrame(ValueSource::Register, left.data, PrimitiveAnalogs::UInt, correct_size));
-						
+						b_state->value_stack.push(ValueFrame(ValueSource::Register, left.data, PrimitiveAnalogs::UInt, left.dynamic_data_size));
 					};
 				auto main_cmp_handler = [&]() -> void
 					{
@@ -286,7 +279,7 @@ namespace MSLC
 							converted_reg, common_type
 						);
 						if (conv_cmd.code != ByteOpCode::NOP) {
-							PushCommand(b_state, conv_cmd, operation.debug_line);	//reference becomes invalid
+							PushCommand(b_state, ByteCommand(conv_cmd), operation.debug_line);	//reference becomes invalid
 						}
 
 						PushCommand(b_state,
@@ -337,7 +330,7 @@ namespace MSLC
 						converted_reg, common_type
 					);
 					if (conv_cmd.code != ByteOpCode::NOP) {
-						PushCommand(b_state, conv_cmd, operation.debug_line);	//reference becomes invalid
+						PushCommand(b_state, ByteCommand(conv_cmd), operation.debug_line);	//reference becomes invalid
 					}
 
 					PushCommand(b_state, ByteCommand(
@@ -575,12 +568,7 @@ namespace MSLC
 				b_state->result.Back().source_line = line;
 				b_state->result.Back().pseudo_op_index = b_state->pseudo_ip;
 			}
-			void CommandsHandler::PushCommand(std::shared_ptr<ByteTranslationState> b_state, ByteCommand& command, size_t line)
-			{
-				b_state->result.Pushback(std::move(command));
-				b_state->result.Back().source_line = line;
-				b_state->result.Back().pseudo_op_index = b_state->pseudo_ip;
-			}
+
 			bool CommandsHandler::CheckRegister(std::shared_ptr<ByteTranslationState> b_state, size_t register_)
 			{
 				if (register_ == InvalidRegister) 
