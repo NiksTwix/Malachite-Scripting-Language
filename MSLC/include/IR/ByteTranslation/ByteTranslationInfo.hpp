@@ -10,6 +10,8 @@ namespace MSLC
 		namespace Byte
 		{
 
+			constexpr size_t LOGIC_RESULT_SIZE = 1;
+			constexpr size_t POINTER_SIZE = 8;
 			using PrimitiveAnalogs = CompilationInfo::Types::PrimitiveAnalogs;
 			#pragma region CommandsInfo
 			//can be copied to linker's header
@@ -172,6 +174,9 @@ namespace MSLC
 				TC_ITU,
 			};
 
+
+
+
 			struct ByteCommand {
 				ByteOpCode code;
 				CommandArgument arg0;
@@ -301,9 +306,9 @@ namespace MSLC
 
 			enum class ValueSource {
 				Register,		//Register (General + Accumulator + Special)
-				Pointer,       // Pointer in register
+				Pointer,       // Pointer in register (data is register index)
 				StaticAddress,		//static memory address 
-				DynamicAddress,		//address got by dereference
+				DynamicAddress,		//address got by dereference (data is register index)
 				Constant,      // Reference in constant pool
 				Symbol,        // Symbol link (for linking)
 				Immediate,		//Immediate value (e.g size)
@@ -315,10 +320,16 @@ namespace MSLC
 				ValueSource source;
 				size_t data;
 
+				//Dynamic - can be edited by operations
+				PrimitiveAnalogs dynamic_primitive_type = PrimitiveAnalogs::UInt;
+				size_t dynamic_data_size = 0;		// Size of value: pointer, simple data and another
 
-				PrimitiveAnalogs native_type = PrimitiveAnalogs::UInt;
-				size_t data_size = 0;
-				ValueFrame(ValueSource source,size_t data, PrimitiveAnalogs type,size_t size) : source(source), data(data), native_type(type), data_size(size) {}
+				//Static are constant
+				PrimitiveAnalogs static_primitive_type = PrimitiveAnalogs::UInt;
+				size_t static_data_size = 0;		// Size of typed value
+
+
+				ValueFrame(ValueSource source,size_t data, PrimitiveAnalogs type, size_t size) : source(source), data(data), dynamic_primitive_type(type), dynamic_data_size(size), static_primitive_type(type), static_data_size(size) {}
 
 
 				static ValueFrame Invalid()
