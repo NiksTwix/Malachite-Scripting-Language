@@ -19,7 +19,8 @@ namespace MSLC
 				Register,        // register (index)
 				MemoryAddress,   // address in memory (offset)
 				Immediate,       // immediated value
-				Constant         // index in the constants poop
+				Constant,         // index in the constants poop
+				Symbol,				//for linking with symbols table
 			};
 
 			enum SpecialRegisterID : uint8_t
@@ -346,7 +347,7 @@ namespace MSLC
 				size_t size = 0;
 				bool local_offsets = false;
 				StackFrame(size_t start_address): start_address(start_address) {}
-				size_t LastAddress() { return start_address + size; }
+				size_t NextFreeAddress() { return start_address + size; }
 			};
 
 
@@ -368,7 +369,8 @@ namespace MSLC
 				
 				CompilationInfo::CompilationState* cs_observer;
 
-				std::unordered_map<size_t, bool> declared_variables_in_current_module;
+				std::unordered_map<size_t, bool> dvicm;//declared_variables_in_current_module
+
 
 				ByteTranslationState(ByteTranslationConfig& config, CompilationInfo::CompilationState* c_state) : registers_table(config.general_registers_count,config.accumulation_registers_count),cs_observer(c_state)
 				{

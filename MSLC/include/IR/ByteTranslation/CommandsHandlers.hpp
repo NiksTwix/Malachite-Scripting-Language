@@ -13,7 +13,7 @@ namespace MSLC
 
 				void HandleUsing(Pseudo::POperationArray& p_array, std::shared_ptr<ByteTranslationState>  b_state);
 
-				ValueFrame GenerateLoadCommand(Pseudo::POperationArray& p_array, std::shared_ptr<ByteTranslationState>  b_state);	//returns new source of value
+				void HandleDeclaring(Pseudo::POperationArray& p_array, std::shared_ptr<ByteTranslationState>  b_state);
 
 				void HandleAL(Pseudo::POperationArray& p_array, std::shared_ptr<ByteTranslationState>  b_state);
 
@@ -23,10 +23,12 @@ namespace MSLC
 				PrimitiveAnalogs ValueContainerTypeToPrimitive(Definitions::ValueType type);
 
 				ByteOpCode GetLogicCommand(Pseudo::PseudoOpCode code, PrimitiveAnalogs type);
-
+				ValueFrame GenerateLoadCommand(Pseudo::POperationArray& p_array, std::shared_ptr<ByteTranslationState>  b_state);	//returns new source of value
 
 				void PushCommand(std::shared_ptr<ByteTranslationState> b_state, ByteCommand&& command, size_t line);
 				bool CheckRegister(std::shared_ptr<ByteTranslationState> b_state, size_t register_);
+				
+				void TryMarkAsUnhandledSymbol(ValueFrame& frame, std::shared_ptr<ByteTranslationState> b_state,uint8_t args_with_us); //args_with_us - bit mask. use 0 | (0,1,2)
 
 			public:
 				void HandleCommand(Pseudo::POperationArray& p_array, std::shared_ptr<ByteTranslationState>  b_state);

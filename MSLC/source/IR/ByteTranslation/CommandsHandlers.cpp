@@ -23,6 +23,7 @@ namespace MSLC
 					ValueFrame frame = b_state->value_stack.top(); b_state->value_stack.pop();
 
 					switch (frame.source) {
+						case ValueSource::Symbol:
 						case ValueSource::StaticAddress:
 						{
 							size_t reg = b_state->registers_table.FindFreeGeneral();
@@ -31,6 +32,7 @@ namespace MSLC
 									CommandArgument(frame.data, CommandSource::MemoryAddress),
 									CommandArgument(reg, CommandSource::Register)),
 								operation.debug_line);
+							TryMarkAsUnhandledSymbol(frame, b_state, 0b001);
 							frame.data = reg;
 							frame.source = ValueSource::Pointer;  // pointer in register
 							frame.dynamic_primitive_type = PrimitiveAnalogs::UInt;  // address = unsigned
@@ -106,20 +108,21 @@ namespace MSLC
 						PushCommand(b_state, ByteCommand(conv_cmd), operation.debug_line);
 					}
 
-					if (left.source == ValueSource::StaticAddress)
+					if (left.source == ValueSource::StaticAddress || left.source == ValueSource::Symbol)
 					{
 						PushCommand(b_state, ByteCommand(ByteOpCode::STORE_STATIC,CommandArgument(left.data,CommandSource::MemoryAddress), CommandArgument(right.data, CommandSource::Register), CommandArgument(left.static_data_size, CommandSource::Immediate)), operation.debug_line);
+						TryMarkAsUnhandledSymbol(left, b_state, 0b001);
 					}
 					else if (left.source == ValueSource::DynamicAddress) 
 					{
 						PushCommand(b_state, ByteCommand(ByteOpCode::STORE_DYNAMIC, CommandArgument(left.data, CommandSource::Register), CommandArgument(right.data, CommandSource::Register), CommandArgument(left.static_data_size, CommandSource::Immediate)), operation.debug_line);
 					}
-					else 
+					else
 					{
 						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Assign works only with either static or dynamic addresses as left operand.", Diagnostics::DeveloperError, Diagnostics::SourceCode, operation.debug_line));
 						return;
 					}
-					
+
 					if (operation.op_code != Pseudo::PseudoOpCode::AssignR)
 					{
 						b_state->value_stack.pop();
@@ -142,9 +145,20 @@ namespace MSLC
 					{
 						CompilationInfo::Variables::VariableDescription* vdesc = b_state->cs_observer->GetGST().GetVariable(operation.arg_0);
 						CompilationInfo::Types::TypeDescription* tdesc = b_state->cs_observer->GetGST().GetType(vdesc->vinfo.type_id);
-						b_state->value_stack.push(ValueFrame(ValueSource::StaticAddress, vdesc->global_stack_offset,
-							vdesc->vinfo.isPointer() ? PrimitiveAnalogs::UInt : tdesc->primitive_analog,
-							vdesc->vinfo.isPointer() ? 8 : tdesc->size));
+
+						if (b_state->dvicm[operation.arg_0]) 
+						{
+							b_state->value_stack.push(ValueFrame(ValueSource::StaticAddress, vdesc->global_stack_offset,
+								vdesc->vinfo.isPointer() ? PrimitiveAnalogs::UInt : tdesc->primitive_analog,
+								vdesc->vinfo.isPointer() ? 8 : tdesc->size));
+						}
+						else 
+						{
+							b_state->value_stack.push(ValueFrame(ValueSource::Symbol, b_state->cs_observer->AddUnhandledSymbol(CompilationInfo::SymbolType::Variable, operation.arg_0),
+								vdesc->vinfo.isPointer() ? PrimitiveAnalogs::UInt : tdesc->primitive_analog,
+								vdesc->vinfo.isPointer() ? 8 : tdesc->size));
+						}
+						
 						break;
 					}
 					case Pseudo::PseudoOpCode::UseConstant:
@@ -156,100 +170,26 @@ namespace MSLC
 				}
 			}
 
-			ValueFrame CommandsHandler::GenerateLoadCommand(Pseudo::POperationArray& p_array, std::shared_ptr<ByteTranslationState> b_state)
+			void CommandsHandler::HandleDeclaring(Pseudo::POperationArray& p_array, std::shared_ptr<ByteTranslationState> b_state)
 			{
-				if (b_state->value_stack.empty()) 
+				auto operation = p_array[b_state->pseudo_ip];
+
+				switch (operation.op_code)
 				{
-					Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Values stack is empty.", Diagnostics::DeveloperError, Diagnostics::IRCode, b_state->pseudo_ip));
-					return ValueFrame::Invalid();
-				}
-				size_t current_line = p_array[b_state->pseudo_ip].debug_line;
-				ValueFrame frame = b_state->value_stack.top(); b_state->value_stack.pop();
-
-				if (frame.source == ValueSource::Register || frame.source == ValueSource::Pointer) return frame;
-
-				if (frame.source== ValueSource::DynamicAddress) {
-					// Address is already in register  (reg_index)
-					if (frame.dynamic_data_size > 8) {
-						// Big data — leave a pointer (address in the register)
-						frame.source = ValueSource::Pointer;
-						frame.dynamic_data_size = 8;
-						return frame;
-					}
-					else {
-						// Small data — load values by address 
-						// LOAD_DYNAMIC [reg_addr] → reg_value
-						PushCommand(b_state,
-							ByteCommand(ByteOpCode::LOAD_DYNAMIC,CommandArgument(frame.data,CommandSource::Register),                    // register with address
-								CommandArgument(frame.data, CommandSource::Register), // destination / Register reusing
-								CommandArgument(frame.dynamic_data_size, Immediate)),
-							current_line);
-
-						frame.source = ValueSource::Register;
-						return frame;
-					}
-				}
-				else if (frame.source == ValueSource::StaticAddress) {
-					// Static address (offset)
-					size_t free_reg = b_state->registers_table.FindFreeGeneral();
-					if (CheckRegister(b_state, free_reg))return ValueFrame::Invalid();
-
-					if (frame.dynamic_data_size > 8) {
-						// Big data — load address
-						PushCommand(b_state,
-							ByteCommand(ByteOpCode::LEA_STATIC,
-								CommandArgument(frame.data,CommandSource::MemoryAddress),                    // static_offset
-								CommandArgument(free_reg, Register)),
-							current_line);
-						frame.data = free_reg;
-						frame.source = ValueSource::Pointer;
-						frame.dynamic_data_size = 8; 
-					}
-					else {
-						// Small data — load value
-						PushCommand(b_state,
-							ByteCommand(ByteOpCode::LOAD_STATIC,
-								CommandArgument(frame.data, CommandSource::MemoryAddress),                  // static_offset
-								CommandArgument(free_reg, Register),
-								CommandArgument(frame.dynamic_data_size, Immediate)),
-							current_line);
-						frame.data = free_reg;
-						frame.source = ValueSource::Register;
-
-					}
-					return frame;
-				}
-				else if (frame.source ==  ValueSource::Constant)
+				case Pseudo::PseudoOpCode::DeclareVariable:
 				{
-					size_t free_reg = b_state->registers_table.FindFreeGeneral();
-					if (CheckRegister(b_state, free_reg))return ValueFrame::Invalid();
-					if (frame.dynamic_data_size > 8) {
-						// Big data — load address
-						PushCommand(b_state,
-							ByteCommand(ByteOpCode::LOAD_CONST_DYNAMIC,
-								CommandArgument(frame.data, CommandSource::Constant),                   // static_offset
-								CommandArgument(free_reg, Register)),
-							current_line);
-						frame.data = free_reg;
-						frame.source = ValueSource::Register;
-					}
-					else {
-						// Small data — load value
-						PushCommand(b_state,
-							ByteCommand(ByteOpCode::LOAD_CONST_STATIC,
-								CommandArgument(frame.data, CommandSource::Constant),                   // static_offset
-								CommandArgument(free_reg, Register),
-								CommandArgument(frame.dynamic_data_size, Immediate)),
-							current_line);
-						frame.data = free_reg;
-						frame.source = ValueSource::Register;
-					}
-				}
+					b_state->dvicm[operation.arg_0] = true;
+					CompilationInfo::Variables::VariableDescription* vdesc = b_state->cs_observer->GetGST().GetVariable(operation.arg_0);
+					CompilationInfo::Types::TypeDescription* tdesc = b_state->cs_observer->GetGST().GetType(vdesc->vinfo.type_id);
 
-				//Another will be in the future
-				return frame;
+					vdesc->global_stack_offset = b_state->frame_stack.top().NextFreeAddress();
+					PushCommand(b_state, ByteCommand(ByteOpCode::PUSH, CommandArgument(tdesc->GetAlignedSize(), CommandSource::Immediate)), operation.debug_line);
+					break;
+				}
+				}
 			}
 
+			
 			void CommandsHandler::HandleAL(Pseudo::POperationArray& p_array, std::shared_ptr<ByteTranslationState> b_state)
 			{
 				auto operation = p_array[b_state->pseudo_ip];
@@ -478,6 +418,103 @@ namespace MSLC
 
 #pragma endregion
 
+			ValueFrame CommandsHandler::GenerateLoadCommand(Pseudo::POperationArray& p_array, std::shared_ptr<ByteTranslationState> b_state)
+			{
+				if (b_state->value_stack.empty())
+				{
+					Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Values stack is empty.", Diagnostics::DeveloperError, Diagnostics::IRCode, b_state->pseudo_ip));
+					return ValueFrame::Invalid();
+				}
+				size_t current_line = p_array[b_state->pseudo_ip].debug_line;
+				ValueFrame frame = b_state->value_stack.top(); b_state->value_stack.pop();
+
+				if (frame.source == ValueSource::Register || frame.source == ValueSource::Pointer) return frame;
+
+				if (frame.source == ValueSource::DynamicAddress) {
+					// Address is already in register  (reg_index)
+					if (frame.dynamic_data_size > 8) {
+						// Big data — leave a pointer (address in the register)
+						frame.source = ValueSource::Pointer;
+						frame.dynamic_data_size = 8;
+						return frame;
+					}
+					else {
+						// Small data — load values by address 
+						// LOAD_DYNAMIC [reg_addr] → reg_value
+						PushCommand(b_state,
+							ByteCommand(ByteOpCode::LOAD_DYNAMIC, CommandArgument(frame.data, CommandSource::Register),                    // register with address
+								CommandArgument(frame.data, CommandSource::Register), // destination / Register reusing
+								CommandArgument(frame.dynamic_data_size, Immediate)),
+							current_line);
+
+						frame.source = ValueSource::Register;
+						return frame;
+					}
+				}
+				else if (frame.source == ValueSource::StaticAddress || frame.source == ValueSource::Symbol) {
+					// Static address (offset)
+					size_t free_reg = b_state->registers_table.FindFreeGeneral();
+					if (CheckRegister(b_state, free_reg))return ValueFrame::Invalid();
+
+					if (frame.dynamic_data_size > 8) {
+						// Big data — load address
+						PushCommand(b_state,
+							ByteCommand(ByteOpCode::LEA_STATIC,
+								CommandArgument(frame.data, CommandSource::MemoryAddress),                    // static_offset
+								CommandArgument(free_reg, Register)),
+							current_line);
+						TryMarkAsUnhandledSymbol(frame, b_state,0b1);
+						frame.data = free_reg;
+						frame.source = ValueSource::Pointer;
+						frame.dynamic_data_size = 8;
+						
+					}
+					else {
+						// Small data — load value
+						PushCommand(b_state,
+							ByteCommand(ByteOpCode::LOAD_STATIC,
+								CommandArgument(frame.data, CommandSource::MemoryAddress),                  // static_offset
+								CommandArgument(free_reg, Register),
+								CommandArgument(frame.dynamic_data_size, Immediate)),
+							current_line);
+						
+						frame.data = free_reg;
+						frame.source = ValueSource::Register;
+					}
+					return frame;
+				}
+				else if (frame.source == ValueSource::Constant)
+				{
+					size_t free_reg = b_state->registers_table.FindFreeGeneral();
+					if (CheckRegister(b_state, free_reg))return ValueFrame::Invalid();
+					if (frame.dynamic_data_size > 8) {
+						// Big data — load address
+						PushCommand(b_state,
+							ByteCommand(ByteOpCode::LOAD_CONST_DYNAMIC,
+								CommandArgument(frame.data, CommandSource::Constant),                   // static_offset
+								CommandArgument(free_reg, Register)),
+							current_line);
+						frame.data = free_reg;
+						frame.source = ValueSource::Pointer;
+						frame.dynamic_data_size = 8;
+					}
+					else {
+						// Small data — load value
+						PushCommand(b_state,
+							ByteCommand(ByteOpCode::LOAD_CONST_STATIC,
+								CommandArgument(frame.data, CommandSource::Constant),                   // static_offset
+								CommandArgument(free_reg, Register),
+								CommandArgument(frame.dynamic_data_size, Immediate)),
+							current_line);
+						frame.data = free_reg;
+						frame.source = ValueSource::Register;
+					}
+				}
+
+				
+				//Another will be in the future
+				return frame;
+			}
 
 			
 
@@ -645,6 +682,17 @@ namespace MSLC
 					return false;
 				}
 				return true;
+			}
+
+			void CommandsHandler::TryMarkAsUnhandledSymbol(ValueFrame& frame, std::shared_ptr<ByteTranslationState> b_state, uint8_t args_with_us)
+			{
+				if (frame.source == ValueSource::Symbol)
+				{
+					b_state->result.Back().flags |= ByteCommand::Flag::UnhandledSymbol;
+					if (args_with_us & (1 << 0)) b_state->result.Back().arg0.type = CommandSource::Symbol;
+					if (args_with_us & (1 << 1)) b_state->result.Back().arg1.type = CommandSource::Symbol;
+					if (args_with_us & (1 << 2)) b_state->result.Back().arg2.type = CommandSource::Symbol;
+				}
 			}
 
 			void CommandsHandler::HandleCommand(Pseudo::POperationArray& p_array, std::shared_ptr<ByteTranslationState> b_state)
