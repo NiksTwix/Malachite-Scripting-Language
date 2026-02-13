@@ -21,6 +21,7 @@ namespace MSLC
 				Nop,
 
 				//Arythmetic
+				ST_AL,
 				Add,
 				Subtract,
 				Divide,
@@ -39,21 +40,6 @@ namespace MSLC
 				BitOffsetRight,
 				BitOffsetLeft,
 
-
-				Assign,		//arg0 = op_code of complex assignment (as example += - Add)
-				AssignR,	//R - returns. Accumulate value of assignment in register, also pushs in value_stack (of ByteTranslationState) Value(OperationResult,reg_number)
-				
-				Push,
-				Pop,
-				//Work with pointers
-				GetPointer,
-				Dereference,
-
-				GetFieldByValue,
-				GetFieldByPointer,
-
-				//Logic
-				
 				Greater,
 				Less,
 				GreaterEqual,
@@ -67,14 +53,40 @@ namespace MSLC
 				BitAnd,
 				BitOr,
 				BitNot,
-				
-				//
+
+				ED_AL,
+
+				ST_MEM,
+				Assign,		//arg0 = op_code of complex assignment (as example += - Add)
+				AssignR,	//R - returns. Accumulate value of assignment in register, also pushs in value_stack (of ByteTranslationState) Value(OperationResult,reg_number)
+
+				Push,
+				Pop,
+				//Work with pointers
+				GetPointer,
+				Dereference,
+
+				GetFieldByValue,
+				GetFieldByPointer,
+
+
+				ED_MEM,
+
+				//Logic
+
+
+
+				ST_DECL,
 				DeclareVariable,	//arg - symbol
 				DefineFunction,
-				
+				ED_DEC,
+
+				ST_USING,
 				Use,			//variable
 				UseConstant,	//constant_id
 				UseType,
+				UseField,
+				ED_USING,
 				Call,
 				CreateArray,	//count of previous elements in stack
 

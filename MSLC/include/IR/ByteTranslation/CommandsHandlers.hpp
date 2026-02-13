@@ -11,6 +11,8 @@ namespace MSLC
 			{
 				void HandleMemory(Pseudo::POperationArray& p_array, std::shared_ptr<ByteTranslationState>  b_state);
 
+				void HandleUsing(Pseudo::POperationArray& p_array, std::shared_ptr<ByteTranslationState>  b_state);
+
 				ValueFrame GenerateLoadCommand(Pseudo::POperationArray& p_array, std::shared_ptr<ByteTranslationState>  b_state);	//returns new source of value
 
 				void HandleAL(Pseudo::POperationArray& p_array, std::shared_ptr<ByteTranslationState>  b_state);

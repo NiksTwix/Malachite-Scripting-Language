@@ -13,21 +13,6 @@ namespace MSLC
 
 				switch (operation.op_code)
 				{
-				case Pseudo::PseudoOpCode::Use:
-					{
-					CompilationInfo::Variables::VariableDescription* vdesc = b_state->cs_observer->GetGST().GetVariable(operation.arg_0);
-					CompilationInfo::Types::TypeDescription* tdesc = b_state->cs_observer->GetGST().GetType(vdesc->vinfo.type_id);
-					b_state->value_stack.push(ValueFrame(ValueSource::StaticAddress, vdesc->global_stack_offset,
-						vdesc->vinfo.isPointer() ? PrimitiveAnalogs::UInt : tdesc->primitive_analog, 
-						vdesc->vinfo.isPointer() ? 8 : tdesc->size));
-					break;
-					}
-				case Pseudo::PseudoOpCode::UseConstant:
-				{
-					const Definitions::ValueContainer& constant = b_state->cs_observer->GetICT().GetByID(operation.arg_0);
-					b_state->value_stack.push(ValueFrame(ValueSource::Constant, operation.arg_0, ValueContainerTypeToPrimitive(constant.type), constant.GetDataSize()));
-					break;
-				}
 				case Pseudo::PseudoOpCode::GetPointer:
 				{
 					if (b_state->value_stack.empty())
@@ -69,6 +54,7 @@ namespace MSLC
 				}
 					
 				case Pseudo::PseudoOpCode::Dereference:
+				{
 					if (b_state->value_stack.empty())
 					{
 						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Values stack is empty.", Diagnostics::DeveloperError, Diagnostics::IRCode, b_state->pseudo_ip));
@@ -86,8 +72,87 @@ namespace MSLC
 					frame.dynamic_primitive_type = frame.static_primitive_type;
 					b_state->value_stack.push(frame);
 					break;
+				}
+				case Pseudo::PseudoOpCode::Assign:
+				case Pseudo::PseudoOpCode::AssignR:		//R = return (result) - pushs to value stack result of operation: y = x = z + 1
+				{
+					if (b_state->value_stack.size() < 2)
+					{
+						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Assign demands two operands.", Diagnostics::DeveloperError, Diagnostics::IRCode, b_state->pseudo_ip));
+						return;
+					}
+					ValueFrame right = GenerateLoadCommand(p_array, b_state);
+					ValueFrame left = b_state->value_stack.top(); 
+					
+					
+					//For not-primitive types will be applied construction call (in the TypeChecker)
+					if (operation.arg_0 != 0)
+					{
+						//Arithmetic and complex assignment: x += 1
+
+						b_state->value_stack.push(right);	//left wasnt removed
+
+						Pseudo::POperationArray temp_array;
+						temp_array.Pushback(Pseudo::PseudoOperation((Pseudo::PseudoOpCode)operation.arg_0,(uint32_t)operation.debug_line));	//AL command
+						size_t temp_pseudo_ip = b_state->pseudo_ip;
+						b_state->pseudo_ip = 0;
+						HandleAL(temp_array, b_state);
+						b_state->pseudo_ip = temp_pseudo_ip;
+						right = GenerateLoadCommand(p_array, b_state);	//New register value! Left we saved, right was used in operation
+					}
+
+					auto conv_cmd = GetConversionCommand(left.dynamic_primitive_type, right.dynamic_primitive_type, right.data);
+					if (conv_cmd.code != ByteOpCode::NOP) {
+						PushCommand(b_state, ByteCommand(conv_cmd), operation.debug_line);
+					}
+
+					if (left.source == ValueSource::StaticAddress)
+					{
+						PushCommand(b_state, ByteCommand(ByteOpCode::STORE_STATIC,CommandArgument(left.data,CommandSource::MemoryAddress), CommandArgument(right.data, CommandSource::Register), CommandArgument(left.static_data_size, CommandSource::Immediate)), operation.debug_line);
+					}
+					else if (left.source == ValueSource::DynamicAddress) 
+					{
+						PushCommand(b_state, ByteCommand(ByteOpCode::STORE_DYNAMIC, CommandArgument(left.data, CommandSource::Register), CommandArgument(right.data, CommandSource::Register), CommandArgument(left.static_data_size, CommandSource::Immediate)), operation.debug_line);
+					}
+					else 
+					{
+						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Assign works only with either static or dynamic addresses as left operand.", Diagnostics::DeveloperError, Diagnostics::SourceCode, operation.debug_line));
+						return;
+					}
+					
+					if (operation.op_code != Pseudo::PseudoOpCode::AssignR)
+					{
+						b_state->value_stack.pop();
+						b_state->registers_table.SetFree(right.data);
+					}
+					break;
+				}
 				default:
 					break;
+				}
+			}
+
+			void CommandsHandler::HandleUsing(Pseudo::POperationArray& p_array, std::shared_ptr<ByteTranslationState> b_state)
+			{
+				auto operation = p_array[b_state->pseudo_ip];
+
+				switch (operation.op_code)
+				{
+					case Pseudo::PseudoOpCode::Use:
+					{
+						CompilationInfo::Variables::VariableDescription* vdesc = b_state->cs_observer->GetGST().GetVariable(operation.arg_0);
+						CompilationInfo::Types::TypeDescription* tdesc = b_state->cs_observer->GetGST().GetType(vdesc->vinfo.type_id);
+						b_state->value_stack.push(ValueFrame(ValueSource::StaticAddress, vdesc->global_stack_offset,
+							vdesc->vinfo.isPointer() ? PrimitiveAnalogs::UInt : tdesc->primitive_analog,
+							vdesc->vinfo.isPointer() ? 8 : tdesc->size));
+						break;
+					}
+					case Pseudo::PseudoOpCode::UseConstant:
+					{
+						const Definitions::ValueContainer& constant = b_state->cs_observer->GetICT().GetByID(operation.arg_0);
+						b_state->value_stack.push(ValueFrame(ValueSource::Constant, operation.arg_0, ValueContainerTypeToPrimitive(constant.type), constant.GetDataSize()));
+						break;
+					}
 				}
 			}
 
@@ -100,6 +165,9 @@ namespace MSLC
 				}
 				size_t current_line = p_array[b_state->pseudo_ip].debug_line;
 				ValueFrame frame = b_state->value_stack.top(); b_state->value_stack.pop();
+
+				if (frame.source == ValueSource::Register || frame.source == ValueSource::Pointer) return frame;
+
 				if (frame.source== ValueSource::DynamicAddress) {
 					// Address is already in register  (reg_index)
 					if (frame.dynamic_data_size > 8) {
@@ -206,7 +274,7 @@ namespace MSLC
 							converted_reg, common_type
 						);
 						if (conv_cmd.code != ByteOpCode::NOP) {
-							PushCommand(b_state, ByteCommand(conv_cmd), operation.debug_line);	//reference becomes invalid
+							PushCommand(b_state, ByteCommand(conv_cmd), operation.debug_line);
 						}
 
 						PushCommand(b_state, ByteCommand(
@@ -279,7 +347,7 @@ namespace MSLC
 							converted_reg, common_type
 						);
 						if (conv_cmd.code != ByteOpCode::NOP) {
-							PushCommand(b_state, ByteCommand(conv_cmd), operation.debug_line);	//reference becomes invalid
+							PushCommand(b_state, ByteCommand(conv_cmd), operation.debug_line);	
 						}
 
 						PushCommand(b_state,
@@ -330,7 +398,7 @@ namespace MSLC
 						converted_reg, common_type
 					);
 					if (conv_cmd.code != ByteOpCode::NOP) {
-						PushCommand(b_state, ByteCommand(conv_cmd), operation.debug_line);	//reference becomes invalid
+						PushCommand(b_state, ByteCommand(conv_cmd), operation.debug_line);
 					}
 
 					PushCommand(b_state, ByteCommand(
@@ -599,8 +667,18 @@ namespace MSLC
 
 				//Standart handling
 
-
-
+				if (operation.op_code > Pseudo::PseudoOpCode::ST_AL && operation.op_code < Pseudo::PseudoOpCode::ED_AL) 
+				{
+					HandleAL(p_array, b_state);
+				}
+				else if (operation.op_code > Pseudo::PseudoOpCode::ST_MEM && operation.op_code < Pseudo::PseudoOpCode::ED_MEM)
+				{
+					HandleMemory(p_array, b_state);
+				}
+				else if (operation.op_code > Pseudo::PseudoOpCode::ST_USING && operation.op_code < Pseudo::PseudoOpCode::ED_USING) 
+				{
+					HandleUsing(p_array, b_state);
+				}
 			}
 		}
 	}
