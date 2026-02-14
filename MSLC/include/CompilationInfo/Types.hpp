@@ -70,7 +70,7 @@ namespace MSLC
 
 				size_t GetAlignedSize() 
 				{
-					return ((size / alignment) + 1) * alignment;
+					return ((size + alignment - 1) / alignment) * alignment;
 				}
 
 			};

@@ -96,7 +96,10 @@
     <ClCompile Include="source\IR\ByteTranslation\ByteTranslator.cpp">
       <Filter>Исходные файлы\IR\Byte</Filter>
     </ClCompile>
-    <ClCompile Include="source\IR\ByteTranslation\CommandsHandlers.cpp">
+    <ClCompile Include="source\IR\ByteTranslation\ByteCommandsHandlers.cpp">
+      <Filter>Исходные файлы\IR\Byte</Filter>
+    </ClCompile>
+    <ClCompile Include="source\IR\ByteTranslation\ByteDebugInfo.cpp">
       <Filter>Исходные файлы\IR\Byte</Filter>
     </ClCompile>
   </ItemGroup>
@@ -182,7 +185,10 @@
     <ClInclude Include="include\IR\ByteTranslation\ByteTranslator.hpp">
       <Filter>Файлы заголовков\IR\Byte</Filter>
     </ClInclude>
-    <ClInclude Include="include\IR\ByteTranslation\CommandsHandlers.hpp">
+    <ClInclude Include="include\IR\ByteTranslation\ByteCommandsHandlers.hpp">
+      <Filter>Файлы заголовков\IR\Byte</Filter>
+    </ClInclude>
+    <ClInclude Include="include\IR\ByteTranslation\ByteDebugInfo.hpp">
       <Filter>Файлы заголовков\IR\Byte</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,5 +1,5 @@
 #pragma once
-#include "CommandsHandlers.hpp"
+#include "ByteCommandsHandlers.hpp"
 
 namespace MSLC
 {

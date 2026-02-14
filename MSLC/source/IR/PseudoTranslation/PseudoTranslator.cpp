@@ -55,8 +55,9 @@ namespace MSLC
 				}
 				CompilationStateStringSerializator csss;
 				PseudoOperationsStringSerializator poss;
-				std::cout << csss.Serialize(*pts.cs_observer);
 
+				std::cout << csss.Serialize(*pts.cs_observer);
+				std::cout << "Count:" << pts.pseudo_code.Size() << "\n";
 				std::cout << poss.Serialize(pts.pseudo_code);
 
 

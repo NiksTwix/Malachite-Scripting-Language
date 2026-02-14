@@ -39,10 +39,7 @@ namespace MSLC
 
 			struct CommandArgument {
 				union {
-					size_t memory_addr;		// For Address
-					uint32_t const_index;	// For Constant
-					uint32_t symbol_id;		// For Symbol  
-					uint16_t reg_index;		// For Register
+					size_t data;		// For Address
 				};
 
 				CommandSource type;
@@ -53,7 +50,7 @@ namespace MSLC
 				}
 
 				CommandArgument() = default;
-				CommandArgument(size_t data, CommandSource source) : memory_addr(data), type(source) {}
+				CommandArgument(size_t data, CommandSource source) : data(data), type(source) {}
 			};
 
 			struct ByteTranslationConfig {	//In the declaring time used standart values
@@ -187,14 +184,15 @@ namespace MSLC
 				// Meta
 				uint32_t flags = 0;
 				enum Flag {
-					Volatile = 1 << 0,   // Command has side effects
-					branch = 1 << 1,   //	Jump Command
-					Call = 1 << 2,   // Calling command
-					Return = 1 << 3,   // Return command
-					Memory = 1 << 4,   // Memory 
-					Syscall = 1 << 5,   // System call
-					LocalOffset = 1 << 6,   //Flag "Local offset" used in function bodies in order to linker disable offset autocorrect
-					UnhandledSymbol = 1 << 7,	//Linker must search and handle symbol in realocation table
+					UnhandledSymbol = 1 << 0,	//Linker must search and handle symbol in realocation table
+					//Volatile = 1 << 0,   // Command has side effects
+					//Branch = 1 << 1,   //	Jump Command
+					//Call = 1 << 2,   // Calling command
+					//Return = 1 << 3,   // Return command
+					//Memory = 1 << 4,   // Memory 
+					//Syscall = 1 << 5,   // System call
+					//LocalOffset = 1 << 6,   //Flag "Local offset" used in function bodies in order to linker disable offset autocorrect
+					
 				};
 
 				// Debug_info
@@ -206,9 +204,9 @@ namespace MSLC
 
 				// Constructors for comfort
 				ByteCommand(ByteOpCode c) : code(c) {}
-				ByteCommand(ByteOpCode c, CommandArgument a0) : code(c), arg0(a0) {}
+				ByteCommand(ByteOpCode c, CommandArgument a0) : code(c), arg0(a0), arg1(0,CommandSource::Immediate), arg2(0, CommandSource::Immediate) {}
 				ByteCommand(ByteOpCode c, CommandArgument a0, CommandArgument a1)
-					: code(c), arg0(a0), arg1(a1) {
+					: code(c), arg0(a0), arg1(a1), arg2(0, CommandSource::Immediate) {
 				}
 				ByteCommand(ByteOpCode c, CommandArgument a0, CommandArgument a1, CommandArgument a2)
 					: code(c), arg0(a0), arg1(a1), arg2(a2) {
@@ -216,7 +214,7 @@ namespace MSLC
 				ByteCommand(ByteOpCode c, CommandArgument a0, CommandArgument a1, CommandArgument a2, uint32_t flags)
 					: code(c), arg0(a0), arg1(a1), arg2(a2),flags(flags) {
 				}
-				ByteCommand(): code(ByteOpCode::NOP){}
+				ByteCommand(): code(ByteOpCode::NOP), arg0(0, CommandSource::Immediate), arg1(0, CommandSource::Immediate), arg2(0, CommandSource::Immediate) {}
 			};
 
 			#pragma endregion
@@ -285,6 +283,17 @@ namespace MSLC
 				size_t FindFreeGeneral() const {
 					for (size_t i = 0; i < general_count; ++i) {
 						if (!IsUsed(i)) return i;
+					}
+					return InvalidRegister;
+				}
+
+				size_t AllocateFreeGeneral() {
+					for (size_t i = 0; i < general_count; ++i) {
+						if (!IsUsed(i))
+						{
+							SetUsed(i);
+							return i;
+						}
 					}
 					return InvalidRegister;
 				}
@@ -396,6 +405,7 @@ namespace MSLC
 				{
 					if (frame_stack.empty()) return false;
 					else frame_stack.pop();
+					return true;
 				}
 			};
 		}

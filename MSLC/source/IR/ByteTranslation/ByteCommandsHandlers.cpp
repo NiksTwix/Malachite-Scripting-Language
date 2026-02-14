@@ -1,4 +1,4 @@
-﻿#include "..\..\..\include\IR\ByteTranslation\CommandsHandlers.hpp"
+﻿#include "..\..\..\include\IR\ByteTranslation\ByteCommandsHandlers.hpp"
 
 namespace MSLC
 {
@@ -26,7 +26,7 @@ namespace MSLC
 						case ValueSource::Symbol:
 						case ValueSource::StaticAddress:
 						{
-							size_t reg = b_state->registers_table.FindFreeGeneral();
+							size_t reg = b_state->registers_table.AllocateFreeGeneral();
 							PushCommand(b_state,
 								ByteCommand(ByteOpCode::LEA_STATIC,
 									CommandArgument(frame.data, CommandSource::MemoryAddress),
@@ -62,8 +62,15 @@ namespace MSLC
 						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Values stack is empty.", Diagnostics::DeveloperError, Diagnostics::IRCode, b_state->pseudo_ip));
 						return;
 					}
-					ValueFrame frame = b_state->value_stack.top(); b_state->value_stack.pop();
-					if (frame.source != ValueSource::Pointer)
+					ValueFrame frame = b_state->value_stack.top();
+
+					if (frame.source == ValueSource::StaticAddress || frame.source == ValueSource::DynamicAddress || frame.source == ValueSource::Symbol) {
+						// Generate LOAD_STATIC/LOAD_DYNAMIC that get Pointer in register
+						frame = GenerateLoadCommand(p_array, b_state);  // now Pointer
+					}
+					else b_state->value_stack.pop();	//GLC didnt be called therefore we should pop it by hand
+
+					if (frame.source != ValueSource::Pointer && frame.source != ValueSource::Register)
 					{
 						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Dereference can complited only with pointer.", Diagnostics::LogicError, Diagnostics::SourceCode, operation.debug_line));
 						return;
@@ -103,7 +110,7 @@ namespace MSLC
 						right = GenerateLoadCommand(p_array, b_state);	//New register value! Left we saved, right was used in operation
 					}
 
-					auto conv_cmd = GetConversionCommand(left.dynamic_primitive_type, right.dynamic_primitive_type, right.data);
+					auto conv_cmd = GetConversionCommand(right.dynamic_primitive_type, left.dynamic_primitive_type, right.data);
 					if (conv_cmd.code != ByteOpCode::NOP) {
 						PushCommand(b_state, ByteCommand(conv_cmd), operation.debug_line);
 					}
@@ -151,12 +158,14 @@ namespace MSLC
 							b_state->value_stack.push(ValueFrame(ValueSource::StaticAddress, vdesc->global_stack_offset,
 								vdesc->vinfo.isPointer() ? PrimitiveAnalogs::UInt : tdesc->primitive_analog,
 								vdesc->vinfo.isPointer() ? 8 : tdesc->size));
+							b_state->value_stack.top().static_primitive_type = tdesc->primitive_analog;
 						}
 						else 
 						{
 							b_state->value_stack.push(ValueFrame(ValueSource::Symbol, b_state->cs_observer->AddUnhandledSymbol(CompilationInfo::SymbolType::Variable, operation.arg_0),
 								vdesc->vinfo.isPointer() ? PrimitiveAnalogs::UInt : tdesc->primitive_analog,
 								vdesc->vinfo.isPointer() ? 8 : tdesc->size));
+							b_state->value_stack.top().static_primitive_type = tdesc->primitive_analog;
 						}
 						
 						break;
@@ -183,6 +192,7 @@ namespace MSLC
 					CompilationInfo::Types::TypeDescription* tdesc = b_state->cs_observer->GetGST().GetType(vdesc->vinfo.type_id);
 
 					vdesc->global_stack_offset = b_state->frame_stack.top().NextFreeAddress();
+					b_state->frame_stack.top().size += tdesc->GetAlignedSize();
 					PushCommand(b_state, ByteCommand(ByteOpCode::PUSH, CommandArgument(tdesc->GetAlignedSize(), CommandSource::Immediate)), operation.debug_line);
 					break;
 				}
@@ -453,8 +463,9 @@ namespace MSLC
 				}
 				else if (frame.source == ValueSource::StaticAddress || frame.source == ValueSource::Symbol) {
 					// Static address (offset)
-					size_t free_reg = b_state->registers_table.FindFreeGeneral();
-					if (CheckRegister(b_state, free_reg))return ValueFrame::Invalid();
+					size_t free_reg = b_state->registers_table.AllocateFreeGeneral();
+
+					if (!CheckRegister(b_state, free_reg))return ValueFrame::Invalid();
 
 					if (frame.dynamic_data_size > 8) {
 						// Big data — load address
@@ -485,8 +496,8 @@ namespace MSLC
 				}
 				else if (frame.source == ValueSource::Constant)
 				{
-					size_t free_reg = b_state->registers_table.FindFreeGeneral();
-					if (CheckRegister(b_state, free_reg))return ValueFrame::Invalid();
+					size_t free_reg = b_state->registers_table.AllocateFreeGeneral();
+					if (!CheckRegister(b_state, free_reg))return ValueFrame::Invalid();
 					if (frame.dynamic_data_size > 8) {
 						// Big data — load address
 						PushCommand(b_state,
@@ -588,9 +599,11 @@ namespace MSLC
 				}
 				if (to == PrimitiveAnalogs::Int) {
 					if (from == PrimitiveAnalogs::UInt) return ByteCommand(ByteOpCode::TC_UTI, CommandArgument(reg, CommandSource::Register));
+					if (from == PrimitiveAnalogs::Real) return ByteCommand(ByteOpCode::TC_RTI, CommandArgument(reg, CommandSource::Register));
 				}
 				if (to == PrimitiveAnalogs::UInt) {
 					if (from == PrimitiveAnalogs::Int) return ByteCommand(ByteOpCode::TC_ITU, CommandArgument(reg, CommandSource::Register));
+					if (from == PrimitiveAnalogs::Real) return ByteCommand(ByteOpCode::TC_RTU, CommandArgument(reg, CommandSource::Register));
 				}
 				return ByteCommand(ByteOpCode::NOP);
 			}
@@ -726,6 +739,10 @@ namespace MSLC
 				else if (operation.op_code > Pseudo::PseudoOpCode::ST_USING && operation.op_code < Pseudo::PseudoOpCode::ED_USING) 
 				{
 					HandleUsing(p_array, b_state);
+				}
+				else if (operation.op_code > Pseudo::PseudoOpCode::ST_DECL && operation.op_code < Pseudo::PseudoOpCode::ED_DEC)
+				{
+					HandleDeclaring(p_array, b_state);
 				}
 			}
 		}
