@@ -46,6 +46,12 @@
     <Filter Include="Исходные файлы\IR\Byte">
       <UniqueIdentifier>{c0e57add-0c95-4d9a-9834-ae8fcdf49b06}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Исходные файлы\Packing">
+      <UniqueIdentifier>{62b86753-8d60-404a-8e8d-002e5057aa4a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы заголовков\Packing">
+      <UniqueIdentifier>{98dee330-4776-4938-8a27-6687f6f18be4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MSLC.cpp">
@@ -101,6 +107,9 @@
     </ClCompile>
     <ClCompile Include="source\IR\ByteTranslation\ByteDebugInfo.cpp">
       <Filter>Исходные файлы\IR\Byte</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Packing\Packer.cpp">
+      <Filter>Исходные файлы\Packing</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -190,6 +199,9 @@
     </ClInclude>
     <ClInclude Include="include\IR\ByteTranslation\ByteDebugInfo.hpp">
       <Filter>Файлы заголовков\IR\Byte</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Packing\Packer.hpp">
+      <Filter>Файлы заголовков\Packing</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

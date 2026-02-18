@@ -66,7 +66,7 @@ namespace MSLC
 				size_t alignment = STANDART_ALIGNMENT;
 				//Meta
 				size_t definition_line = 0;
-				size_t module_id = 0;
+				moduleid module_id = INVALID_ID;
 
 				size_t GetAlignedSize() 
 				{

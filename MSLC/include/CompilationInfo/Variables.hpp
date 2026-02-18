@@ -14,6 +14,7 @@ namespace MSLC
 				VariableID id;
 				uint64_t local_stack_offset;	//In the byte code
 				uint64_t global_stack_offset;	//In the byte code
+				moduleid module_id = INVALID_ID;
 				Values::ValueInfo vinfo;
 				Definitions::AccessMode access_mode = Definitions::AccessMode::Public;
 			};	

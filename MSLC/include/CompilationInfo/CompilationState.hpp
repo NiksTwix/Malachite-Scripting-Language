@@ -9,7 +9,7 @@ namespace MSLC
 	namespace CompilationInfo
 	{
 		using NamespaceID = DescriptionID;
-		enum class SymbolType 
+		enum class SymbolType : uint8_t
 		{
 			Undefined,
 			Variable,
@@ -81,7 +81,9 @@ namespace MSLC
 			Variables::VariableDescription* GetVariable(Variables::VariableID id);
 			bool HasVariable(Variables::VariableID id);
 
-
+			Functions::FunctionID AddFunction(Functions::FunctionDescription fun_description);
+			Functions::FunctionDescription* GetFunction(Functions::FunctionID id);
+			bool HasFunction(Functions::FunctionID id);
 			//
 			Types::TypeID GetLastTypeID() { return global_type_id - 1; }
 			Variables::VariableID GetLastVariableID() { return global_variable_id - 1; }
@@ -107,12 +109,23 @@ namespace MSLC
 			size_t global_id = 0;
 			SymbolType symbol_type = SymbolType::Undefined;
 			size_t desc_id = 0;
+			uint32_t module_id = 0;
 		};
 
 		struct ConstantInfo 
 		{
 			size_t stack_offset;
 			size_t using_count;
+		};
+
+
+		struct pair_hash {
+			template <class T1, class T2>
+			std::size_t operator()(const std::pair<T1, T2>& p) const {
+				auto h1 = std::hash<T1>{}(p.first);
+				auto h2 = std::hash<T2>{}(p.second);
+				return h1 ^ (h2 << 1); 
+			}
 		};
 
 		class CompilationState 
@@ -131,7 +144,13 @@ namespace MSLC
 
 			void InitBasics();
 			std::unordered_map<size_t, UnhandledSymbol> unhandled_symbols;
+
+			std::unordered_map<std::pair<SymbolType,size_t>, size_t, pair_hash> local_desc_to_global_id;
+
 			std::unordered_map<Values::ConstantID, ConstantInfo> constants_info;
+
+			uint32_t current_module_id = 0;
+
 		public:
 			CompilationState();
 			Preprocessing::MacrosTable& GetMacrosTable();
@@ -146,6 +165,8 @@ namespace MSLC
 
 			void PopFrame();		
 
+			void SetModule(uint32_t module_) { current_module_id = module_; }
+
 			//Registration
 
 			Symbol* RegisterVariable(Variables::VariableDescription description);
@@ -154,6 +175,8 @@ namespace MSLC
 
 			size_t AddUnhandledSymbol(SymbolType type, size_t desc_id);
 			UnhandledSymbol* GetUnhandledSymbol(size_t global_id);
+
+			size_t GetUnhandledSymbolsCount() const;
 
 			std::unordered_map<Values::ConstantID, ConstantInfo>& ConstantInfoTable() { return constants_info; }
 		};

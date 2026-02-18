@@ -6,9 +6,10 @@ namespace MSLC
 	{
 
 		Preprocessing::HandlingOrder handling_order = amg_builder.Analyze(path);
-
+		CompilationInfo::CompilationState comp_state;
 		for (auto id : handling_order.processing_order) 
 		{
+			comp_state.SetModule(id);
 			Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Compiling is started: \"" + handling_order.files[id].path + "\"."));
 
 			Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Stage: Loading text of file."));
@@ -19,7 +20,7 @@ namespace MSLC
 
 			auto tokens = lexer.ToTokens(text);
 
-			CompilationInfo::CompilationState comp_state;
+			
 
 			Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Stage: Preprocessing 1."));
 

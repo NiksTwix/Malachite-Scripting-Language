@@ -124,12 +124,17 @@ namespace MSLC
 
 		size_t CompilationState::AddUnhandledSymbol(SymbolType type, size_t desc_id)
 		{
+			auto it = local_desc_to_global_id.find({ type,desc_id });
+			if (it != local_desc_to_global_id.end()) return it->second;
 			UnhandledSymbol symbol;
+
 			symbol.desc_id = desc_id;
 			
 			symbol.global_id = global_us_id++;
 			symbol.symbol_type = type;
 			unhandled_symbols[symbol.global_id] = symbol;
+			local_desc_to_global_id[{ type, desc_id }] = symbol.global_id;
+			symbol.module_id = current_module_id;
 			return symbol.global_id;
 		}
 
@@ -139,6 +144,11 @@ namespace MSLC
 			if (it == unhandled_symbols.end()) return nullptr;
 			
 			return &it->second;
+		}
+
+		size_t CompilationState::GetUnhandledSymbolsCount() const
+		{
+			return unhandled_symbols.size();
 		}
 
 
@@ -186,6 +196,23 @@ namespace MSLC
 		bool GlobalSymbolTable::HasVariable(Variables::VariableID id)
 		{
 			return variables_descriptions.count(id);
+		}
+		Functions::FunctionID GlobalSymbolTable::AddFunction(Functions::FunctionDescription fun_description)
+		{
+			size_t fun_id = global_variable_id++;
+			fun_description.id = fun_id;
+			functions_descriptions[fun_id] = fun_description;
+
+			return fun_id;
+		}
+		Functions::FunctionDescription* GlobalSymbolTable::GetFunction(Functions::FunctionID id)
+		{
+			auto it = functions_descriptions.find(id);
+			return it == functions_descriptions.end() ? nullptr : &it->second;
+		}
+		bool GlobalSymbolTable::HasFunction(Functions::FunctionID id)
+		{
+			return functions_descriptions.count(id);
 		}
 	}
 }

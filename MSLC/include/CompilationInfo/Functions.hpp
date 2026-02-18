@@ -48,9 +48,11 @@ namespace MSLC
 
 				//For another info (maybe instruction pointer in pseudo/byte code)
 
+				size_t start_byte_ip = INVALID_ID;
+
 				//Meta
 				size_t definition_line = 0;
-				size_t module_id = 0;
+				moduleid module_id = INVALID_ID;
 
 				
 			};

@@ -14,6 +14,8 @@ namespace MSLC
 
 		constexpr DescriptionID START_COUNTER_ID = 0;
 
+		using moduleid = uint16_t;
+
 		namespace Functions
 		{
 			using FunctionID = DescriptionID;

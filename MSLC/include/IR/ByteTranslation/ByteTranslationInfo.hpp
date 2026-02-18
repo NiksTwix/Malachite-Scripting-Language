@@ -31,7 +31,7 @@ namespace MSLC
 				FL,    // Flags
 				RT,     // Return Value Temporary
 				// Could be added in the future:
-				// ZERO,    // Всегда 0 (как в RISC-V)
+				// ZERO,    // Always 0 (as in RISC-V)
 				// RA,      // Return Address
 				// GP       // Global Pointer
 				EnumSize,		///not is a register. Enum size
@@ -331,6 +331,9 @@ namespace MSLC
 				size_t data;
 
 				//Dynamic - can be edited by operations
+
+				//Costil eto (dynamic/static) - costil. We need to replace it on more cool type model in the future 
+
 				PrimitiveAnalogs dynamic_primitive_type = PrimitiveAnalogs::UInt;
 				size_t dynamic_data_size = 0;		// Size of value: pointer, simple data and another
 

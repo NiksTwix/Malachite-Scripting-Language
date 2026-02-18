@@ -102,6 +102,24 @@ namespace MSLC
                 }
             }
 
+            void* GetBytes() 
+            {
+                switch (type)
+                {
+                case MSLC::Definitions::ValueType::VOID:return nullptr;
+                case MSLC::Definitions::ValueType::UINT: return &uintVal;
+                case MSLC::Definitions::ValueType::INT:return &intVal;
+                case MSLC::Definitions::ValueType::CHAR:return &charVal;
+                case MSLC::Definitions::ValueType::BOOL:return &boolVal;
+                case MSLC::Definitions::ValueType::REAL:return &realVal;
+                case MSLC::Definitions::ValueType::STRING:
+                    return strVal.data();
+
+                default:
+                    return 0;
+                }
+            }
+
 
             std::string ToString() const
             {
