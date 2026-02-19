@@ -31,7 +31,7 @@ namespace MSLC
 
 			constexpr uint32_t size_of_constant_field_header = size_of_id + size_of_size;	//data can be infinity 
 			constexpr uint32_t size_of_symbol_field = size_of_id + size_of_offset + size_of_module_id + sizeof(CompilationInfo::SymbolType);//19 bytes
-			constexpr uint32_t command_size = 26;	//It's possible to use less, but the packaging will be more complicated.
+			constexpr uint32_t command_size = 32;	//It's possible to use less, but the packaging will be more complicated.
 		}
 
 		enum SectionType : uint8_t 

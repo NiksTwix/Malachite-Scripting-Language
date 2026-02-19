@@ -100,5 +100,43 @@ namespace MSLC
 			//In the future
 			return { allocated, size_of_data };
 		}
+		std::pair<char*, size_t> Packer::ByterizeCommands(CompilationInfo::CompilationState* cs_state, BCommandsArray& commands, size_t module_id)
+		{
+			size_t size_of_data = MSLOSizes::co_header_reserved_size;
+
+			size_t command_offset = size_of_data;
+			size_t commands_size = commands.Size() * MSLOSizes::command_size;
+			size_of_data += commands.Size() * MSLOSizes::command_size;
+
+			size_t current_offset = 0;
+
+			char* allocated = static_cast<char*>(calloc(size_of_data, 1));
+
+			memcpy(allocated, "MSLCO", 5);	//Magic
+
+			current_offset += 5;
+
+			WriteBytes(allocated + current_offset, &FilesVersion, sizeof(FilesVersion), current_offset);	//Version
+			WriteBytes(allocated + current_offset, 0, sizeof(uint16_t), current_offset);	//Flags
+
+			WriteBytes(allocated + current_offset, &commands_size, sizeof(size_t), current_offset);	//Code size
+
+			for (size_t i = 0; i < commands.Size(); i++) 
+			{
+				ByteCommand& command = commands[i];
+
+				WriteBytes(allocated + current_offset, &command.code, sizeof(ByteOpCode), current_offset);	//OpCode
+				WriteBytes(allocated + current_offset, &command.arg0.type, sizeof(command.arg0.type), current_offset);	//Type of arg0
+				WriteBytes(allocated + current_offset, &command.arg0.data, sizeof(command.arg0.data), current_offset);	//Data of arg0
+				WriteBytes(allocated + current_offset, &command.arg1.type, sizeof(command.arg1.type), current_offset);	//Type of arg1
+				WriteBytes(allocated + current_offset, &command.arg1.data, sizeof(command.arg1.data), current_offset);	//Data of arg1
+				WriteBytes(allocated + current_offset, &command.arg2.type, sizeof(command.arg2.type), current_offset);	//Type of arg2
+				WriteBytes(allocated + current_offset, &command.arg2.data, sizeof(command.arg2.data), current_offset);	//Data of arg2
+				WriteBytes(allocated + current_offset, &command.flags, sizeof(command.flags), current_offset);	//Flags
+			}
+
+
+			return { allocated,size_of_data};
+		}
 	}
 }
