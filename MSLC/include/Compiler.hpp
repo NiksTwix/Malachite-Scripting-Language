@@ -5,6 +5,8 @@
 #include "AST/ASTBuilder.hpp"
 #include "IR/PseudoTranslation/PseudoTranslator.hpp"
 #include "IR/ByteTranslation/ByteTranslator.hpp"
+#include "Packing/Packer.hpp"
+
 namespace MSLC 
 {
 
@@ -17,6 +19,7 @@ namespace MSLC
 		AST::ASTBuilder ast_builder;
 		IntermediateRepresentation::Pseudo::PseudoTranslator preudo_translator;
 		IntermediateRepresentation::Byte::ByteTranslator byte_translator;
+		Packing::Packer packer;
 	public:
 
 		void TestCompile(std::string path);	//test compiling for development

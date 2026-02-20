@@ -151,6 +151,8 @@ namespace MSLC
 
 			uint32_t current_module_id = 0;
 
+			uint16_t compilation_flags = 0;
+
 		public:
 			CompilationState();
 			Preprocessing::MacrosTable& GetMacrosTable();
@@ -179,6 +181,11 @@ namespace MSLC
 			size_t GetUnhandledSymbolsCount() const;
 
 			std::unordered_map<Values::ConstantID, ConstantInfo>& ConstantInfoTable() { return constants_info; }
+
+
+			inline uint16_t& GetCompilationFlags() {
+				return compilation_flags;
+			}
 		};
 
 
