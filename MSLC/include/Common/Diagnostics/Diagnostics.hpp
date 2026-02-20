@@ -5,6 +5,7 @@
 #include <typeinfo>
 #include <stack>
 #include <functional>
+#include <sstream>
 
 namespace MSLC 
 {
