@@ -119,7 +119,7 @@
     <ClInclude Include="include\Preprocessing\Preprocessor.hpp">
       <Filter>Файлы заголовков\Frontend</Filter>
     </ClInclude>
-    <ClInclude Include="include\Syntax\StringContants.hpp">
+    <ClInclude Include="include\Syntax\StringConstants.hpp">
       <Filter>Файлы заголовков\Frontend</Filter>
     </ClInclude>
     <ClInclude Include="include\Tokenization\TokensInfo.hpp">
@@ -155,7 +155,7 @@
     <ClInclude Include="include\Definitions\ChunkArray.hpp">
       <Filter>Файлы заголовков\Info</Filter>
     </ClInclude>
-    <ClInclude Include="include\Definitions\CommonEnums.hpp">
+    <ClInclude Include="include\Definitions\Common.hpp">
       <Filter>Файлы заголовков\Info</Filter>
     </ClInclude>
     <ClInclude Include="include\Common\Diagnostics\Diagnostics.hpp">

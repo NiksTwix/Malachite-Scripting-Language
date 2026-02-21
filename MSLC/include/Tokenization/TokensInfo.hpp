@@ -1,6 +1,6 @@
 #pragma once
 #include "..\Definitions\ValueContainer.hpp"
-#include "..\Syntax\StringContants.hpp"
+#include "..\Syntax\StringConstants.hpp"
 
 #include <unordered_map>
 

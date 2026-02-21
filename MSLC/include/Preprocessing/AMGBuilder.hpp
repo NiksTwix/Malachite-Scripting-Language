@@ -4,13 +4,14 @@
 #include <filesystem>
 #include <sstream>
 #include <unordered_set>
+#include "..\Definitions\Common.hpp"
 
 namespace MSLC 
 {
 	namespace Preprocessing 
 	{
 
-		using file_identificator = size_t;
+		using file_identificator = Definitions::moduleid;
 
 		struct FileInfo 
 		{

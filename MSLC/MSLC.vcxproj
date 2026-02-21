@@ -158,7 +158,7 @@
     <ClInclude Include="include\CompilationInfo\Variables.hpp" />
     <ClInclude Include="include\Compiler.hpp" />
     <ClInclude Include="include\Definitions\ChunkArray.hpp" />
-    <ClInclude Include="include\Definitions\CommonEnums.hpp" />
+    <ClInclude Include="include\Definitions\Common.hpp" />
     <ClInclude Include="include\Definitions\ValueContainer.hpp" />
     <ClInclude Include="include\IR\ByteTranslation\ByteDebugInfo.hpp" />
     <ClInclude Include="include\IR\ByteTranslation\ByteTranslationInfo.hpp" />
@@ -175,7 +175,7 @@
     <ClInclude Include="include\Preprocessing\AMGBuilder.hpp" />
     <ClInclude Include="include\Preprocessing\MacrosInfo.hpp" />
     <ClInclude Include="include\Preprocessing\Preprocessor.hpp" />
-    <ClInclude Include="include\Syntax\StringContants.hpp" />
+    <ClInclude Include="include\Syntax\StringConstants.hpp" />
     <ClInclude Include="include\Tokenization\Lexer.hpp" />
     <ClInclude Include="include\Tokenization\TokensInfo.hpp" />
   </ItemGroup>

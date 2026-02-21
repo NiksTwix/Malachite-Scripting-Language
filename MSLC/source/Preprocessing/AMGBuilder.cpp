@@ -1,6 +1,6 @@
 #include "..\..\include\Preprocessing\AMGBuilder.hpp"
 #include "..\..\include\Common\Diagnostics\Diagnostics.hpp"
-#include "..\..\include\Syntax\StringContants.hpp"
+#include "..\..\include\Syntax\StringConstants.hpp"
 #include <fstream>
 #include <queue>
 

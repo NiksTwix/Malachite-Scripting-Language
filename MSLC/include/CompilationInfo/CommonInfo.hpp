@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "..\Definitions\ValueContainer.hpp"
-#include "..\Definitions\CommonEnums.hpp"
+#include "..\Definitions\Common.hpp"
 #include <unordered_map>
 
 

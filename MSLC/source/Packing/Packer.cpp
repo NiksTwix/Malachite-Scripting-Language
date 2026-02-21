@@ -69,9 +69,8 @@ namespace MSLC
 			current_offset = MSLOData::mo_header_reserved_size;
 			//Linking order
 			//Linking order bytes
-			for (size_t id : ho.processing_order) {
-				uint16_t id16 = static_cast<uint16_t>(id);
-				WriteBytes(allocated + current_offset, &id16, sizeof(id16), current_offset);
+			for (uint16_t id : ho.processing_order) {
+				WriteBytes(allocated + current_offset, &id, sizeof(id), current_offset);
 			}
 			//Constants
 			for (size_t i = 0; i < cs_state->GetICT().constants_by_id.size(); i++)

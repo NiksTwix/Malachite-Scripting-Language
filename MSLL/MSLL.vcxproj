@@ -128,6 +128,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="MSLL.cpp" />
+    <ClCompile Include="source\ObjectsReading\ObjectsReader.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\ObjectsReading\ObjectsInfo.hpp" />
+    <ClInclude Include="include\ObjectsReading\ObjectsReader.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

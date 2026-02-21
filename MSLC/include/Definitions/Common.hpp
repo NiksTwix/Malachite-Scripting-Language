@@ -1,5 +1,5 @@
 #pragma once
-
+#include <cstdint>
 
 
 
@@ -13,6 +13,9 @@ namespace MSLC
 			Protected,
 			Private
 		};
+
+		using moduleid = uint16_t;
+
 	}
 
 }

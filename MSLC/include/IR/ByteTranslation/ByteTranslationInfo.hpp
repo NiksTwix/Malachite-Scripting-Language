@@ -69,14 +69,14 @@ namespace MSLC
 				bool optimize = false;         // Optimization is enable
 				bool debug_info = true;       // Save debug information
 
-				// Target platform
-				enum Target {
-					MSLVM_V1,      // Basic VM (32-byte commands)
-					MSLVM_COMPACT, // Little VM (8-byte) (in the future)
-					MSLVM_FAST,    // Fast VM (optimized) (in the future)
-					WASM,          // WebAssembly for browser (in the future)
-					NATIVE_X64,    // Native code x86_64  (in the future)
-				} target = MSLVM_V1;
+				//// Target platform
+				//enum Target {
+				//	MSLVM_V1,      // Basic VM (32-byte commands)
+				//	MSLVM_COMPACT, // Little VM (8-byte) (in the future)
+				//	MSLVM_FAST,    // Fast VM (optimized) (in the future)
+				//	WASM,          // WebAssembly for browser (in the future)
+				//	NATIVE_X64,    // Native code x86_64  (in the future)
+				//} target = MSLVM_V1;
 			};
 
 			enum CompilationFlag: uint16_t
