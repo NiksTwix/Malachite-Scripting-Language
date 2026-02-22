@@ -43,20 +43,20 @@ namespace MSLC
 			//Filling
 			memcpy(allocated, MSLOData::mo_magic.data(), 5);	//Magic
 
-			current_offset += 5;
+			current_offset += MSLOData::magic_size;
 
 			float version = MSLOData::FilesVersion;
 
 			WriteBytes(allocated + current_offset, &version, sizeof(version), current_offset);	//Version
 			WriteBytes(allocated + current_offset, &cs_state->GetCompilationFlags(), sizeof(cs_state->GetCompilationFlags()), current_offset);	//Flags
 
-			char mprefix[MSLOData::size_of_module_file_prefix] = {};
+			char mprefix[MSLOData::size_of_module_prefix] = {};
 			memcpy(mprefix, MSLOData::module_prefix.data(), MSLOData::module_prefix.size());
 
 			char mextension[MSLOData::size_of_module_extension] = {};
 			memcpy(mextension, MSLOData::module_extension.data(), MSLOData::module_extension.size());
 
-			WriteBytes(allocated + current_offset, mprefix,  MSLOData::size_of_module_file_prefix, current_offset);	//Module prefix
+			WriteBytes(allocated + current_offset, mprefix,  MSLOData::size_of_module_prefix, current_offset);	//Module prefix
 			WriteBytes(allocated + current_offset, mextension, MSLOData::size_of_module_extension, current_offset);	//Module extension
 
 			//Sections
@@ -125,7 +125,7 @@ namespace MSLC
 
 			memcpy(allocated,MSLOData::co_magic.data(), 5);	//Magic
 
-			current_offset += 5;
+			current_offset += MSLOData::magic_size;
 			float version = MSLOData::FilesVersion;
 
 			WriteBytes(allocated + current_offset, &version, sizeof(version), current_offset);	//Version

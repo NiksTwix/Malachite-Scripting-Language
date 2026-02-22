@@ -18,10 +18,8 @@ namespace MSLC
 			constexpr uint32_t mo_header_reserved_size = 500;
 			constexpr uint32_t co_header_reserved_size = 100;
 
-			constexpr uint32_t magic = 4;
-			constexpr uint32_t version = 2;
-			constexpr uint32_t flags = 2;
-			constexpr uint32_t size_of_module_file_prefix = 32;//31 character + \0
+			constexpr uint32_t magic_size = 5;
+			constexpr uint32_t size_of_module_prefix = 32;//31 character + \0
 			constexpr uint32_t size_of_module_extension = 10;
 			constexpr uint32_t section_count = 4;
 
