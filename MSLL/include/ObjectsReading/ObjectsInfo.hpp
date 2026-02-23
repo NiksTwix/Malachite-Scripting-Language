@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <vector>
 #include <string_view>
+#include <string>
 namespace MSLL 
 {
 	namespace ObjectsInfo 

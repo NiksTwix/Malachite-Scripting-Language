@@ -128,9 +128,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="MSLL.cpp" />
+    <ClCompile Include="source\Linker.cpp" />
     <ClCompile Include="source\ObjectsReading\ObjectsReader.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Linker.hpp" />
     <ClInclude Include="include\ObjectsReading\ObjectsInfo.hpp" />
     <ClInclude Include="include\ObjectsReading\ObjectsReader.hpp" />
   </ItemGroup>
