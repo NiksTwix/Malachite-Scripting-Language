@@ -114,7 +114,7 @@ namespace MSLC
 
 			size_t command_offset = size_of_data;
 			size_t commands_size = commands.Size() * MSLOData::command_size;
-			size_of_data += commands.Size() * MSLOData::command_size;
+			size_of_data += commands_size;
 
 			size_t current_offset = 0;
 

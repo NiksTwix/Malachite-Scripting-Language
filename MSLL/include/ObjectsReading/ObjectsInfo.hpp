@@ -11,8 +11,8 @@ namespace MSLL
 		using symbolid = size_t;
 
 		enum CommandSource : uint8_t {
-			Register = 1,        // register (index)
-			MemoryAddress,   // address in memory (offset)
+			Register = 1,        // register (index), can contain a dynamic memory address
+			MemoryAddress,   // address in memory (offset/static)
 			Immediate,       // immediated value
 			Constant,         // index in the constants poop
 			Symbol,				//for linking with symbols table
@@ -266,5 +266,14 @@ namespace MSLL
 			}
 		};
 
+
+		struct CommandsPool 
+		{
+			std::vector<ByteCommand> commands;
+			float version = MSLOData::FilesVersion;
+			uint16_t compilation_flags = 0;
+
+			size_t code_size_in_bytes = 0;
+		};
 	}
 }

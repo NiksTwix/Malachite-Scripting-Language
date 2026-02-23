@@ -16,8 +16,8 @@ namespace MSLC
 			#pragma region CommandsInfo
 			//can be copied to linker's header
 			enum CommandSource : uint8_t {
-				Register = 1,        // register (index)
-				MemoryAddress,   // address in memory (offset)
+				Register = 1,        // register (index), can contain a dynamic memory address
+				MemoryAddress,   // address in memory (offset/static)
 				Immediate,       // immediated value
 				Constant,         // index in the constants poop
 				Symbol,				//for linking with symbols table

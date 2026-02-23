@@ -86,8 +86,7 @@ namespace MSLL
 		{
 			std::clog << "Versions are different. Errors can occur during the reading process.\n";
 		}
-		
-		offset += sizeof(MD::FilesVersion);
+
 		memcpy(&linking_state->compilation_flags, bytes_buffer.first + offset, sizeof(linking_state->compilation_flags));
 		offset += sizeof(linking_state->compilation_flags);
 
@@ -141,6 +140,69 @@ namespace MSLL
 		
 
 		return linking_state;
+	}
+	std::shared_ptr<ObjectsInfo::CommandsPool> ObjectsReader::DeserializeCO(std::pair<char*, size_t> bytes_buffer)
+	{
+		if (bytes_buffer.first == nullptr || bytes_buffer.second == 0) return nullptr;
+
+		if (bytes_buffer.second < MD::co_header_reserved_size)
+		{
+			std::cerr << "Invalid code object file.\n";
+			return nullptr;
+		}
+
+		std::shared_ptr<ObjectsInfo::CommandsPool> result = std::make_shared<ObjectsInfo::CommandsPool>();
+
+		bool magic_check = memcmp(bytes_buffer.first, MD::co_magic.data(), MD::magic_size);
+
+		if (magic_check)
+		{
+			std::cerr << "Attemp to deserialize not CO file.\n";
+			return nullptr;
+		}
+		size_t offset = MD::magic_size;
+
+		memcpy(&result->version, bytes_buffer.first + offset, sizeof(result->version));
+		offset += sizeof(result->version);
+
+		if (result->version != MD::FilesVersion)
+		{
+			std::clog << "Versions are different. Errors can occur during the reading process.\n";
+		}
+		memcpy(&result->compilation_flags, bytes_buffer.first + offset, sizeof(result->compilation_flags));
+
+		offset += sizeof(result->compilation_flags);
+
+
+		memcpy(&result->code_size_in_bytes, bytes_buffer.first + offset, sizeof(result->code_size_in_bytes));
+		offset += sizeof(result->code_size_in_bytes);
+
+		offset = MD::co_header_reserved_size;
+		//Commands
+		while (offset < MD::co_header_reserved_size + result->code_size_in_bytes) 
+		{
+			ObjectsInfo::ByteOpCode opcode;
+			memcpy(&opcode, bytes_buffer.first + offset, sizeof(opcode)); offset += sizeof(opcode);
+			ObjectsInfo::CommandSource source0;
+			memcpy(&source0, bytes_buffer.first + offset, sizeof(source0)); offset += sizeof(source0);
+			size_t arg0;
+			memcpy(&arg0, bytes_buffer.first + offset, sizeof(arg0)); offset += sizeof(arg0);
+			ObjectsInfo::CommandSource source1;
+			memcpy(&source1, bytes_buffer.first + offset, sizeof(source1)); offset += sizeof(source1);
+			size_t arg1;
+			memcpy(&arg1, bytes_buffer.first + offset, sizeof(arg1)); offset += sizeof(arg1);
+			ObjectsInfo::CommandSource source2;
+			memcpy(&source2, bytes_buffer.first + offset, sizeof(source2)); offset += sizeof(source2);
+			size_t arg2;
+			memcpy(&arg2, bytes_buffer.first + offset, sizeof(arg2)); offset += sizeof(arg2);
+			uint32_t flags;
+			memcpy(&flags, bytes_buffer.first + offset, sizeof(flags)); offset += sizeof(flags);
+			ObjectsInfo::ByteCommand command(opcode, ObjectsInfo::CommandArgument(arg0, source0), ObjectsInfo::CommandArgument(arg1, source1), ObjectsInfo::CommandArgument(arg2, source2), flags);
+			result->commands.push_back(command);
+		}
+
+
+		return result;
 	}
 	std::pair<char*, size_t> ObjectsReader::ReadFile(const std::string& path)
 	{

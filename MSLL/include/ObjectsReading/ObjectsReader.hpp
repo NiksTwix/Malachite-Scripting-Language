@@ -13,7 +13,7 @@ namespace MSLL
 		void HandleDebugSection(std::pair<char*, size_t> bytes_buffer, std::shared_ptr<ObjectsInfo::LinkingState> state, size_t section_offset, size_t section_size);
 	public:
 		std::shared_ptr<ObjectsInfo::LinkingState> DeserializeMO(std::pair<char*, size_t> bytes_buffer);
-
+		std::shared_ptr<ObjectsInfo::CommandsPool> DeserializeCO(std::pair<char*, size_t> bytes_buffer);
 
 		std::pair<char*, size_t> ReadFile(const std::string& path);
 	};
