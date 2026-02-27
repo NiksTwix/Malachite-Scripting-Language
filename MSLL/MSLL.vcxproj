@@ -130,11 +130,14 @@
     <ClCompile Include="MSLL.cpp" />
     <ClCompile Include="source\Linker.cpp" />
     <ClCompile Include="source\ObjectsReading\ObjectsReader.cpp" />
+    <ClCompile Include="source\Translators\MSLVM_1\MSLVM_1Translator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Linker.hpp" />
     <ClInclude Include="include\ObjectsReading\ObjectsInfo.hpp" />
     <ClInclude Include="include\ObjectsReading\ObjectsReader.hpp" />
+    <ClInclude Include="include\Translators\MSLVM_1\MSLVM_1Common.hpp" />
+    <ClInclude Include="include\Translators\MSLVM_1\MSLVM_1Translator.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

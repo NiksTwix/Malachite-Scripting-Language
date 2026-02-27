@@ -1,7 +1,7 @@
 ﻿// MSLL.cpp : Этот файл содержит функцию "main". Здесь начинается и заканчивается выполнение программы.
 //
 
-#include <iostream>
+
 #include "include/Linker.hpp"
 int main(int argc, char* argv[])    //argc - count of args, argv - array of arg-strings
 {
@@ -21,28 +21,28 @@ int main(int argc, char* argv[])    //argc - count of args, argv - array of arg-
 
         
 
-        uint16_t index = 0;
+        uint8_t index = 0;
         for (const std::string& str : linker.GetVMList()) 
         {
             std::cout << index << ") " << str << "\n";
             index++;
         }
         std::cout << "Enter vm model version (number):";
-        uint16_t choice;
+        uint8_t choice;
         std::cin >> choice;
-
-        linker.Link(path, choice);
-
+        linker.SetOutputMode(true);
+        bool result = linker.Link(path, (MSLL::VMs)choice);
+        if (!result) return 1;
     }
     else if (argc > 1)
     {
-        uint16_t index = 0;
+        uint8_t index = 0;
         if (argc > 2) 
         {
             std::string version = std::string(argv[2]);
-            index = UINT16_MAX; //MAX of uint16_t
+            index = UINT8_MAX; //MAX of uint16_t
             const auto& vms = linker.GetVMList();
-            for (uint16_t i = 0; i < vms.size(); i++)
+            for (uint8_t i = 0; i < vms.size(); i++)
             {
                 if (version == vms[i])
                 {
@@ -50,19 +50,17 @@ int main(int argc, char* argv[])    //argc - count of args, argv - array of arg-
                     break;
                 }
             }
-            if (index == UINT16_MAX)
+            if (index == UINT8_MAX)
             {
                 std::cerr << "Invalid vm_type parameter.\n";
-                return 0;
+                return 1;
             }
         }
     
         std::string path = std::string(argv[1]);
-        linker.Link(path, index);
-    }
-    else 
-    {
-        std::cout << argc << " error";
+        linker.SetOutputMode(false);//Without debug output(Loading and etc)
+        bool result = linker.Link(path, (MSLL::VMs)index);
+        if (!result) return 1;
     }
 }
 

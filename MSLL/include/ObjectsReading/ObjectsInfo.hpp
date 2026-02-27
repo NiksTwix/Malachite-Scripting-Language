@@ -147,10 +147,7 @@ namespace MSLL
 
 			// Debug_info
 			uint32_t source_line = 0;
-			uint32_t pseudo_op_index = 0;  // Reference of pseudo command
 
-			// For linking
-			uint32_t relocation_index = 0xFFFFFFFF;  // Index in the realocation table
 
 			// Constructors for comfort
 			ByteCommand(ByteOpCode c) : code(c) {}
@@ -163,6 +160,9 @@ namespace MSLL
 			}
 			ByteCommand(ByteOpCode c, CommandArgument a0, CommandArgument a1, CommandArgument a2, uint32_t flags)
 				: code(c), arg0(a0), arg1(a1), arg2(a2), flags(flags) {
+			}
+			ByteCommand(ByteOpCode c, CommandArgument a0, CommandArgument a1, CommandArgument a2, uint32_t flags, uint32_t s_line)
+				: code(c), arg0(a0), arg1(a1), arg2(a2), flags(flags),source_line(s_line) {
 			}
 			ByteCommand() : code(ByteOpCode::NOP), arg0(0, CommandSource::Immediate), arg1(0, CommandSource::Immediate), arg2(0, CommandSource::Immediate) {}
 		};
@@ -193,7 +193,7 @@ namespace MSLL
 
 			constexpr uint32_t size_of_constant_field_header = size_of_id + size_of_size;	//data can be infinity 
 			constexpr uint32_t size_of_symbol_field = size_of_id + size_of_offset + size_of_module_id + sizeof(SymbolType);//19 bytes
-			constexpr uint32_t command_size = 32;	//It's possible to use less, but the packaging will be more complicated.
+			constexpr uint32_t command_size = 40;	//It's possible to use less, but the packaging will be more complicated.
 
 			constexpr std::string_view module_prefix = "mslmodule";
 			constexpr std::string_view module_extension = "mslco";
@@ -217,7 +217,7 @@ namespace MSLL
 			constantid id;
 			size_t size_in_bytes;
 			char* data;
-			
+			size_t memory_offset;
 			void Free() 
 			{
 				delete data;
@@ -276,5 +276,19 @@ namespace MSLL
 
 			size_t code_size_in_bytes = 0;
 		};
+
+		struct ExecutionData 
+		{
+			std::pair<char*, size_t> read_only_data;
+			std::pair<char*, size_t> code;
+
+
+			void Free() 
+			{
+				delete read_only_data.first;
+				delete code.first;
+			}
+		};
+
 	}
 }

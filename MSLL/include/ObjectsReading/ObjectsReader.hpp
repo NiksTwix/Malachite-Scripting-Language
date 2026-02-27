@@ -2,6 +2,7 @@
 #include "ObjectsInfo.hpp"
 #include <memory>
 #include <string>
+#include <iostream>
 namespace MSLL
 {
 	class ObjectsReader {

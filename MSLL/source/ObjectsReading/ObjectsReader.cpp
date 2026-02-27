@@ -197,7 +197,9 @@ namespace MSLL
 			memcpy(&arg2, bytes_buffer.first + offset, sizeof(arg2)); offset += sizeof(arg2);
 			uint32_t flags;
 			memcpy(&flags, bytes_buffer.first + offset, sizeof(flags)); offset += sizeof(flags);
-			ObjectsInfo::ByteCommand command(opcode, ObjectsInfo::CommandArgument(arg0, source0), ObjectsInfo::CommandArgument(arg1, source1), ObjectsInfo::CommandArgument(arg2, source2), flags);
+			uint32_t source_line;
+			memcpy(&flags, bytes_buffer.first + offset, sizeof(source_line)); offset += sizeof(source_line);
+			ObjectsInfo::ByteCommand command(opcode, ObjectsInfo::CommandArgument(arg0, source0), ObjectsInfo::CommandArgument(arg1, source1), ObjectsInfo::CommandArgument(arg2, source2), flags, source_line);
 			result->commands.push_back(command);
 		}
 

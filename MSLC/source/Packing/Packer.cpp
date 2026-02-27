@@ -148,6 +148,7 @@ namespace MSLC
 				WriteBytes(allocated + current_offset, &command.arg2.type, sizeof(command.arg2.type), current_offset);	//Type of arg2
 				WriteBytes(allocated + current_offset, &command.arg2.data, sizeof(command.arg2.data), current_offset);	//Data of arg2
 				WriteBytes(allocated + current_offset, &command.flags, sizeof(command.flags), current_offset);	//Flags
+				WriteBytes(allocated + current_offset, &command.source_line, sizeof(command.source_line), current_offset);	//Line
 			}
 
 
