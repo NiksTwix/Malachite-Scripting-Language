@@ -104,6 +104,8 @@ namespace MSLL
 
 			TC_RTU,    //Type Convertion Real To Unsigned Integer
 			TC_ITU,
+
+			SYMBOL_LABEL,	//Symbol declaring (function), arg0 - symbol_id
 		};
 
 		enum Flag {
