@@ -14,7 +14,10 @@ namespace MSLL
 		class TranslatorVM_1
 		{
 		public:
-			std::shared_ptr<ObjectsInfo::ExecutionData> Translate(fs::path directory, std::shared_ptr<ObjectsInfo::LinkingState> state, ObjectsReader& reader);
+			ObjectsInfo::ExecutionData Translate(fs::path directory, std::shared_ptr<ObjectsInfo::LinkingState> state, ObjectsReader& reader);
+
+			bool HandleModule(fs::path file, std::shared_ptr<ObjectsInfo::LinkingState> state, ObjectsReader& reader, std::vector<VMOperation>& commands);
+
 		};
 
 	}

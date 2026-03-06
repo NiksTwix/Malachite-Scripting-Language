@@ -32,6 +32,8 @@ namespace MSLL
 			constant.InitBy(bytes_buffer.first + offset, data_size);
 			offset += data_size;
 			constant.id = c_id;
+			state->constants_size += data_size;
+			state->constants.push_back(constant);
 		}
 	}
 	void ObjectsReader::HandleSymbolSection(std::pair<char*, size_t> bytes_buffer, std::shared_ptr<ObjectsInfo::LinkingState> state, size_t section_offset, size_t section_size)

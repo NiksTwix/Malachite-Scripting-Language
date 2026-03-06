@@ -67,8 +67,6 @@ namespace MSLVM
 		STOPPED = 1 << 4,
 	};
 
-	using operation_code = uint16_t;
-
 	enum VMOperationCode : uint8_t
 	{
 		NOP = 0,

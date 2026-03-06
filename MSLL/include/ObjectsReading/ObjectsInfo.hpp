@@ -248,9 +248,14 @@ namespace MSLL
 
 		struct LinkingState 
 		{
+		public:
 			std::vector<ConstantData> constants;
+			size_t constants_size = 0;
+
 			std::vector<SymbolData> symbols;
 			std::vector<moduleid> linking_order;
+
+
 
 			uint16_t compilation_flags;
 			float version = 1.0f;
@@ -281,14 +286,14 @@ namespace MSLL
 
 		struct ExecutionData 
 		{
-			std::pair<char*, size_t> read_only_data;
-			std::pair<char*, size_t> code;
+			std::pair<char*, size_t> read_only_data = {nullptr,0};
+			std::pair<char*, size_t> code = { nullptr,0 };
 
 
 			void Free() 
 			{
-				delete read_only_data.first;
-				delete code.first;
+				if (read_only_data.first != nullptr)delete read_only_data.first;
+				if (code.first != nullptr)delete code.first;
 			}
 		};
 
