@@ -178,6 +178,9 @@ namespace MSLL
 
 		memcpy(&result->code_size_in_bytes, bytes_buffer.ptr + offset, sizeof(result->code_size_in_bytes));
 		offset += sizeof(result->code_size_in_bytes);
+		memcpy(&result->stack_size, bytes_buffer.ptr + offset, sizeof(result->stack_size));
+		offset += sizeof(result->stack_size);
+
 
 		offset = MD::co_header_reserved_size;
 		//Commands

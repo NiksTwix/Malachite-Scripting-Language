@@ -67,7 +67,7 @@ namespace MSLC
 			}
 		public:
 			std::pair<char*, size_t> ByterizeCompilationState(CompilationInfo::CompilationState* cs_state, Preprocessing::HandlingOrder& ho);
-			std::pair<char*, size_t> ByterizeCommands(CompilationInfo::CompilationState* cs_state, BCommandsArray& commands, size_t module_id);
+			std::pair<char*, size_t> ByterizeCommands(CompilationInfo::CompilationState* cs_state, std::shared_ptr<ByteTranslationState> bts, size_t module_id);
 
 
 			bool SaveAsMSLMO(const fs::path& path, std::pair<char*, size_t> bytes, const std::string& file_name);	//path with

@@ -107,13 +107,13 @@ namespace MSLC
 			//In the future
 			return { allocated, size_of_data };
 		}
-		std::pair<char*, size_t> Packer::ByterizeCommands(CompilationInfo::CompilationState* cs_state, BCommandsArray& commands, size_t module_id)
+		std::pair<char*, size_t> Packer::ByterizeCommands(CompilationInfo::CompilationState* cs_state, std::shared_ptr<ByteTranslationState> bts, size_t module_id)
 		{
 			//Calc size of array for allocation
 			size_t size_of_data = MSLOData::co_header_reserved_size;
 
 			size_t command_offset = size_of_data;
-			size_t commands_size = commands.Size() * MSLOData::command_size;
+			size_t commands_size = bts->result.Size() * MSLOData::command_size;
 			size_of_data += commands_size;
 
 			size_t current_offset = 0;
@@ -132,13 +132,13 @@ namespace MSLC
 			WriteBytes(allocated + current_offset, &cs_state->GetCompilationFlags(), sizeof(cs_state->GetCompilationFlags()), current_offset);	//Flags
 
 			WriteBytes(allocated + current_offset, &commands_size, sizeof(size_t), current_offset);	//Code size
-
+			WriteBytes(allocated + current_offset, &bts->frame_stack.top().size, sizeof(size_t), current_offset);	//Stack size
 			//Commands
 			current_offset = command_offset;
 
-			for (size_t i = 0; i < commands.Size(); i++) 
+			for (size_t i = 0; i < bts->result.Size(); i++)
 			{
-				ByteCommand& command = commands[i];
+				ByteCommand& command = bts->result[i];
 
 				WriteBytes(allocated + current_offset, &command.code, sizeof(ByteOpCode), current_offset);	//OpCode
 				WriteBytes(allocated + current_offset, &command.arg0.type, sizeof(command.arg0.type), current_offset);	//Type of arg0

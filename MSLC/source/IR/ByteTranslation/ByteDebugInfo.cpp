@@ -49,8 +49,8 @@ namespace MSLC {
                     {ByteOpCode::CMPR, "CMPR"},
                     {ByteOpCode::MOVRR, "MOVRR"},
                     {ByteOpCode::MOVRI, "MOVRI"},
-                    {ByteOpCode::PUSH, "PUSH"},
-                    {ByteOpCode::POP, "POP"},
+                    {ByteOpCode::STACK_UP, "PUSH"},
+                    {ByteOpCode::STACK_DOWN, "POP"},
 
                     {ByteOpCode::LEA_STATIC, "LEA_STATIC"},
                     {ByteOpCode::LEA_DYNAMIC, "LEA_DYNAMIC"},

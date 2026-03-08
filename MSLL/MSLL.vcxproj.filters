@@ -13,11 +13,11 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Файлы заголовков\MSLVM__1">
-      <UniqueIdentifier>{d6ede44d-c997-4083-af1f-2eb490df23f7}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Исходные файлы\MSLVM_1%255c">
+    <Filter Include="Исходные файлы\MSLVM_1">
       <UniqueIdentifier>{face6835-1c45-46ce-9b8c-82485d2f2fa3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы заголовков\MSLVM_1">
+      <UniqueIdentifier>{d6ede44d-c997-4083-af1f-2eb490df23f7}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -31,7 +31,7 @@
       <Filter>Исходные файлы</Filter>
     </ClCompile>
     <ClCompile Include="source\Translators\MSLVM_1\MSLVM_1Translator.cpp">
-      <Filter>Исходные файлы\MSLVM_1%255c</Filter>
+      <Filter>Исходные файлы\MSLVM_1</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -45,10 +45,10 @@
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="include\Translators\MSLVM_1\MSLVM_1Common.hpp">
-      <Filter>Файлы заголовков\MSLVM__1</Filter>
+      <Filter>Файлы заголовков\MSLVM_1</Filter>
     </ClInclude>
     <ClInclude Include="include\Translators\MSLVM_1\MSLVM_1Translator.hpp">
-      <Filter>Файлы заголовков\MSLVM__1</Filter>
+      <Filter>Файлы заголовков\MSLVM_1</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

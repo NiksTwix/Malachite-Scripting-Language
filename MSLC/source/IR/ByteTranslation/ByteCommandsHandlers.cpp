@@ -193,7 +193,7 @@ namespace MSLC
 
 					vdesc->global_stack_offset = b_state->frame_stack.top().NextFreeAddress();
 					b_state->frame_stack.top().size += tdesc->GetAlignedSize();
-					PushCommand(b_state, ByteCommand(ByteOpCode::PUSH, CommandArgument(tdesc->GetAlignedSize(), CommandSource::Immediate)), operation.debug_line);
+					PushCommand(b_state, ByteCommand(ByteOpCode::STACK_UP, CommandArgument(tdesc->GetAlignedSize(), CommandSource::Immediate)), operation.debug_line);
 					break;
 				}
 				}

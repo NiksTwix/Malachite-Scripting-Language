@@ -92,7 +92,7 @@ namespace MSLC
 
 				COMP_FLG,	//CompilationFlag arg0  - CompilationFlag. In functions declarations
 
-				SECTION_ARITHMETIC_ST,
+				SECTION_ARITHMETIC_ST,	//reg0,reg1,reg2
 				ADDR,
 				SUBR,
 				DIVR,
@@ -133,10 +133,11 @@ namespace MSLC
 				//Memory
 				SECTION_MEMORY_ST,
 				MOVRR,
-				MOVRI,
-				PUSH,              
-				POP,    
-
+				MOVRI,	
+				STACK_UP,		//size - arg0      
+				STACK_DOWN,    //size - arg0 
+				PUSH,		//reg and size
+				POP,		//reg and size
 				LEA_STATIC,		// Static address calculating: MemoryAddress (static) -> reg 
 				LEA_DYNAMIC,	// Dynamic address calculating: register (with address) -> register_dest
 

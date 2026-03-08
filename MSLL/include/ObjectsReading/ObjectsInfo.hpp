@@ -3,6 +3,7 @@
 #include <vector>
 #include <string_view>
 #include <string>
+#include <unordered_map>
 namespace MSLL 
 {
 	namespace ObjectsInfo 
@@ -68,8 +69,10 @@ namespace MSLL
 			SECTION_MEMORY_ST,
 			MOVRR,
 			MOVRI,
-			PUSH,
-			POP,
+			STACK_UP,		//size - arg0      
+			STACK_DOWN,    //size - arg0 
+			PUSH,		//reg and size
+			POP,		//reg and size
 
 			LEA_STATIC,		// Static address calculating: MemoryAddress (static) -> reg 
 			LEA_DYNAMIC,	// Dynamic address calculating: register (with address) -> register_dest
@@ -266,12 +269,12 @@ namespace MSLL
 		struct SymbolData 
 		{
 			symbolid id;
-			size_t ir_code_base_offset;
+			size_t offset_m_c;
 			moduleid module_id;
 			
 			SymbolType type;
 
-			SymbolData(symbolid id,size_t ir_cbo, moduleid module_id, SymbolType type):id(id),ir_code_base_offset(ir_cbo),module_id(module_id),type(type){}
+			SymbolData(symbolid id,size_t ir_cbo, moduleid module_id, SymbolType type):id(id), offset_m_c(ir_cbo),module_id(module_id),type(type){}
 		};
 
 
@@ -284,7 +287,9 @@ namespace MSLL
 			std::vector<SymbolData> symbols;
 			std::vector<moduleid> linking_order;
 
+			std::unordered_map<moduleid, size_t> stack_offset_of_module;
 
+			size_t global_stack_offset = 0;
 
 			uint16_t compilation_flags;
 			float version = 1.0f;
@@ -301,6 +306,9 @@ namespace MSLL
 				}
 				constants.clear();
 			}
+
+
+
 		};
 
 
@@ -311,6 +319,7 @@ namespace MSLL
 			uint16_t compilation_flags = 0;
 
 			size_t code_size_in_bytes = 0;
+			size_t stack_size = 0;
 		};
 
 		struct ExecutionData 

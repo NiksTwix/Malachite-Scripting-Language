@@ -1,8 +1,8 @@
 #pragma once
-
-namespace MSLL 
+#include "unordered_map"
+namespace MSLL
 {
-	namespace MSLVM_1 
+	namespace MSLVM_1
 	{
 		using memory_cell = uint8_t;
 		using register_index = uint64_t;
@@ -12,6 +12,17 @@ namespace MSLL
 		using register_real = double;
 		using register_pointer = uint64_t;
 
+
+		enum SpecialRegister : uint8_t {
+			SP = 120,    // Stack Pointer (R120)
+			FP = 121,    // Frame Pointer (R121)
+			IP = 122,    // Instruction Pointer (R122)
+			FL = 123,    // Flags (R123)
+			A0 = 124,    // Argument/Accumulator 0 (R124)
+			A1 = 125,    // Argument/Accumulator 1 (R125)
+			A2 = 126,    // Argument/Accumulator 2 (R126)
+			RT = 127     // Return Value Temporary (R127)
+		};
 
 		enum VMOperationCode : uint8_t
 		{
@@ -144,5 +155,58 @@ namespace MSLL
 			VMOperation(VMOperationCode code, Register arg0) : code(code), arg0(arg0) {}
 			VMOperation() {}
 		};
+		class OpCodeTable
+		{
+			std::unordered_map<ObjectsInfo::ByteOpCode, VMOperationCode> table =
+			{
+				{ObjectsInfo::ByteOpCode::ADDR,VMOperationCode::ADD_RRR_REAL	},
+				{ObjectsInfo::ByteOpCode::SUBR,VMOperationCode::SUB_RRR_REAL	},
+				{ObjectsInfo::ByteOpCode::DIVR,VMOperationCode::DIV_RRR_REAL	},
+				{ObjectsInfo::ByteOpCode::MULR,VMOperationCode::MUL_RRR_REAL	},
+				{ObjectsInfo::ByteOpCode::NEGR,VMOperationCode::NEG_RR_REAL		},
+				{ObjectsInfo::ByteOpCode::EXPR,VMOperationCode::NOP				},//Check!
+				{ObjectsInfo::ByteOpCode::ADDI,VMOperationCode::ADD_RRR_INTEGER	},
+				{ObjectsInfo::ByteOpCode::SUBI,VMOperationCode::SUB_RRR_INTEGER	},
+				{ObjectsInfo::ByteOpCode::DIVI,VMOperationCode::DIV_RRR_INTEGER	},
+				{ObjectsInfo::ByteOpCode::MULI,VMOperationCode::MUL_RRR_INTEGER	},
+				{ObjectsInfo::ByteOpCode::NEGI,VMOperationCode::NEG_RR_INTEGER	},
+				{ObjectsInfo::ByteOpCode::MODI,VMOperationCode::MOD_RRR_INTEGER	},
+				{ObjectsInfo::ByteOpCode::EXPI,VMOperationCode::NOP				},//Check!
+				{ObjectsInfo::ByteOpCode::ADDU,VMOperationCode::ADD_RRR_UNSIGNED},
+				{ObjectsInfo::ByteOpCode::SUBU,VMOperationCode::SUB_RRR_UNSIGNED},
+				{ObjectsInfo::ByteOpCode::DIVU,VMOperationCode::DIV_RRR_UNSIGNED},
+				{ObjectsInfo::ByteOpCode::MULU,VMOperationCode::MUL_RRR_UNSIGNED},
+				{ObjectsInfo::ByteOpCode::MODU,VMOperationCode::MOD_RRR_UNSIGNED},
+				{ObjectsInfo::ByteOpCode::EXPU,VMOperationCode::NOP				},//Check!
+
+				{ObjectsInfo::ByteOpCode::AND,				VMOperationCode::AND_RRR},
+				{ObjectsInfo::ByteOpCode::OR,				VMOperationCode::OR_RRR},
+				{ObjectsInfo::ByteOpCode::NOT,				VMOperationCode::NOT_RR},
+				{ObjectsInfo::ByteOpCode::BIT_OR,			VMOperationCode::BIT_OR_RRR},
+				{ObjectsInfo::ByteOpCode::BIT_NOT,			VMOperationCode::BIT_NOT_RR},
+				{ObjectsInfo::ByteOpCode::BIT_AND,			VMOperationCode::BIT_AND_RRR},
+				{ObjectsInfo::ByteOpCode::BIT_OFFSET_LEFT,	VMOperationCode::BIT_OFFSET_LEFT_RRR},
+				{ObjectsInfo::ByteOpCode::BIT_OFFSET_RIGHT,	VMOperationCode::BIT_OFFSET_RIGHT_RRR},
+
+				{ObjectsInfo::ByteOpCode::CMPI,VMOperationCode::CMP_RR_INTEGER},
+				{ObjectsInfo::ByteOpCode::CMPU,VMOperationCode::CMP_RR_UNSIGNED},
+				{ObjectsInfo::ByteOpCode::CMPR,VMOperationCode::CMP_RR_REAL}
+			};
+		public:
+			static OpCodeTable& Get()
+			{
+				static OpCodeTable table;
+				return table;
+			}
+
+			VMOperationCode At(ObjectsInfo::ByteOpCode boc)
+			{
+				auto it = table.find(boc);
+				if (it == table.end()) return VMOperationCode::NOP;
+				return it->second;
+			}
+
+		};
+		
 	}
 }

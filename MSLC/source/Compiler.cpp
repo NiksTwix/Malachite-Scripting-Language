@@ -62,7 +62,7 @@ namespace MSLC
 
 			Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Stage: Packing."));
 
-			auto bytes = packer.ByterizeCommands(&comp_state, b_state->result, id);
+			auto bytes = packer.ByterizeCommands(&comp_state, b_state, id);
 
 
 
