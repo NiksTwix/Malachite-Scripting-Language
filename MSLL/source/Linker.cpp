@@ -9,8 +9,8 @@ namespace MSLL
 	{
 		//MO file loading
 
-		std::pair<char*, size_t> mo_bytes = reader.ReadFile(path);
-		if (mo_bytes.first == nullptr) 
+		ObjectsInfo::static_bpointer  mo_bytes = reader.ReadFile(path);
+		if (!mo_bytes.is_valid())
 		{
 			std::cerr << "Invalid MO file.\n";
 			return false;
@@ -19,6 +19,8 @@ namespace MSLL
 		fs::path directory_path = fs::path(path).parent_path();
 
 		auto state = reader.DeserializeMO(mo_bytes);
+
+		mo_bytes.release();
 
 		switch (vm_index)
 		{

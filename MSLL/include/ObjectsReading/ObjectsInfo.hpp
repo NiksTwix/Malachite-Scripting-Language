@@ -214,6 +214,35 @@ namespace MSLL
 			DEBUG,
 
 		};
+
+		struct static_bpointer
+		{
+			char* ptr = nullptr;
+			size_t bytes_size = 0;
+
+			static_bpointer() = default;
+
+			explicit static_bpointer(size_t bytes) {
+				allocate(bytes);
+			}
+
+			bool allocate(size_t bytes) {
+				ptr = static_cast<char*>(calloc(bytes, 1));
+				if (!ptr) return false;
+				bytes_size = bytes;
+				return true;
+			}
+
+			void release() {
+				if (ptr) ::free(ptr);
+				ptr = nullptr;
+				bytes_size = 0;
+			}
+
+			bool is_valid() { return ptr != nullptr && bytes_size != 0; }
+		};
+
+
 		struct ConstantData 
 		{
 			constantid id;
@@ -286,16 +315,17 @@ namespace MSLL
 
 		struct ExecutionData 
 		{
-			std::pair<char*, size_t> read_only_data = {nullptr,0};
-			std::pair<char*, size_t> code = { nullptr,0 };
+			static_bpointer read_only_data = {};
+			static_bpointer code = {};
 
 
 			void Free() 
 			{
-				if (read_only_data.first != nullptr)delete read_only_data.first;
-				if (code.first != nullptr)delete code.first;
+				read_only_data.release();
+				code.release();
 			}
 		};
+
 
 	}
 }

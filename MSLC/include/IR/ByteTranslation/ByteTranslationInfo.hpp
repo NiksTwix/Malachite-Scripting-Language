@@ -156,7 +156,7 @@ namespace MSLC
 				JMPCV,      //CV- Condition Valid - arg0[where], arg1[condition register]
 				JMPCNV,     //CNV - Condition Not Valid - arg0[where], arg1[condition register]
 				CALL,
-				RET,
+				RET,		//-> inserting GRAB_FRAME with negative in MSLVM_1
 				EXT,	//EXIT
 				SECTION_CONTROL_FLOW_ED,
 
@@ -172,7 +172,7 @@ namespace MSLC
 				TC_ITU,
 
 
-				SYMBOL_LABEL,	//Symbol declaring (function), arg0 - symbol_id
+				SYMBOL_LABEL,	//Symbol declaring (function), arg0 - symbol_id -> inserting GRAB_FRAME with positive in MSLVM_1
 			};
 
 
