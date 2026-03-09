@@ -499,10 +499,10 @@ namespace MSLC
 					size_t free_reg = b_state->registers_table.AllocateFreeGeneral();
 					if (!CheckRegister(b_state, free_reg))return ValueFrame::Invalid();
 					if (frame.dynamic_data_size > 8) {
-						// Big data — load address
+						// Big data — load address of constant
 						PushCommand(b_state,
-							ByteCommand(ByteOpCode::LOAD_CONST_DYNAMIC,
-								CommandArgument(frame.data, CommandSource::Constant),                   // static_offset
+							ByteCommand(ByteOpCode::LEA_CONST,
+								CommandArgument(frame.data, CommandSource::Constant),                   
 								CommandArgument(free_reg, Register)),
 							current_line);
 						frame.data = free_reg;

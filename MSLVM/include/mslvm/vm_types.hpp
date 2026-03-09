@@ -13,6 +13,9 @@ namespace MSLVM
 	{
 		memory_cell memory[STACK_SIZE + HEAP_SIZE]{};
 		HeapFreeIntervals HFI{HEAP_START, HEAP_END};
+
+		size_t rod_size = 0;
+		uint8_t* rod_memory = nullptr;		//Allocates by loader
 	};
 
 

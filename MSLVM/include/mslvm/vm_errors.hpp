@@ -16,7 +16,7 @@ namespace MSLVM
 		StackOverflow,
 		StackUnderflow,
 		InvalidMemoryAccess,
-
+		InvalidRODAccess,
 		RegisterOverflow,
 
 		FrameExpansionFailed,

@@ -80,6 +80,9 @@ namespace MSLL
 			LOAD_BY_ADDRESS,			// register(ARG0), register - address(ARG1), size(ARG2)
 			STORE_BY_ADDRESS,			// register(ARG0), register - address(ARG1), size(ARG2)
 
+			LOAD_CONST_LOCAL,		//register-dest, offset in rod, size
+			LOAD_CONST_BY_ADDRESS,	//register-dest, reg with address, size
+
 			ALLOCATE_MEMORY,		//arg0[register of address's saving], arg1[register with size of memory's interval]
 			FREE_MEMORY,			//arg0[register with address], arg1[register with size of memory's interval]
 			GRAB_FRAME,				//arg0[bytes] If bytes < 0 => grab to up, else - grab to down 

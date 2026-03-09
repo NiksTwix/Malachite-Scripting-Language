@@ -145,7 +145,7 @@ namespace MSLC
 				STORE_DYNAMIC,	//Storing by address in register
 
 				LOAD_CONST_STATIC,	//load constant value to register. Linker will replace id on offset
-				LOAD_CONST_DYNAMIC,	//load constant offset to register. Linker will replace id on offset
+				LEA_CONST,	//Load constant pointer in register. ConstantID, register
 
 				LOAD_STATIC,	//Loading by address in register
 				STORE_STATIC,	//Storing by address in register

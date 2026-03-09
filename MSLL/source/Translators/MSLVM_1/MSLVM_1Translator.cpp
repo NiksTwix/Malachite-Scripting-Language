@@ -129,26 +129,73 @@ namespace MSLL
 			}
 				break;
 			case ObjectsInfo::ByteOpCode::LEA_STATIC:
+			{
 				VMOperation operation;
 				operation.code = VMOperationCode::MOV_RI;
 				operation.arg0 = command.arg1.data;
 				operation.arg1 = command.arg0.data;
 				result.push_back(operation);
 				break;
+			}	
 			case ObjectsInfo::ByteOpCode::LEA_DYNAMIC:
-				break;
+				std::cerr << "Unsupported operation. Byte operation code:" << command.code << "\n";
+				return false;
+
 			case ObjectsInfo::ByteOpCode::LOAD_DYNAMIC:
+			{
+				VMOperation operation;
+				operation.code = VMOperationCode::LOAD_BY_ADDRESS;
+				operation.arg0 = command.arg1.data;
+				operation.arg1 = command.arg0.data;
+				operation.arg2 = command.arg2.data;
+				result.push_back(operation);
 				break;
+			}	
 			case ObjectsInfo::ByteOpCode::STORE_DYNAMIC:
+			{
+				VMOperation operation;
+				operation.code = VMOperationCode::STORE_BY_ADDRESS;
+				operation.arg0 = command.arg1.data;
+				operation.arg1 = command.arg0.data;
+				operation.arg2 = command.arg2.data;
+				result.push_back(operation);
 				break;
+			}
 			case ObjectsInfo::ByteOpCode::LOAD_CONST_STATIC:
+			{
+				VMOperation operation;
+				operation.code = VMOperationCode::LOAD_CONST_LOCAL;
+				operation.arg0 = command.arg1.data;
+				operation.arg1 = state->constants[command.arg0.data].memory_offset;
+				operation.arg2 = command.arg2.data;
+				result.push_back(operation);
 				break;
-			case ObjectsInfo::ByteOpCode::LOAD_CONST_DYNAMIC:
-				break;
+			}
+			case ObjectsInfo::ByteOpCode::LEA_CONST:
+			{
+				std::cerr << "Unsupported operation. Byte operation code:" << command.code << "\n";
+				return false;
+			}
 			case ObjectsInfo::ByteOpCode::LOAD_STATIC:
+			{
+				VMOperation operation;
+				operation.code = VMOperationCode::LOAD_LOCAL;
+				operation.arg0 = command.arg1.data;
+				operation.arg1 = command.arg0.data;
+				operation.arg2 = command.arg2.data;
+				result.push_back(operation);
 				break;
+			}
 			case ObjectsInfo::ByteOpCode::STORE_STATIC:
+			{
+				VMOperation operation;
+				operation.code = VMOperationCode::STORE_LOCAL;
+				operation.arg0 = command.arg1.data;
+				operation.arg1 = command.arg0.data;
+				operation.arg2 = command.arg2.data;
+				result.push_back(operation);
 				break;
+			}
 
 			default:
 				break;

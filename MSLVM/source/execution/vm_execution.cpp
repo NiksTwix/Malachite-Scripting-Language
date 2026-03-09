@@ -319,7 +319,46 @@ namespace MSLVM
 				write_little_endian(state.memory.memory, address, value, size);
 				break;
 			}
-		
+			case LOAD_CONST_BY_ADDRESS:
+			{
+				uint64_t address = state.registers[REG_U(operation.arg1)].u;
+				uint64_t size = REG_U(operation.arg2);
+
+				if (size == 0) {
+					state.registers[REG_U(operation.arg0)].u = 0;
+					break;
+				}
+
+				uint64_t check_address = address + size;
+
+				if (check_address >= state.memory.rod_size) {
+					errcode = ErrorCode::InvalidRODAccess;
+					break;
+				}
+
+				// Read little-endian
+				uint64_t value = read_little_endian(state.memory.rod_memory, address, size);
+				state.registers[REG_U(operation.arg0)].u = value;
+				break;
+			}
+
+			case LOAD_CONST_LOCAL:
+			{
+				uint64_t offset = REG_U(operation.arg1);
+				uint64_t size = REG_U(operation.arg2);
+
+			
+				// Checking
+				if (offset > state.memory.rod_size || offset + size > state.memory.rod_size) {
+					errcode = ErrorCode::InvalidRODAccess;
+					break;
+				}
+
+				// Read little-endian
+				uint64_t value = read_little_endian(state.memory.memory, offset, size);
+				state.registers[REG_U(operation.arg0)].u = value;
+				break;
+			}
 			case CALC_FRAME_ADDRESS:        
 			{
 				uint64_t offset = REG_U(operation.arg1);
