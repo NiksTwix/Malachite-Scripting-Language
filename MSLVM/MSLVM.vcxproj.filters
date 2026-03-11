@@ -27,6 +27,9 @@
     <ClCompile Include="source\execution\vm_execution.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="source\memory\vm_memory.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\mslvm\fwd.hpp">

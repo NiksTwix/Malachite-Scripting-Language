@@ -6,7 +6,7 @@
 
 namespace MSLVM 
 {
-	enum ErrorCode: uint8_t
+	enum ErrorCode : uint8_t
 	{
 		NoError = 0,
 
@@ -20,6 +20,8 @@ namespace MSLVM
 		RegisterOverflow,
 
 		FrameExpansionFailed,
+
+		ChangingConstantData,
 
 
 		//Arithmetic

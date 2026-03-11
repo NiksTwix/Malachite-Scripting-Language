@@ -130,6 +130,7 @@
     <ClCompile Include="MSLVM.cpp" />
     <ClCompile Include="source\api\virtual_machine.cpp" />
     <ClCompile Include="source\execution\vm_execution.cpp" />
+    <ClCompile Include="source\memory\vm_memory.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\mslvm\fwd.hpp" />

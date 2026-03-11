@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include "vm_linked_list.hpp"
+#include "vm_errors.hpp"
 #include <iostream>
 
 
@@ -33,6 +34,58 @@ namespace MSLVM
         }
         return value;
     }
+
+    constexpr size_t MinStackSize = UINT16_MAX / 2;
+    constexpr size_t MinHeapSize = UINT16_MAX / 2;
+
+
+    struct alignas(8) DynamicMemory		//LittleEndian
+    {
+    private:
+        uint8_t* m_pointer = nullptr;
+
+        size_t code_sa = 0;		//sa - start address, ea - end address (last + 1)
+        size_t rod_sa = 0;
+        size_t stack_sa = 0;
+        size_t heap_sa = 0;
+        size_t end = 0;
+        size_t size = 0;
+
+       
+
+        inline size_t GetSize(size_t first, size_t second) { if (second < first) return 0; return second - first; }
+
+        void TransferData(uint8_t* new_m_pointer, size_t new_size);
+     
+
+        inline bool InInterval(size_t istart, size_t iend, size_t place)
+        {
+            return place >= istart && place <= iend;
+        }
+
+
+        ErrorCode status = ErrorCode::NoError;
+
+    public:
+        DynamicMemory() = default;
+
+        void Allocate(size_t code_size, size_t rod_size);
+
+        uint64_t Read(uint64_t address, size_t size);		//64 - max size of data
+        void Write(uint64_t address, uint64_t value, size_t size);		//64 - max size of data
+
+        void Free();
+
+        void IncreaseStack();	//increase stack 2 times more
+        void IncreaseHeap();	//increase heap 2 times more
+
+        void DencreaseStack();	//IDK
+        void DencreaseHeap();	//IDK
+
+
+        inline ErrorCode GetStatus() { return status; }
+    };
+
 
     struct HeapFreeInterval {
         uint64_t start;
@@ -394,4 +447,8 @@ namespace MSLVM
         size_t size, size_t alignment) {
         return hfi.allocate_aligned(size, alignment, &address) == ALLOC_SUCCESS;
     }
+
+
+
+  
 }
