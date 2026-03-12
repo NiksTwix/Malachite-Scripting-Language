@@ -20,26 +20,16 @@ namespace MSLVM
 {
 
     inline void write_little_endian(uint8_t* memory, uint64_t address, uint64_t value, size_t size) {
-
-        size = size > VALID_MEMORY_ACCESS_SIZE? VALID_MEMORY_ACCESS_SIZE : size;
-        for (size_t i = 0; i < size; i++) {
-            memory[address+i] = static_cast<uint8_t>((value >> (i * BYTE)) & 0xFF);
-        }
     }
     inline uint64_t read_little_endian(const uint8_t* memory, uint64_t address, size_t size) {
-        uint64_t value = 0;
-        size = size > VALID_MEMORY_ACCESS_SIZE ? VALID_MEMORY_ACCESS_SIZE : size;
-        for (size_t i = 0; i < size; i++) {
-            value |= static_cast<uint64_t>(memory[address + i]) << (i * BYTE);
-        }
-        return value;
+        return 0;
     }
 
     constexpr size_t MinStackSize = UINT16_MAX / 2;
     constexpr size_t MinHeapSize = UINT16_MAX / 2;
 
 
-    struct alignas(8) DynamicMemory		//LittleEndian
+    struct alignas(8) DynamicMemory		//LittleEndian      Stack is static. Heap is dynamic(can be resized) 
     {
     private:
         uint8_t* m_pointer = nullptr;
@@ -48,14 +38,23 @@ namespace MSLVM
         size_t rod_sa = 0;
         size_t stack_sa = 0;
         size_t heap_sa = 0;
-        size_t end = 0;
-        size_t size = 0;
 
+        union 
+        {
+            size_t end = 0;
+            size_t size;
+        };
+        
+
+        size_t code_size = 0;   //constant
+        size_t rod_size = 0;    //constant
+        size_t stack_size = 0;
+        size_t heap_size = 0;
        
 
         inline size_t GetSize(size_t first, size_t second) { if (second < first) return 0; return second - first; }
 
-        void TransferData(uint8_t* new_m_pointer, size_t new_size);
+        void TransferData(size_t new_stack_size, size_t new_heap_size);
      
 
         inline bool InInterval(size_t istart, size_t iend, size_t place)
@@ -74,12 +73,13 @@ namespace MSLVM
         uint64_t Read(uint64_t address, size_t size);		//64 - max size of data
         void Write(uint64_t address, uint64_t value, size_t size);		//64 - max size of data
 
+        VMOperation& GetOperation(size_t index);
+
+        inline size_t GetOperationsCount() { return code_size / sizeof(VMOperation); }
+
+
         void Free();
-
-        void IncreaseStack();	//increase stack 2 times more
         void IncreaseHeap();	//increase heap 2 times more
-
-        void DencreaseStack();	//IDK
         void DencreaseHeap();	//IDK
 
 

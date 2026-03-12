@@ -161,4 +161,45 @@ namespace MSLVM
 		PRINT_UNSIGNED,		//arg0[VMCall], arg1[register_from]
 		PRINT_CHAR,			//arg0[VMCall], arg1[register_from]
 	};
+
+	struct alignas(8) Register
+	{
+		union
+		{
+			register_integer i;
+			register_unsigned u;	//unsigned int/pointer
+			register_real r;
+		};
+		Register()
+		{
+			u = 0;
+		}
+		explicit Register(register_integer imm_i)
+		{
+			i = imm_i;
+		}
+		Register(register_unsigned imm_u)	//Register number
+		{
+			u = imm_u;
+		}
+		explicit Register(register_real imm_r)
+		{
+			r = imm_r;
+		}
+	};
+
+	struct alignas(8) VMOperation	//32 bytes
+	{
+		Register arg0{};	//8 byte
+		Register arg1{};	//8 byte
+		Register arg2{};	//8 byte
+		uint32_t dsi{};			//4 byte
+		VMOperationCode code{};	//1 byte
+		VMOperation(VMOperationCode code, Register arg0, Register arg1, Register arg2, uint32_t debug_symbol_index) : code(code), arg0(arg0), arg1(arg1), arg2(arg2), dsi(debug_symbol_index) {}
+		VMOperation(VMOperationCode code, Register arg0, Register arg1, Register arg2) : code(code), arg0(arg0), arg1(arg1), arg2(arg2) {}
+		VMOperation(VMOperationCode code, Register arg0, Register arg1) : code(code), arg0(arg0), arg1(arg1) {}
+		VMOperation(VMOperationCode code, Register arg0) : code(code), arg0(arg0) {}
+		VMOperation() {}
+	};
+
 }
