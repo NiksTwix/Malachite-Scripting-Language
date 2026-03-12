@@ -230,6 +230,9 @@ namespace MSLL
 				c_offset += constant.size_in_bytes;
 				constant.Free();
 			}
+
+			state->global_stack_offset = c_offset;
+
 			std::vector<VMOperation> commands;
 			for (ObjectsInfo::moduleid id : state->linking_order) 
 			{
