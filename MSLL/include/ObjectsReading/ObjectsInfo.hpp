@@ -289,7 +289,7 @@ namespace MSLL
 
 			std::unordered_map<moduleid, size_t> stack_offset_of_module;
 
-			size_t global_stack_offset = 0;
+			size_t global_memory_offset = 0;
 
 			uint16_t compilation_flags;
 			float version = 1.0f;

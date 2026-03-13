@@ -13,6 +13,8 @@ namespace MSLL
 		using register_pointer = uint64_t;
 
 
+		constexpr size_t DEFAULT_ALIGNMENT = 8;
+
 		enum SpecialRegister : uint8_t {
 			SP = 120,    // Stack Pointer (R120)
 			FP = 121,    // Frame Pointer (R121)
@@ -212,4 +214,5 @@ namespace MSLL
 		};
 		
 	}
+
 }

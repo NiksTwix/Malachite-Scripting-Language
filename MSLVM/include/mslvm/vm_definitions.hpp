@@ -27,16 +27,12 @@ namespace MSLVM
 		RT = 127     // Return Value Temporary (R127)
 	};
 
+	constexpr size_t MinStackSize = UINT16_MAX / 2;
+	constexpr size_t MinHeapSize = UINT16_MAX / 2;
 
-	constexpr uint32_t STACK_SIZE = 32768; //32 KB
-	constexpr uint32_t STACK_START = 0;
-	constexpr uint32_t STACK_END = STACK_START + STACK_SIZE - 1;
+	constexpr size_t INVALID_ADDRESS = UINT64_MAX;
 
-	constexpr uint32_t HEAP_SIZE = 32768; //32 KB
-	constexpr uint32_t HEAP_START = STACK_END + 1;
-	constexpr uint32_t HEAP_END = HEAP_START + HEAP_SIZE - 1;
-
-	
+	constexpr size_t DEFAULT_ALIGNMENT = 8;
 
 	constexpr uint32_t CALL_STACK_SIZE = 256;
 	constexpr uint32_t ERROR_STACK_SIZE = 64;

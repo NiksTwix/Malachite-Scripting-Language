@@ -212,13 +212,13 @@ namespace MSLL
 
 			//moving data, constants freeing and offset calculating
 
-			size_t c_offset = 0;
+			size_t rod_offset = 0;
 
 			for (auto& constant: state->constants)
 			{
-				constant.memory_offset = c_offset;
+				constant.memory_offset = rod_offset;
 
-				if (constant.size_in_bytes + c_offset > execution_data.read_only_data.bytes_size) 
+				if (constant.size_in_bytes + rod_offset > execution_data.read_only_data.bytes_size) 
 				{
 					std::cerr << "Invalid size calculating in the constants handling process.";
 					execution_data.Free();
@@ -226,18 +226,18 @@ namespace MSLL
 					return ObjectsInfo::ExecutionData();
 				}
 
-				memcpy(execution_data.read_only_data.ptr + c_offset, constant.data, constant.size_in_bytes); 
-				c_offset += constant.size_in_bytes;
+				memcpy(execution_data.read_only_data.ptr + rod_offset, constant.data, constant.size_in_bytes); 
+				rod_offset += constant.size_in_bytes;
 				constant.Free();
 			}
 
-			state->global_stack_offset = c_offset;
+			state->global_memory_offset = ((rod_offset + DEFAULT_ALIGNMENT - 1) / DEFAULT_ALIGNMENT) * DEFAULT_ALIGNMENT;
 
 			std::vector<VMOperation> commands;
 			for (ObjectsInfo::moduleid id : state->linking_order) 
 			{
 				std::string file_name = state->module_prefix + std::to_string(id) + "." + state->module_extention;
-				state->stack_offset_of_module[id] = state->global_stack_offset;
+				state->stack_offset_of_module[id] = state->global_memory_offset;
 				bool check = HandleModule(directory / file_name, state, reader, commands);
 				if (!check) 
 				{
@@ -266,7 +266,7 @@ namespace MSLL
 				if (HandleCommand(pool, state, commands, i)) return false;
 			}
 
-			state->global_stack_offset += pool->stack_size;
+			state->global_memory_offset += pool->stack_size;
 			return true;
 		}
 	}
