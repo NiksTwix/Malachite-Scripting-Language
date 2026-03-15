@@ -86,6 +86,9 @@ namespace MSLVM
         void ClearDynamicPart();    //Stack + heap
 
         inline ErrorCode GetStatus() { return status; }
+
+        bool LoadCode(char* code_bytes, size_t size);
+        bool LoadROD(char* rod_bytes, size_t size);
     };
 
 

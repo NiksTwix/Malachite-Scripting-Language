@@ -31,6 +31,14 @@ namespace MSLVM
 
 		//VM Calls
 		InvalidVMCall,
+
+
+		//FileLoading
+
+		InvalidMagic,
+		InvalidFile,
+		IncorrectVMVCode,
+
 	};
 
 	struct ErrorFrame 

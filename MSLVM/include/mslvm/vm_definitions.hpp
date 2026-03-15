@@ -17,6 +17,9 @@ namespace MSLVM
 	constexpr register_index GENERAL_REGISTERS = 120;   // R0-R119
 	constexpr register_index SPECIAL_REGISTERS = 8;     // R120-R127
 
+	constexpr char msli_magic[] = "MSLI";
+	constexpr float msli_version = 1.0f;
+	constexpr uint8_t vm_version_code = 1;
 	enum SpecialRegister : uint8_t {
 		SP = 120,    // Stack Pointer (R120)
 		FP = 121,    // Frame Pointer (R121)

@@ -45,6 +45,20 @@ namespace MSLVM
 	{
 		memset(m_pointer + ToNative(stack_sa), 0, stack_size + heap_size);
 	}
+
+	bool DynamicMemory::LoadCode(char* code_bytes, size_t size)
+	{
+		memcpy(m_pointer + code_sa, code_bytes, size);
+
+		return true;
+	}
+
+	bool DynamicMemory::LoadROD(char* rod_bytes, size_t size)
+	{
+		memcpy(m_pointer + ToNative(rod_sa), rod_bytes, size);
+
+		return true;
+	}
 	
 	uint64_t DynamicMemory::Read(uint64_t address, size_t size)
 	{
@@ -94,8 +108,8 @@ namespace MSLVM
 			return;
 		}
 
-		code_sa = 0;
-
+		code_sa = 0;	//native
+		//virtual
 		rod_sa = 0;
 		stack_sa = rod_sa + rod_size;
 		heap_sa = stack_sa + MinStackSize;

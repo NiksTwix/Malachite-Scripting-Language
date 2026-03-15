@@ -9,7 +9,7 @@ namespace MSLVM
 	{
 	public:
 
-		std::vector<VMOperation> LoadBinary(const std::string& path);
+		bool LoadScript(const std::string& path);
 
 	private:
 		VMState state;
