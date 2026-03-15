@@ -23,7 +23,7 @@ namespace MSLL
 		public:
 			ObjectsInfo::ExecutionData Translate(fs::path directory, std::shared_ptr<ObjectsInfo::LinkingState> state, ObjectsReader& reader);
 
-			bool HandleModule(fs::path file, std::shared_ptr<ObjectsInfo::LinkingState> state, ObjectsReader& reader, std::vector<VMOperation>& commands);
+			bool HandleModule(fs::path file, std::shared_ptr<ObjectsInfo::LinkingState> state, ObjectsReader& reader, std::vector<VMOperation>& commands, ObjectsInfo::moduleid id);
 
 		};
 

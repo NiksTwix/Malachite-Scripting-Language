@@ -13,28 +13,45 @@ namespace MSLL
 
 			//Symbol handling
 
-			if (cmd.flags & ObjectsInfo::Flag::UnhandledSymbol) 
-			{
-				//checking arg0,arg1,arg2 -> replace symbol to address or ip by symbol's type
-				auto checking = [](ObjectsInfo::CommandArgument& arg, std::shared_ptr<ObjectsInfo::LinkingState> state, size_t i)
+			//if (cmd.flags & ObjectsInfo::Flag::UnhandledSymbol) 
+			//{
+			//	//checking arg0,arg1,arg2 -> replace symbol to address or ip by symbol's type
+			//	
+			//}
+			auto checking = [](ObjectsInfo::CommandArgument& arg, std::shared_ptr<ObjectsInfo::LinkingState> state, size_t i, ObjectsInfo::moduleid m_id)
+				{
+					if (arg.type == ObjectsInfo::CommandSource::Symbol)
 					{
-						if (arg.type == ObjectsInfo::CommandSource::Symbol)
+						if (arg.data >= state->symbols.size())
 						{
-							if (arg.data >= state->symbols.size())
-							{
-								std::cerr << "Invalid symbol in argument 0. Byte Command index:" << i << "\n";
-								return false;
-							}
-							auto& symbol_info = state->symbols[arg.data];
-							arg.data = state->stack_offset_of_module[symbol_info.module_id] + symbol_info.offset_m_c;
-							arg.type = symbol_info.type == ObjectsInfo::SymbolType::Variable ? ObjectsInfo::CommandSource::MemoryAddress : ObjectsInfo::CommandSource::Immediate;
+							std::cerr << "Invalid symbol in argument 0. Byte Command index:" << i << "\n";
+							return false;
 						}
-					};
-				checking(cmd.arg0, state, i);
-				checking(cmd.arg1, state, i);
-				checking(cmd.arg2, state, i);
-			}
-
+						auto& symbol_info = state->symbols[arg.data];
+						if (symbol_info.type == ObjectsInfo::SymbolType::Variable)
+						{
+							arg.data = state->stack_offset_of_module[symbol_info.module_id] + symbol_info.offset_m_c;
+							arg.type = ObjectsInfo::CommandSource::MemoryAddress;
+						}
+						else if (symbol_info.type == ObjectsInfo::SymbolType::Function)
+						{
+							arg.data = symbol_info.native_code_offset;
+							arg.type = ObjectsInfo::CommandSource::Immediate;
+						}
+					}
+					else if (arg.type == ObjectsInfo::CommandSource::MemoryAddress)
+					{
+						arg.data = state->stack_offset_of_module[m_id] + arg.data;
+					}
+					else if (arg.type == ObjectsInfo::CommandSource::Constant)
+					{
+						arg.data = state->constants[arg.data].memory_offset;
+						arg.type = ObjectsInfo::CommandSource::MemoryAddress;
+					}
+				};
+			checking(cmd.arg0, state, i,commands->m_id);
+			checking(cmd.arg1, state, i,commands->m_id);
+			checking(cmd.arg2, state, i,commands->m_id);
 			bool check = true;
 
 			if ((cmd.code > ObjectsInfo::ByteOpCode::SECTION_ARITHMETIC_ST && cmd.code < ObjectsInfo::ByteOpCode::SECTION_ARITHMETIC_ED) 
@@ -164,10 +181,10 @@ namespace MSLL
 			case ObjectsInfo::ByteOpCode::LOAD_CONST_STATIC:
 			{
 				VMOperation operation;
-				operation.code = VMOperationCode::LOAD_CONST_LOCAL;
-				operation.arg0 = command.arg1.data;
-				operation.arg1 = state->constants[command.arg0.data].memory_offset;
-				operation.arg2 = command.arg2.data;
+				operation.code = VMOperationCode::LOAD_LOCAL;
+				operation.arg0 = command.arg1.data;//REGISTER FOR SAVING
+				operation.arg1 = command.arg0.data;//ADDRESS IN ROD
+				operation.arg2 = command.arg2.data;//SIZE
 				result.push_back(operation);
 				break;
 			}
@@ -200,7 +217,7 @@ namespace MSLL
 			default:
 				break;
 			}
-			return false;
+			return true;
 		}
 
 
@@ -234,23 +251,29 @@ namespace MSLL
 			state->rod_offset_aligned = rod_offset;
 			state->global_memory_offset = rod_offset;
 
+			execution_data.aligned_rod_size = rod_offset;
+
 			std::vector<VMOperation> commands;
 			for (ObjectsInfo::moduleid id : state->linking_order) 
 			{
 				std::string file_name = state->module_prefix + std::to_string(id) + "." + state->module_extention;
 				state->stack_offset_of_module[id] = state->global_memory_offset;
-				bool check = HandleModule(directory / file_name, state, reader, commands);
+				bool check = HandleModule(directory / file_name, state, reader, commands,id);
 				if (!check) 
 				{
 					std::cerr << "Error of module(" << id << ") handling. Module's name:" << file_name << "\n";
+					execution_data.read_only_data.release();
 					return ObjectsInfo::ExecutionData();
 				}
 			}
 
+			execution_data.code.allocate(commands.size() * sizeof(VMOperation));
+
+			memcpy(execution_data.code,commands.data(), commands.size() * sizeof(VMOperation));
 
 			return execution_data;
 		}
-		bool TranslatorVM_1::HandleModule(fs::path file, std::shared_ptr<ObjectsInfo::LinkingState> state, ObjectsReader& reader, std::vector<VMOperation>& commands)
+		bool TranslatorVM_1::HandleModule(fs::path file, std::shared_ptr<ObjectsInfo::LinkingState> state, ObjectsReader& reader, std::vector<VMOperation>& commands, ObjectsInfo::moduleid id)
 		{
 			ObjectsInfo::static_bpointer  co_bytes = reader.ReadFile(file.string());
 			if (co_bytes.ptr == nullptr)
@@ -260,7 +283,8 @@ namespace MSLL
 			}
 
 			std::shared_ptr<ObjectsInfo::CommandsPool> pool = reader.DeserializeCO(co_bytes);
-			
+
+			pool->m_id = id;
 
 			for (size_t i = 0; i < pool->commands.size(); i++) 
 			{

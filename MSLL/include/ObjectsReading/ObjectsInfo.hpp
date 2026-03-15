@@ -254,7 +254,7 @@ namespace MSLL
 			size_t memory_offset;
 			void Free() 
 			{
-				delete data;
+				free(data);
 			}
 			void InitBy(char* source, size_t bytes_count) 
 			{
@@ -269,7 +269,9 @@ namespace MSLL
 		struct SymbolData 
 		{
 			symbolid id;
-			size_t offset_m_c;
+			//offset memory code
+			size_t offset_m_c;//For variable its memory address, for function - code. 
+			size_t native_code_offset; //Code address in target representation (SYMBOL_LABEL)
 			moduleid module_id;
 			
 			SymbolType type;
@@ -322,12 +324,17 @@ namespace MSLL
 
 			size_t code_size_in_bytes = 0;
 			size_t stack_size = 0;
+
+			moduleid m_id = UINT16_MAX;
+
 		};
 
 		struct ExecutionData 
 		{
 			static_bpointer read_only_data = {};
 			static_bpointer code = {};
+
+			size_t aligned_rod_size = 0;
 
 
 			void Free() 
