@@ -230,8 +230,9 @@ namespace MSLL
 				rod_offset += constant.size_in_bytes;
 				constant.Free();
 			}
-
-			state->global_memory_offset = ((rod_offset + DEFAULT_ALIGNMENT - 1) / DEFAULT_ALIGNMENT) * DEFAULT_ALIGNMENT;
+			rod_offset = ((rod_offset + DEFAULT_ALIGNMENT - 1) / DEFAULT_ALIGNMENT) * DEFAULT_ALIGNMENT;
+			state->rod_offset_aligned = rod_offset;
+			state->global_memory_offset = rod_offset;
 
 			std::vector<VMOperation> commands;
 			for (ObjectsInfo::moduleid id : state->linking_order) 

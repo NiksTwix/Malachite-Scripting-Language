@@ -1,9 +1,9 @@
 #pragma once
-#include <cstdint>
+
 #include "vm_linked_list.hpp"
 #include "vm_errors.hpp"
 #include <iostream>
-
+#include <cstdint>
 
 
 #define BYTE 8
@@ -14,13 +14,6 @@
 
 namespace MSLVM
 {
-
-    inline void write_little_endian(uint8_t* memory, uint64_t address, uint64_t value, size_t size) {
-    }
-    inline uint64_t read_little_endian(const uint8_t* memory, uint64_t address, size_t size) {
-        return 0;
-    }
-
    
 
     struct alignas(8) DynamicMemory		//LittleEndian      Stack is static. Heap is dynamic(can be resized) 
@@ -32,12 +25,10 @@ namespace MSLVM
         size_t rod_sa = 0;
         size_t stack_sa = 0;
         size_t heap_sa = 0;
+        size_t size = 0;
 
-        union 
-        {
-            size_t end = 0;
-            size_t size;
-        };
+        size_t end = 0;
+
         
 
         size_t code_size = 0;   //constant
@@ -64,8 +55,8 @@ namespace MSLVM
 
         void Allocate(size_t code_size, size_t rod_size);
 
-        uint64_t Read(uint64_t address, size_t size);		//64 - max size of data
-        void Write(uint64_t address, uint64_t value, size_t size);		//64 - max size of data
+        uint64_t Read(uint64_t address, size_t size);		//64 - max size of data/ Little Endian
+        void Write(uint64_t address, uint64_t value, size_t size);		//64 - max size of data/ Little Endian
 
         VMOperation& GetOperation(size_t index);
 
@@ -76,6 +67,23 @@ namespace MSLVM
         void IncreaseHeap();	//increase heap 2 times more
         void DencreaseHeap();	//IDK
 
+        inline size_t GetStackStart() { return stack_sa; }
+        inline size_t GetHeapStart() { return heap_sa; }
+        inline size_t GetEnd() { return end; }
+        inline size_t GetSize() { return size; }
+        inline bool IsValid() { return m_pointer != nullptr; }
+
+        inline bool CheckIntervals(size_t start, size_t end, size_t address, size_t size) //end = last_valid address + 1
+        {
+            if (address < start) return false;
+            if (address >= end) return false;
+            if (address + size > end) return false;
+            return true;
+        }
+
+        inline size_t ToNative(size_t address) {return code_size + address;}
+
+        void ClearDynamicPart();    //Stack + heap
 
         inline ErrorCode GetStatus() { return status; }
     };
@@ -161,6 +169,14 @@ namespace MSLVM
             AddInterval(initial);
 
 
+        }
+        HeapFreeIntervals() = default;
+
+        void Set(uint64_t heap_start, uint64_t heap_end, size_t align = DEFAULT_ALIGNMENT) 
+        {
+            alignment = align;
+            HeapFreeInterval initial(heap_start, heap_end);
+            AddInterval(initial);
         }
 
         // Append interval in both indices 

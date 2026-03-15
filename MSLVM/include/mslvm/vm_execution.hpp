@@ -16,7 +16,6 @@ namespace MSLVM
 	void execute_code_compute_goto(VMState& state, VMOperation* operations, size_t length);
 #endif
 
-
 	void handle_vm_call(VMState& state, VMOperation& operation);
 
 }

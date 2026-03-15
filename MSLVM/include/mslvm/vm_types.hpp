@@ -1,5 +1,4 @@
 #pragma once
-#include "vm_errors.hpp"
 #include "vm_memory.hpp"
 
 #define REG_U(reg) ((reg).u)	   // для номеров регистров
@@ -35,15 +34,18 @@ namespace MSLVM
 	struct VMState
 	{
 		Register registers[TOTAL_REGISTERS]{};		//All here: flags, special register and etc
-		LinearMemory memory{};
+		DynamicMemory memory{};
+
+		HeapFreeIntervals HFI{};
+
 		CallStack call_stack{};
 		ErrorStack error_stack{};
 
 		VMState()
 		{
 			registers[SpecialRegister::IP].u = 0;
-			registers[SpecialRegister::SP].u = STACK_START;
-			registers[SpecialRegister::FP].u = STACK_START;
+			registers[SpecialRegister::SP].u = 0;
+			registers[SpecialRegister::FP].u = 0;
 			registers[SpecialRegister::FL].u = 0;
 
 		}

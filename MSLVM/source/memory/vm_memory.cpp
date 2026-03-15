@@ -1,4 +1,4 @@
-#include "..\..\include\mslvm\fwd.hpp"
+//#include "..\..\include\mslvm\fwd.hpp"
 #include "..\..\include\mslvm\vm_definitions.hpp"
 #include "..\..\include\mslvm\vm_stack.hpp"
 #include "..\..\include\mslvm\vm_memory.hpp"
@@ -17,9 +17,9 @@ namespace MSLVM
 
 		memcpy(pointer_p, m_pointer, code_size + rod_size);		//copieng rod and code
 
-		memcpy(pointer_p + stack_sa, m_pointer + stack_sa, stack_size);
+		memcpy(pointer_p + ToNative(stack_sa), m_pointer + ToNative(stack_sa), stack_size);
 
-		memcpy(pointer_p + (stack_sa + new_stack_size), m_pointer + heap_sa, heap_size);
+		memcpy(pointer_p + (ToNative(stack_sa) + new_stack_size), m_pointer + ToNative(heap_sa), heap_size);
 
 		heap_sa = stack_sa + new_stack_size;
 
@@ -29,6 +29,7 @@ namespace MSLVM
 		stack_size = new_stack_size;
 		heap_size = new_heap_size;
 		size = new_size;
+		end = heap_sa + heap_size;
 	}
 
 	void DynamicMemory::IncreaseHeap()
@@ -39,10 +40,15 @@ namespace MSLVM
 	void DynamicMemory::DencreaseHeap()
 	{
 	}
+
+	void DynamicMemory::ClearDynamicPart()
+	{
+		memset(m_pointer + ToNative(stack_sa), 0, stack_size + heap_size);
+	}
 	
 	uint64_t DynamicMemory::Read(uint64_t address, size_t size)
 	{
-		uint64_t native_address = rod_sa + address;
+		uint64_t native_address = ToNative(address);
 		uint64_t value = 0;
 		size = size > VALID_MEMORY_ACCESS_SIZE ? VALID_MEMORY_ACCESS_SIZE : size;
 		for (size_t i = 0; i < size; i++) {
@@ -52,7 +58,7 @@ namespace MSLVM
 	}
 	void DynamicMemory::Write(uint64_t address, uint64_t value, size_t size)
 	{
-		uint64_t native_address = rod_sa + address;
+		uint64_t native_address = ToNative(address);
 		if (native_address < stack_sa)
 		{
 			status = ErrorCode::ChangingConstantData;
@@ -90,14 +96,14 @@ namespace MSLVM
 
 		code_sa = 0;
 
-		rod_sa = code_size;
+		rod_sa = 0;
 		stack_sa = rod_sa + rod_size;
 		heap_sa = stack_sa + MinStackSize;
 
 		stack_size = MinStackSize;
 		heap_size = MinHeapSize;
 
-		end = size;
+		end = heap_sa + heap_size;
 	}
 
 	void DynamicMemory::Free()
@@ -115,6 +121,7 @@ namespace MSLVM
 		stack_sa = 0;
 		heap_sa = 0;
 		end = 0;
+		size = 0;
 		code_size = 0;
 		rod_size = 0;
 		stack_size = 0;

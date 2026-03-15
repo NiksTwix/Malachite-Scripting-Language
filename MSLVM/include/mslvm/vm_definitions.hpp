@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <vector>
 #include <string>
+#include <unordered_map>
 namespace MSLVM
 {
 	using memory_cell = uint8_t;

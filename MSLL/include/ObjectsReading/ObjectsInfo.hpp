@@ -291,6 +291,8 @@ namespace MSLL
 
 			size_t global_memory_offset = 0;
 
+			size_t rod_offset_aligned = 0;		//Saved in executable file
+
 			uint16_t compilation_flags;
 			float version = 1.0f;
 

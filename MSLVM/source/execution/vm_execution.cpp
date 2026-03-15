@@ -4,27 +4,34 @@
 
 namespace MSLVM
 {
-	void clear_vm_state(VMState& state, bool clear_memory)
+	void clear_vm_state(VMState& state, bool clear_memory)	//Plan: load script, clear vm state, execute
 	{
 		state.call_stack.clear();
 		state.error_stack.clear();
-		for (size_t i = 0; i < TOTAL_REGISTERS; i++)	//IP also will be zero
-		{
-			state.registers[i].u = 0;
-		}
-		state.registers[(uint64_t)SpecialRegister::SP].u = STACK_START;
-		state.registers[(uint64_t)SpecialRegister::FP].u = STACK_START;
+		memset(state.registers, 0, TOTAL_REGISTERS * sizeof(Register));
+		state.registers[(uint64_t)SpecialRegister::SP].u = state.memory.GetStackStart();
+		state.registers[(uint64_t)SpecialRegister::FP].u = state.memory.GetStackStart();
 
 		if (clear_memory) 
 		{
-			memset(state.memory.memory, 0, STACK_SIZE + HEAP_SIZE);
+			state.memory.ClearDynamicPart();
 		}
 	}
 	void execute_code_switch(VMState& state, VMOperation* operations, size_t length)
 	{
-		while (state.registers[SpecialRegister::IP].u < length)
+		if (!state.memory.IsValid())
 		{
-			VMOperation operation = *(operations + state.registers[SpecialRegister::IP].u);
+			ErrorFrame ef;
+			ef.code = ErrorCode::InvalidVMMemory;
+			ef.instruction_counter = state.registers[SpecialRegister::IP].u;
+			state.error_stack.push(ef);
+			state.registers[SpecialRegister::FL].u |= (uint64_t)Flag::STOPPED;
+			return;
+		}
+			
+		while (state.registers[SpecialRegister::IP].u < state.memory.GetOperationsCount())
+		{
+			VMOperation& operation = state.memory.GetOperation(state.registers[SpecialRegister::IP].u);
 			ErrorCode errcode{};
 
 			switch (operation.code)
@@ -204,17 +211,15 @@ namespace MSLVM
 			{
 				uint64_t size = REG_U(operation.arg1);
 				uint64_t current_sp = state.registers[SpecialRegister::SP].u;
-				uint64_t new_sp = current_sp + size;
 
-				if (new_sp > STACK_END) {
+				if (!state.memory.CheckIntervals(state.memory.GetStackStart(),state.memory.GetHeapStart(),current_sp,size)) {
 					errcode = ErrorCode::StackOverflow;
 					break;
 				}
 
 				uint64_t value = state.registers[REG_U(operation.arg0)].u;
-				write_little_endian(state.memory.memory, current_sp, value, size);
-
-				state.registers[SpecialRegister::SP].u = new_sp;
+				state.memory.Write(current_sp, value, size);
+				state.registers[SpecialRegister::SP].u = current_sp + size;
 				break;
 			}
 
@@ -223,16 +228,16 @@ namespace MSLVM
 				uint64_t size = REG_U(operation.arg1);
 				uint64_t current_sp = state.registers[SpecialRegister::SP].u;
 
-				if (current_sp < size) {
+				if (current_sp - size < state.memory.GetStackStart()) {
 					errcode = ErrorCode::StackUnderflow;
 					break;
 				}
 
 				uint64_t new_sp = current_sp - size;
 
-				uint64_t value = read_little_endian(state.memory.memory, new_sp, size);
+				uint64_t value = state.memory.Read(new_sp, size);
 				state.registers[REG_U(operation.arg0)].u = value;
-
+				
 				// Обновление SP
 				state.registers[SpecialRegister::SP].u = new_sp;
 				break;
@@ -246,13 +251,13 @@ namespace MSLVM
 				uint64_t address = state.registers[SpecialRegister::FP].u + offset;
 
 				// Checking
-				if (address > STACK_END || size > STACK_END - address + 1) {
+				if (!state.memory.CheckIntervals(0, state.memory.GetHeapStart(), address, size)) {
 					errcode = ErrorCode::InvalidMemoryAccess;
 					break;
 				}
 
 				// Read little-endian
-				uint64_t value = read_little_endian(state.memory.memory, address, size);
+				uint64_t value = state.memory.Read(address, size);
 				state.registers[REG_U(operation.arg0)].u = value;
 				break;
 			}
@@ -265,17 +270,16 @@ namespace MSLVM
 
 				uint64_t address = state.registers[SpecialRegister::FP].u + offset;
 
-				// Проверка границ
-				if (address > STACK_END || size > STACK_END - address + 1) {
+				// Checking of access interval
+				if (!state.memory.CheckIntervals(state.memory.GetStackStart(), state.memory.GetHeapStart(), address, size)) {
 					errcode = ErrorCode::InvalidMemoryAccess;
 					break;
 				}
-
 				// Write little-endian
-				write_little_endian(state.memory.memory, address, value, size);
+				state.memory.Write(address, value, size);
 				break;
 			}
-			case LOAD_BY_ADDRESS: 
+			case LOAD_BY_ADDRESS:
 			{
 				uint64_t address = state.registers[REG_U(operation.arg1)].u;
 				uint64_t size = REG_U(operation.arg2);
@@ -285,15 +289,12 @@ namespace MSLVM
 					break;
 				}
 
-				uint64_t check_address = HEAP_END + 1 - size - address;	//uint64_t overflow
-
-				if (check_address > HEAP_END) {
+				if (!state.memory.CheckIntervals(0, state.memory.GetEnd(), address, size)) {
 					errcode = ErrorCode::InvalidMemoryAccess;
 					break;
 				}
-
 				// Read little-endian
-				uint64_t value = read_little_endian(state.memory.memory, address, size);
+				uint64_t value = state.memory.Read(address, size);
 				state.registers[REG_U(operation.arg0)].u = value;
 				break;
 			}
@@ -307,58 +308,55 @@ namespace MSLVM
 				if (size == 0) {
 					break;
 				}
-				uint64_t check_address = HEAP_END + 1 - size - address;
-
-				// Checking
-				if (check_address > HEAP_END) {
+				if (!state.memory.CheckIntervals(state.memory.GetStackStart(), state.memory.GetEnd(), address, size)) {
 					errcode = ErrorCode::InvalidMemoryAccess;
 					break;
 				}
 
 				// Write little-endian
-				write_little_endian(state.memory.memory, address, value, size);
+				state.memory.Write(address, value, size);
 				break;
 			}
-			case LOAD_CONST_BY_ADDRESS:
-			{
-				uint64_t address = state.registers[REG_U(operation.arg1)].u;
-				uint64_t size = REG_U(operation.arg2);
-
-				if (size == 0) {
-					state.registers[REG_U(operation.arg0)].u = 0;
-					break;
-				}
-
-				uint64_t check_address = address + size;
-
-				if (check_address >= state.memory.rod_size) {
-					errcode = ErrorCode::InvalidRODAccess;
-					break;
-				}
-
-				// Read little-endian
-				uint64_t value = read_little_endian(state.memory.rod_memory, address, size);
-				state.registers[REG_U(operation.arg0)].u = value;
-				break;
-			}
-
-			case LOAD_CONST_LOCAL:
-			{
-				uint64_t offset = REG_U(operation.arg1);
-				uint64_t size = REG_U(operation.arg2);
-
-			
-				// Checking
-				if (offset > state.memory.rod_size || offset + size > state.memory.rod_size) {
-					errcode = ErrorCode::InvalidRODAccess;
-					break;
-				}
-
-				// Read little-endian
-				uint64_t value = read_little_endian(state.memory.memory, offset, size);
-				state.registers[REG_U(operation.arg0)].u = value;
-				break;
-			}
+			//case LOAD_CONST_BY_ADDRESS:
+			//{
+			//	uint64_t address = state.registers[REG_U(operation.arg1)].u;
+			//	uint64_t size = REG_U(operation.arg2);
+			//
+			//	if (size == 0) {
+			//		state.registers[REG_U(operation.arg0)].u = 0;
+			//		break;
+			//	}
+			//
+			//	uint64_t check_address = address + size;
+			//
+			//	if (check_address >= state.memory.gET) {
+			//		errcode = ErrorCode::InvalidRODAccess;
+			//		break;
+			//	}
+			//
+			//	// Read little-endian
+			//	uint64_t value = read_little_endian(state.memory.rod_memory, address, size);
+			//	state.registers[REG_U(operation.arg0)].u = value;
+			//	break;
+			//}
+			//
+			//case LOAD_CONST_LOCAL:
+			//{
+			//	uint64_t offset = REG_U(operation.arg1);
+			//	uint64_t size = REG_U(operation.arg2);
+			//
+			//
+			//	// Checking
+			//	if (offset > state.memory.rod_size || offset + size > state.memory.rod_size) {
+			//		errcode = ErrorCode::InvalidRODAccess;
+			//		break;
+			//	}
+			//
+			//	// Read little-endian
+			//	uint64_t value = read_little_endian(state.memory.memory, offset, size);
+			//	state.registers[REG_U(operation.arg0)].u = value;
+			//	break;
+			//}
 			case CALC_FRAME_ADDRESS:        
 			{
 				uint64_t offset = REG_U(operation.arg1);
@@ -370,25 +368,32 @@ namespace MSLVM
 
 			case ALLOCATE_MEMORY:
 			{
-				uint64_t address = HEAP_START;
-				if (!allocate_memory(state.memory.HFI, address, state.registers[REG_U(operation.arg1)].u))
-				{
+				uint64_t address = state.memory.GetHeapStart();
+				uint64_t size = state.registers[REG_U(operation.arg1)].u;
+				if (size == 0) {
 					errcode = ErrorCode::FailedMemoryAllocation;
 					break;
 				}
-				state.registers[REG_U(operation.arg0)].u =  address;
+				//!allocate_memory(state.HFI, address, state.registers[REG_U(operation.arg1)].u)
+				if (auto t  = state.HFI.Allocate(size,&address); t != ErrorCode::NoError)
+				{
+					errcode = t;
+					break;
+				}
+				state.registers[REG_U(operation.arg0)].u = address;
 				break;
 			}
 			case FREE_MEMORY:
 			{
 				uint64_t address = state.registers[REG_U(operation.arg0)].u;
 				uint64_t size = state.registers[REG_U(operation.arg1)].u;
-				if (address < HEAP_START ||  size > HEAP_END - address + 1) {
+				if (address < state.memory.GetHeapStart() ||  address + size > state.memory.GetEnd()) {
 					errcode = ErrorCode::InvalidMemoryAccess;
 					break;
 				}
-				if (!free_memory(state.memory.HFI, address, size)) {
-					errcode = ErrorCode::FailedMemoryFreeing;
+				if (auto t = state.HFI.Free(address, size); t != ErrorCode::NoError)
+				{
+					errcode = t;
 					break;
 				}
 				break;
@@ -406,8 +411,8 @@ namespace MSLVM
 				auto& t = state.call_stack.top();
 				uint64_t new_fp = state.registers[SpecialRegister::FP].u - expanded_bytes;
 
-				if (new_fp > STACK_END) {	//STACK_START = 0 -> underflow -> new_fp > STACK_END
-					errcode = ErrorCode::StackOverflow;
+				if (new_fp > state.memory.GetHeapStart()) {	//STACK_START = 0 -> underflow -> new_fp > STACK_END
+					errcode = ErrorCode::StackUnderflow;
 					break;
 				}
 
