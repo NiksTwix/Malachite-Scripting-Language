@@ -227,14 +227,11 @@ namespace MSLVM
 			{
 				uint64_t size = REG_U(operation.arg1);
 				uint64_t current_sp = state.registers[SpecialRegister::SP].u;
-
-				if (current_sp - size < state.memory.GetStackStart()) {
+				uint64_t new_sp = current_sp - size;
+				if (!state.memory.CheckIntervals(state.memory.GetStackStart(), state.memory.GetHeapStart(),new_sp,0)) {
 					errcode = ErrorCode::StackUnderflow;
 					break;
 				}
-
-				uint64_t new_sp = current_sp - size;
-
 				uint64_t value = state.memory.Read(new_sp, size);
 				state.registers[REG_U(operation.arg0)].u = value;
 				
