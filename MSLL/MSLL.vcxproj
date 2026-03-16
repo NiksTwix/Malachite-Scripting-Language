@@ -128,11 +128,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="MSLL.cpp" />
+    <ClCompile Include="source\ECWriting\ExecutableCodeWriter.cpp" />
     <ClCompile Include="source\Linker.cpp" />
     <ClCompile Include="source\ObjectsReading\ObjectsReader.cpp" />
     <ClCompile Include="source\Translators\MSLVM_1\MSLVM_1Translator.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\ECWriting\ExecutableCodeWriter.hpp" />
     <ClInclude Include="include\Linker.hpp" />
     <ClInclude Include="include\ObjectsReading\ObjectsInfo.hpp" />
     <ClInclude Include="include\ObjectsReading\ObjectsReader.hpp" />

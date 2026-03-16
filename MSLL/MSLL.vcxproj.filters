@@ -33,6 +33,9 @@
     <ClCompile Include="source\Translators\MSLVM_1\MSLVM_1Translator.cpp">
       <Filter>Исходные файлы\MSLVM_1</Filter>
     </ClCompile>
+    <ClCompile Include="source\ECWriting\ExecutableCodeWriter.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\ObjectsReading\ObjectsInfo.hpp">
@@ -49,6 +52,9 @@
     </ClInclude>
     <ClInclude Include="include\Translators\MSLVM_1\MSLVM_1Translator.hpp">
       <Filter>Файлы заголовков\MSLVM_1</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ECWriting\ExecutableCodeWriter.hpp">
+      <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
