@@ -38,7 +38,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\ObjectsReading\ObjectsInfo.hpp">
+    <ClInclude Include="include\ObjectsReading\LinkDefinitions.hpp">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="include\ObjectsReading\ObjectsReader.hpp">

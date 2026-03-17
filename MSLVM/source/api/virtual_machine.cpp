@@ -24,7 +24,7 @@ namespace MSLVM
 
 		//Deserialization
 
-		bool magic_check = memcmp(file_stream, msli_magic, 4);
+		bool magic_check = memcmp(file_stream, msli_magic.data(), msli_magic.size());
 
 		if (magic_check) 
 		{
@@ -32,7 +32,7 @@ namespace MSLVM
 			return false;
 		}
 
-		size_t offset = 4;
+		size_t offset = msli_magic.size();
 
 		bool version_check = memcmp(file_stream+offset, &msli_version, sizeof(msli_version)); offset += sizeof(msli_version);
 
@@ -58,14 +58,14 @@ namespace MSLVM
 		size_t rod_offset;
 		size_t rod_size;
 
-		memcpy(file_stream + offset, &rod_offset, sizeof(rod_offset)); offset += sizeof(rod_offset);
-		memcpy(file_stream + offset, &rod_size, sizeof(rod_size)); offset += sizeof(rod_size);
+		memcpy(&rod_offset, file_stream + offset, sizeof(rod_offset)); offset += sizeof(rod_offset);
+		memcpy(&rod_size, file_stream + offset, sizeof(rod_size)); offset += sizeof(rod_size);
 
 		size_t code_offset;
 		size_t code_size;
 
-		memcpy(file_stream + offset, &code_offset, sizeof(code_offset)); offset += sizeof(code_offset);
-		memcpy(file_stream + offset, &code_size, sizeof(code_size)); offset += sizeof(code_size);
+		memcpy(&code_offset,file_stream + offset, sizeof(code_offset)); offset += sizeof(code_offset);
+		memcpy(&code_size  ,file_stream + offset, sizeof(code_size)); offset += sizeof(code_size);
 
 		bool checking = fileSize >= (code_offset + code_size);
 

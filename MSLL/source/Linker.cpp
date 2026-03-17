@@ -5,11 +5,11 @@
 
 namespace MSLL
 {
-	bool Linker::Link(std::string& path, VMs vm_index)
+	bool Linker::Link(std::string& path, LinkDefinitions::VMs vm_index)
 	{
 		//MO file loading
 
-		ObjectsInfo::static_bpointer  mo_bytes = reader.ReadFile(path);
+		LinkDefinitions::static_bpointer  mo_bytes = reader.ReadFile(path);
 		if (!mo_bytes.is_valid())
 		{
 			std::cerr << "Invalid MO file.\n";
@@ -18,25 +18,40 @@ namespace MSLL
 
 		fs::path directory_path = fs::path(path).parent_path();
 
+		fs::path name = fs::path(path).stem();
+
 		auto state = reader.DeserializeMO(mo_bytes);
 
 		mo_bytes.release();
 
 		switch (vm_index)
 		{
-		case MSLL::VMs::MSLVM_1:
+		case LinkDefinitions::VMs::MSLVM_1:
 		{
 			MSLVM_1::TranslatorVM_1 translator;
 			auto execution_data = translator.Translate(directory_path, state, reader);
 
-			// write to msl exe format file
+			execution_data.vm_type = LinkDefinitions::VMs::MSLVM_1;
+
+			bool result = ec_writer.SaveAsMSLI(directory_path, name.string() + ".msli", execution_data, true);
+
+			if (output_mode) 
+			{
+				if (!result) std::cerr << "File saving has failed.\n";
+				else 
+				{
+					std::cout << "File has been successfully saved on path:\"" << (directory_path / name).string() + ".msli\".\n";
+					return result;
+				}
+			}
 		}
 			break;
 		default:
+			std::cerr << "Invalid vm index.\n";
 			break;
 		}
 
 
-		return true;
+		return false;
 	}
 }

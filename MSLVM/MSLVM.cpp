@@ -7,37 +7,29 @@ using namespace MSLVM;
 
 int main()
 {
-    VMState state;
+    VirtualMachine machine;
 
-    std::vector<VMOperation> operations =
-    {
-        
-        {VMOperationCode::MOV_RI, 2, 9000},
-        {VMOperationCode::MOV_RI, 5, HEAP_SIZE / 2},
-        {VMOperationCode::ALLOCATE_MEMORY,0,5},
-        {VMOperationCode::ALLOCATE_MEMORY,1,5},
-        {VMOperationCode::STORE_BY_ADDRESS, 2, 1, 8},
-        {VMOperationCode::LOAD_BY_ADDRESS, 3, 1, 8},
-    };
-
-    execute_code_switch(state, operations.data(), operations.size());
+    bool loading = machine.LoadScript("D:\\Games\\MSLCTests\\AST\\first\\first.msli");
+    std::cout << loading << "\n";
+    clear_vm_state(machine.GetState(),false);
+    execute_code_switch(machine.GetState());
     std::cout << "\n";
-    state.memory.HFI.debug_print();
+    //state.memory.HFI.debug_print();
+    std::cout << "Errors:\n";
+
+    while (!machine.GetState().error_stack.empty()) 
+    {
+        auto error = machine.GetState().error_stack.pop();
+        std::cout << error.code << ";";
+    }
+
+
     std::cout << "\nRegisters:\n";
     for (int i = 0; i < 8; i++)
     {
-        std::cout << std::to_string(state.registers[i].u) << " ";
+        std::cout << std::to_string(machine.GetState().registers[i].u) << " ";
     }
 
-    operations =
-    {
-        {VMOperationCode::FREE_MEMORY,0,5},
-        {VMOperationCode::FREE_MEMORY,1,5},
-    };
-    state.registers[SpecialRegister::IP] = 0;
-    execute_code_switch(state, operations.data(), operations.size());
-    std::cout << "\n";
-    state.memory.HFI.debug_print();
     //std::cout << "\n";
     //for (int i = 0; i < 16; i++) 
     //{

@@ -1,52 +1,53 @@
 #pragma once
 #include "..\..\..\include\Translators\MSLVM_1\MSLVM_1Translator.hpp"
 
+#include <string>
 
 namespace MSLL
 {
 	namespace MSLVM_1
 	{
-		bool TranslatorVM_1::HandleCommand(std::shared_ptr<ObjectsInfo::CommandsPool> commands, std::shared_ptr<ObjectsInfo::LinkingState> state, std::vector<VMOperation>& result, size_t& i)
+		bool TranslatorVM_1::HandleCommand(std::shared_ptr<LinkDefinitions::CommandsPool> commands, std::shared_ptr<LinkDefinitions::LinkingState> state, std::vector<VMOperation>& result, size_t& i)
 		{
 
-			ObjectsInfo::ByteCommand& cmd = commands->commands[i];
+			LinkDefinitions::ByteCommand& cmd = commands->commands[i];
 
 			//Symbol handling
 
-			//if (cmd.flags & ObjectsInfo::Flag::UnhandledSymbol) 
+			//if (cmd.flags & LinkDefinitions::Flag::UnhandledSymbol) 
 			//{
 			//	//checking arg0,arg1,arg2 -> replace symbol to address or ip by symbol's type
 			//	
 			//}
-			auto checking = [](ObjectsInfo::CommandArgument& arg, std::shared_ptr<ObjectsInfo::LinkingState> state, size_t i, ObjectsInfo::moduleid m_id)
+			auto checking = [](LinkDefinitions::CommandArgument& arg, std::shared_ptr<LinkDefinitions::LinkingState> state, size_t i, LinkDefinitions::moduleid m_id) -> void
 				{
-					if (arg.type == ObjectsInfo::CommandSource::Symbol)
+					if (arg.type == LinkDefinitions::CommandSource::Symbol)
 					{
 						if (arg.data >= state->symbols.size())
 						{
 							std::cerr << "Invalid symbol in argument 0. Byte Command index:" << i << "\n";
-							return false;
+
 						}
 						auto& symbol_info = state->symbols[arg.data];
-						if (symbol_info.type == ObjectsInfo::SymbolType::Variable)
+						if (symbol_info.type == LinkDefinitions::SymbolType::Variable)
 						{
 							arg.data = state->stack_offset_of_module[symbol_info.module_id] + symbol_info.offset_m_c;
-							arg.type = ObjectsInfo::CommandSource::MemoryAddress;
+							arg.type = LinkDefinitions::CommandSource::MemoryAddress;
 						}
-						else if (symbol_info.type == ObjectsInfo::SymbolType::Function)
+						else if (symbol_info.type == LinkDefinitions::SymbolType::Function)
 						{
 							arg.data = symbol_info.native_code_offset;
-							arg.type = ObjectsInfo::CommandSource::Immediate;
+							arg.type = LinkDefinitions::CommandSource::Immediate;
 						}
 					}
-					else if (arg.type == ObjectsInfo::CommandSource::MemoryAddress)
+					else if (arg.type == LinkDefinitions::CommandSource::MemoryAddress)
 					{
 						arg.data = state->stack_offset_of_module[m_id] + arg.data;
 					}
-					else if (arg.type == ObjectsInfo::CommandSource::Constant)
+					else if (arg.type == LinkDefinitions::CommandSource::Constant)
 					{
 						arg.data = state->constants[arg.data].memory_offset;
-						arg.type = ObjectsInfo::CommandSource::MemoryAddress;
+						arg.type = LinkDefinitions::CommandSource::MemoryAddress;
 					}
 				};
 			checking(cmd.arg0, state, i,commands->m_id);
@@ -54,16 +55,16 @@ namespace MSLL
 			checking(cmd.arg2, state, i,commands->m_id);
 			bool check = true;
 
-			if ((cmd.code > ObjectsInfo::ByteOpCode::SECTION_ARITHMETIC_ST && cmd.code < ObjectsInfo::ByteOpCode::SECTION_ARITHMETIC_ED) 
-				|| (cmd.code > ObjectsInfo::ByteOpCode::SECTION_LOGIC_ST && cmd.code < ObjectsInfo::ByteOpCode::SECTION_LOGIC_ED))
+			if ((cmd.code > LinkDefinitions::ByteOpCode::SECTION_ARITHMETIC_ST && cmd.code < LinkDefinitions::ByteOpCode::SECTION_ARITHMETIC_ED) 
+				|| (cmd.code > LinkDefinitions::ByteOpCode::SECTION_LOGIC_ST && cmd.code < LinkDefinitions::ByteOpCode::SECTION_LOGIC_ED))
 			{
 				check = check && HandleAL(cmd, state, result);
 			}
-			if (cmd.code > ObjectsInfo::ByteOpCode::SECTION_CONTROL_FLOW_ST && cmd.code < ObjectsInfo::ByteOpCode::SECTION_CONTROL_FLOW_ED)
+			if (cmd.code > LinkDefinitions::ByteOpCode::SECTION_CONTROL_FLOW_ST && cmd.code < LinkDefinitions::ByteOpCode::SECTION_CONTROL_FLOW_ED)
 			{
 				check = check && HandleAL(cmd, state, result);
 			}
-			if (cmd.code > ObjectsInfo::ByteOpCode::SECTION_MEMORY_ST && cmd.code < ObjectsInfo::ByteOpCode::SECTION_MEMORY_ED)
+			if (cmd.code > LinkDefinitions::ByteOpCode::SECTION_MEMORY_ST && cmd.code < LinkDefinitions::ByteOpCode::SECTION_MEMORY_ED)
 			{
 				check = check && HandleMR(cmd, state, result);
 			}
@@ -71,9 +72,9 @@ namespace MSLL
 			{
 				switch (cmd.code)
 				{
-				case ObjectsInfo::ByteOpCode::NOP:
+				case LinkDefinitions::ByteOpCode::NOP:
 					break;
-				case ObjectsInfo::ByteOpCode::SYMBOL_LABEL:
+				case LinkDefinitions::ByteOpCode::SYMBOL_LABEL:
 					break;
 				default:
 					break;
@@ -83,12 +84,12 @@ namespace MSLL
 			return check;
 		}
 
-		bool TranslatorVM_1::HandleAL(ObjectsInfo::ByteCommand command, std::shared_ptr<ObjectsInfo::LinkingState> state, std::vector<VMOperation>& result)
+		bool TranslatorVM_1::HandleAL(LinkDefinitions::ByteCommand command, std::shared_ptr<LinkDefinitions::LinkingState> state, std::vector<VMOperation>& result)
 		{
 			VMOperationCode code = OpCodeTable::Get().At(command.code);
 			if (code == VMOperationCode::NOP) 
 			{
-				std::cerr << "Unsupported operation. Byte operation code:" << command.code << "\n";
+				std::cerr << "Unsupported operation. Byte operation code:" << (uint8_t)command.code << "\n";
 				return false;
 			}
 			
@@ -104,25 +105,25 @@ namespace MSLL
 			return true;
 		}
 
-		bool TranslatorVM_1::HandleCF(ObjectsInfo::ByteCommand command, std::shared_ptr<ObjectsInfo::LinkingState> state, std::vector<VMOperation>& result)
+		bool TranslatorVM_1::HandleCF(LinkDefinitions::ByteCommand command, std::shared_ptr<LinkDefinitions::LinkingState> state, std::vector<VMOperation>& result)
 		{
 			return false;
 		}
 
-		bool TranslatorVM_1::HandleMR(ObjectsInfo::ByteCommand command, std::shared_ptr<ObjectsInfo::LinkingState> state, std::vector<VMOperation>& result)
+		bool TranslatorVM_1::HandleMR(LinkDefinitions::ByteCommand command, std::shared_ptr<LinkDefinitions::LinkingState> state, std::vector<VMOperation>& result)
 		{
 			switch (command.code)
 			{
-			case ObjectsInfo::ByteOpCode::MOVRR://Unused
+			case LinkDefinitions::ByteOpCode::MOVRR://Unused
 				break;
-			case ObjectsInfo::ByteOpCode::MOVRI://Unused
+			case LinkDefinitions::ByteOpCode::MOVRI://Unused
 				break;
-			case ObjectsInfo::ByteOpCode::STACK_UP://Direct order of arguments
+			case LinkDefinitions::ByteOpCode::STACK_UP://Direct order of arguments
 			{
 				VMOperation operation;
 				operation.code = VMOperationCode::MOV_RI;
 				operation.arg0 = SpecialRegister::A0;
-				operation.arg1 = command.arg0;
+				operation.arg1 = command.arg0.data;
 				result.push_back(operation);
 				operation.code = VMOperationCode::ADD_RRR_UNSIGNED;
 				operation.arg0 = SpecialRegister::SP;
@@ -131,12 +132,12 @@ namespace MSLL
 				result.push_back(operation);
 			}
 				break;
-			case ObjectsInfo::ByteOpCode::STACK_DOWN:
+			case LinkDefinitions::ByteOpCode::STACK_DOWN:
 			{
 				VMOperation operation;
 				operation.code = VMOperationCode::MOV_RI;
 				operation.arg0 = SpecialRegister::A0;
-				operation.arg1 = command.arg0;
+				operation.arg1 = command.arg0.data;
 				result.push_back(operation);
 				operation.code = VMOperationCode::SUB_RRR_UNSIGNED;
 				operation.arg0 = SpecialRegister::SP;
@@ -145,7 +146,7 @@ namespace MSLL
 				result.push_back(operation);
 			}
 				break;
-			case ObjectsInfo::ByteOpCode::LEA_STATIC:
+			case LinkDefinitions::ByteOpCode::LEA_STATIC:
 			{
 				VMOperation operation;
 				operation.code = VMOperationCode::MOV_RI;
@@ -154,11 +155,11 @@ namespace MSLL
 				result.push_back(operation);
 				break;
 			}	
-			case ObjectsInfo::ByteOpCode::LEA_DYNAMIC:
-				std::cerr << "Unsupported operation. Byte operation code:" << command.code << "\n";
+			case LinkDefinitions::ByteOpCode::LEA_DYNAMIC:
+				std::cerr << "Unsupported operation. Byte operation code:" << (uint8_t)command.code << "\n";
 				return false;
 
-			case ObjectsInfo::ByteOpCode::LOAD_DYNAMIC:
+			case LinkDefinitions::ByteOpCode::LOAD_DYNAMIC:
 			{
 				VMOperation operation;
 				operation.code = VMOperationCode::LOAD_BY_ADDRESS;
@@ -168,7 +169,7 @@ namespace MSLL
 				result.push_back(operation);
 				break;
 			}	
-			case ObjectsInfo::ByteOpCode::STORE_DYNAMIC:
+			case LinkDefinitions::ByteOpCode::STORE_DYNAMIC:
 			{
 				VMOperation operation;
 				operation.code = VMOperationCode::STORE_BY_ADDRESS;
@@ -178,7 +179,7 @@ namespace MSLL
 				result.push_back(operation);
 				break;
 			}
-			case ObjectsInfo::ByteOpCode::LOAD_CONST_STATIC:
+			case LinkDefinitions::ByteOpCode::LOAD_CONST_STATIC:
 			{
 				VMOperation operation;
 				operation.code = VMOperationCode::LOAD_LOCAL;
@@ -188,12 +189,12 @@ namespace MSLL
 				result.push_back(operation);
 				break;
 			}
-			case ObjectsInfo::ByteOpCode::LEA_CONST:
+			case LinkDefinitions::ByteOpCode::LEA_CONST:
 			{
-				std::cerr << "Unsupported operation. Byte operation code:" << command.code << "\n";
+				std::cerr << "Unsupported operation. Byte operation code:" << (uint8_t)command.code << "\n";
 				return false;
 			}
-			case ObjectsInfo::ByteOpCode::LOAD_STATIC:
+			case LinkDefinitions::ByteOpCode::LOAD_STATIC:
 			{
 				VMOperation operation;
 				operation.code = VMOperationCode::LOAD_LOCAL;
@@ -203,7 +204,7 @@ namespace MSLL
 				result.push_back(operation);
 				break;
 			}
-			case ObjectsInfo::ByteOpCode::STORE_STATIC:
+			case LinkDefinitions::ByteOpCode::STORE_STATIC:
 			{
 				VMOperation operation;
 				operation.code = VMOperationCode::STORE_LOCAL;
@@ -221,9 +222,9 @@ namespace MSLL
 		}
 
 
-		ObjectsInfo::ExecutionData TranslatorVM_1::Translate(fs::path directory, std::shared_ptr<ObjectsInfo::LinkingState> state, ObjectsReader& reader)
+		LinkDefinitions::ExecutionData TranslatorVM_1::Translate(fs::path directory, std::shared_ptr<LinkDefinitions::LinkingState> state, ObjectsReader& reader)
 		{
-			ObjectsInfo::ExecutionData execution_data;
+			LinkDefinitions::ExecutionData execution_data;
 
 			execution_data.read_only_data.allocate(state->constants_size);
 
@@ -240,7 +241,7 @@ namespace MSLL
 					std::cerr << "Invalid size calculating in the constants handling process.";
 					execution_data.Free();
 					state->FreeConstants();
-					return ObjectsInfo::ExecutionData();
+					return LinkDefinitions::ExecutionData();
 				}
 
 				memcpy(execution_data.read_only_data.ptr + rod_offset, constant.data, constant.size_in_bytes); 
@@ -254,7 +255,7 @@ namespace MSLL
 			execution_data.aligned_rod_size = rod_offset;
 
 			std::vector<VMOperation> commands;
-			for (ObjectsInfo::moduleid id : state->linking_order) 
+			for (LinkDefinitions::moduleid id : state->linking_order) 
 			{
 				std::string file_name = state->module_prefix + std::to_string(id) + "." + state->module_extention;
 				state->stack_offset_of_module[id] = state->global_memory_offset;
@@ -263,32 +264,32 @@ namespace MSLL
 				{
 					std::cerr << "Error of module(" << id << ") handling. Module's name:" << file_name << "\n";
 					execution_data.read_only_data.release();
-					return ObjectsInfo::ExecutionData();
+					return LinkDefinitions::ExecutionData();
 				}
 			}
 
 			execution_data.code.allocate(commands.size() * sizeof(VMOperation));
 
-			memcpy(execution_data.code,commands.data(), commands.size() * sizeof(VMOperation));
+			::memcpy(execution_data.code.ptr,commands.data(), commands.size() * sizeof(VMOperation));
 
 			return execution_data;
 		}
-		bool TranslatorVM_1::HandleModule(fs::path file, std::shared_ptr<ObjectsInfo::LinkingState> state, ObjectsReader& reader, std::vector<VMOperation>& commands, ObjectsInfo::moduleid id)
+		bool TranslatorVM_1::HandleModule(fs::path file, std::shared_ptr<LinkDefinitions::LinkingState> state, ObjectsReader& reader, std::vector<VMOperation>& commands, LinkDefinitions::moduleid id)
 		{
-			ObjectsInfo::static_bpointer  co_bytes = reader.ReadFile(file.string());
+			LinkDefinitions::static_bpointer  co_bytes = reader.ReadFile(file.string());
 			if (co_bytes.ptr == nullptr)
 			{
 				std::cerr << "Invalid CO file \"" + file.string() + "\".\n";
 				return false;
 			}
 
-			std::shared_ptr<ObjectsInfo::CommandsPool> pool = reader.DeserializeCO(co_bytes);
+			std::shared_ptr<LinkDefinitions::CommandsPool> pool = reader.DeserializeCO(co_bytes);
 
 			pool->m_id = id;
 
 			for (size_t i = 0; i < pool->commands.size(); i++) 
 			{
-				if (HandleCommand(pool, state, commands, i)) return false;
+				if (!HandleCommand(pool, state, commands, i)) return false;
 			}
 
 			state->global_memory_offset += pool->stack_size;

@@ -136,7 +136,7 @@
   <ItemGroup>
     <ClInclude Include="include\ECWriting\ExecutableCodeWriter.hpp" />
     <ClInclude Include="include\Linker.hpp" />
-    <ClInclude Include="include\ObjectsReading\ObjectsInfo.hpp" />
+    <ClInclude Include="include\ObjectsReading\LinkDefinitions.hpp" />
     <ClInclude Include="include\ObjectsReading\ObjectsReader.hpp" />
     <ClInclude Include="include\Translators\MSLVM_1\MSLVM_1Common.hpp" />
     <ClInclude Include="include\Translators\MSLVM_1\MSLVM_1Translator.hpp" />

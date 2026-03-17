@@ -1,5 +1,7 @@
 #pragma once
 #include "unordered_map"
+#include "..\..\ObjectsReading\LinkDefinitions.hpp"
+#include "..\..\ObjectsReading\ObjectsReader.hpp"
 namespace MSLL
 {
 	namespace MSLVM_1
@@ -162,40 +164,40 @@ namespace MSLL
 		};
 		class OpCodeTable
 		{
-			std::unordered_map<ObjectsInfo::ByteOpCode, VMOperationCode> table =
+			std::unordered_map<LinkDefinitions::ByteOpCode, VMOperationCode> table =
 			{
-				{ObjectsInfo::ByteOpCode::ADDR,VMOperationCode::ADD_RRR_REAL	},
-				{ObjectsInfo::ByteOpCode::SUBR,VMOperationCode::SUB_RRR_REAL	},
-				{ObjectsInfo::ByteOpCode::DIVR,VMOperationCode::DIV_RRR_REAL	},
-				{ObjectsInfo::ByteOpCode::MULR,VMOperationCode::MUL_RRR_REAL	},
-				{ObjectsInfo::ByteOpCode::NEGR,VMOperationCode::NEG_RR_REAL		},
-				{ObjectsInfo::ByteOpCode::EXPR,VMOperationCode::NOP				},//Check!
-				{ObjectsInfo::ByteOpCode::ADDI,VMOperationCode::ADD_RRR_INTEGER	},
-				{ObjectsInfo::ByteOpCode::SUBI,VMOperationCode::SUB_RRR_INTEGER	},
-				{ObjectsInfo::ByteOpCode::DIVI,VMOperationCode::DIV_RRR_INTEGER	},
-				{ObjectsInfo::ByteOpCode::MULI,VMOperationCode::MUL_RRR_INTEGER	},
-				{ObjectsInfo::ByteOpCode::NEGI,VMOperationCode::NEG_RR_INTEGER	},
-				{ObjectsInfo::ByteOpCode::MODI,VMOperationCode::MOD_RRR_INTEGER	},
-				{ObjectsInfo::ByteOpCode::EXPI,VMOperationCode::NOP				},//Check!
-				{ObjectsInfo::ByteOpCode::ADDU,VMOperationCode::ADD_RRR_UNSIGNED},
-				{ObjectsInfo::ByteOpCode::SUBU,VMOperationCode::SUB_RRR_UNSIGNED},
-				{ObjectsInfo::ByteOpCode::DIVU,VMOperationCode::DIV_RRR_UNSIGNED},
-				{ObjectsInfo::ByteOpCode::MULU,VMOperationCode::MUL_RRR_UNSIGNED},
-				{ObjectsInfo::ByteOpCode::MODU,VMOperationCode::MOD_RRR_UNSIGNED},
-				{ObjectsInfo::ByteOpCode::EXPU,VMOperationCode::NOP				},//Check!
+				{LinkDefinitions::ByteOpCode::ADDR,VMOperationCode::ADD_RRR_REAL	},
+				{LinkDefinitions::ByteOpCode::SUBR,VMOperationCode::SUB_RRR_REAL	},
+				{LinkDefinitions::ByteOpCode::DIVR,VMOperationCode::DIV_RRR_REAL	},
+				{LinkDefinitions::ByteOpCode::MULR,VMOperationCode::MUL_RRR_REAL	},
+				{LinkDefinitions::ByteOpCode::NEGR,VMOperationCode::NEG_RR_REAL		},
+				{LinkDefinitions::ByteOpCode::EXPR,VMOperationCode::NOP				},//Check!
+				{LinkDefinitions::ByteOpCode::ADDI,VMOperationCode::ADD_RRR_INTEGER	},
+				{LinkDefinitions::ByteOpCode::SUBI,VMOperationCode::SUB_RRR_INTEGER	},
+				{LinkDefinitions::ByteOpCode::DIVI,VMOperationCode::DIV_RRR_INTEGER	},
+				{LinkDefinitions::ByteOpCode::MULI,VMOperationCode::MUL_RRR_INTEGER	},
+				{LinkDefinitions::ByteOpCode::NEGI,VMOperationCode::NEG_RR_INTEGER	},
+				{LinkDefinitions::ByteOpCode::MODI,VMOperationCode::MOD_RRR_INTEGER	},
+				{LinkDefinitions::ByteOpCode::EXPI,VMOperationCode::NOP				},//Check!
+				{LinkDefinitions::ByteOpCode::ADDU,VMOperationCode::ADD_RRR_UNSIGNED},
+				{LinkDefinitions::ByteOpCode::SUBU,VMOperationCode::SUB_RRR_UNSIGNED},
+				{LinkDefinitions::ByteOpCode::DIVU,VMOperationCode::DIV_RRR_UNSIGNED},
+				{LinkDefinitions::ByteOpCode::MULU,VMOperationCode::MUL_RRR_UNSIGNED},
+				{LinkDefinitions::ByteOpCode::MODU,VMOperationCode::MOD_RRR_UNSIGNED},
+				{LinkDefinitions::ByteOpCode::EXPU,VMOperationCode::NOP				},//Check!
 
-				{ObjectsInfo::ByteOpCode::AND,				VMOperationCode::AND_RRR},
-				{ObjectsInfo::ByteOpCode::OR,				VMOperationCode::OR_RRR},
-				{ObjectsInfo::ByteOpCode::NOT,				VMOperationCode::NOT_RR},
-				{ObjectsInfo::ByteOpCode::BIT_OR,			VMOperationCode::BIT_OR_RRR},
-				{ObjectsInfo::ByteOpCode::BIT_NOT,			VMOperationCode::BIT_NOT_RR},
-				{ObjectsInfo::ByteOpCode::BIT_AND,			VMOperationCode::BIT_AND_RRR},
-				{ObjectsInfo::ByteOpCode::BIT_OFFSET_LEFT,	VMOperationCode::BIT_OFFSET_LEFT_RRR},
-				{ObjectsInfo::ByteOpCode::BIT_OFFSET_RIGHT,	VMOperationCode::BIT_OFFSET_RIGHT_RRR},
+				{LinkDefinitions::ByteOpCode::AND,				VMOperationCode::AND_RRR},
+				{LinkDefinitions::ByteOpCode::OR,				VMOperationCode::OR_RRR},
+				{LinkDefinitions::ByteOpCode::NOT,				VMOperationCode::NOT_RR},
+				{LinkDefinitions::ByteOpCode::BIT_OR,			VMOperationCode::BIT_OR_RRR},
+				{LinkDefinitions::ByteOpCode::BIT_NOT,			VMOperationCode::BIT_NOT_RR},
+				{LinkDefinitions::ByteOpCode::BIT_AND,			VMOperationCode::BIT_AND_RRR},
+				{LinkDefinitions::ByteOpCode::BIT_OFFSET_LEFT,	VMOperationCode::BIT_OFFSET_LEFT_RRR},
+				{LinkDefinitions::ByteOpCode::BIT_OFFSET_RIGHT,	VMOperationCode::BIT_OFFSET_RIGHT_RRR},
 
-				{ObjectsInfo::ByteOpCode::CMPI,VMOperationCode::CMP_RR_INTEGER},
-				{ObjectsInfo::ByteOpCode::CMPU,VMOperationCode::CMP_RR_UNSIGNED},
-				{ObjectsInfo::ByteOpCode::CMPR,VMOperationCode::CMP_RR_REAL}
+				{LinkDefinitions::ByteOpCode::CMPI,VMOperationCode::CMP_RR_INTEGER},
+				{LinkDefinitions::ByteOpCode::CMPU,VMOperationCode::CMP_RR_UNSIGNED},
+				{LinkDefinitions::ByteOpCode::CMPR,VMOperationCode::CMP_RR_REAL}
 			};
 		public:
 			static OpCodeTable& Get()
@@ -204,7 +206,7 @@ namespace MSLL
 				return table;
 			}
 
-			VMOperationCode At(ObjectsInfo::ByteOpCode boc)
+			VMOperationCode At(LinkDefinitions::ByteOpCode boc)
 			{
 				auto it = table.find(boc);
 				if (it == table.end()) return VMOperationCode::NOP;

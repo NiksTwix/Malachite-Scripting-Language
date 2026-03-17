@@ -17,7 +17,7 @@ namespace MSLVM
 			state.memory.ClearDynamicPart();
 		}
 	}
-	void execute_code_switch(VMState& state, VMOperation* operations, size_t length)
+	void execute_code_switch(VMState& state)	//Plan: load script, clear vm state, execute
 	{
 		if (!state.memory.IsValid())
 		{
@@ -33,6 +33,22 @@ namespace MSLVM
 		{
 			VMOperation& operation = state.memory.GetOperation(state.registers[SpecialRegister::IP].u);
 			ErrorCode errcode{};
+
+			std::cout << "\nRegisters:\n";
+			for (int i = 0; i < 8; i++)
+			{
+				std::cout << std::to_string(state.registers[i].u) << " ";
+			}
+
+			if (state.memory.GetStatus() != ErrorCode::NoError) 
+			{
+				ErrorFrame ef;
+				ef.code = state.memory.GetStatus();
+				ef.instruction_counter = state.registers[SpecialRegister::IP].u - 1;	//previous instruction
+				state.error_stack.push(ef);
+				state.registers[SpecialRegister::FL].u |= (uint64_t)Flag::STOPPED;
+				break;
+			}
 
 			switch (operation.code)
 			{
@@ -529,6 +545,7 @@ namespace MSLVM
 
 			state.registers[SpecialRegister::IP].u += 1;
 		}
+
 	}
 #if defined(CLANG_OR_GNUC)
 	void execute_code_compute_goto(VMState& state, VMOperation* operations, size_t length)

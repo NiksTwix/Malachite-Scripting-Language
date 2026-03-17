@@ -1,6 +1,6 @@
 #pragma once
 #include "vm_memory.hpp"
-
+#include "fwd.hpp"
 #define REG_U(reg) ((reg).u)	   // для номеров регистров
 #define REG_I(reg) ((reg).i)		// для immediate integer
 #define REG_R(reg) ((reg).r)		// для immediate real
@@ -8,14 +8,14 @@
 
 namespace MSLVM
 {
-	struct alignas(8) LinearMemory
-	{
-		memory_cell memory[STACK_SIZE + HEAP_SIZE]{};
-		HeapFreeIntervals HFI{HEAP_START, HEAP_END};
-
-		size_t rod_size = 0;
-		uint8_t* rod_memory = nullptr;		//Allocates by loader
-	};
+	//struct alignas(8) LinearMemory
+	//{
+	//	memory_cell memory[STACK_SIZE + HEAP_SIZE]{};
+	//	HeapFreeIntervals HFI{HEAP_START, HEAP_END};
+	//
+	//	size_t rod_size = 0;
+	//	uint8_t* rod_memory = nullptr;		//Allocates by loader
+	//};
 
 		   
 

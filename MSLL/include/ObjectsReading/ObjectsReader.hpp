@@ -1,5 +1,5 @@
 #pragma once
-#include "ObjectsInfo.hpp"
+#include "LinkDefinitions.hpp"
 #include <memory>
 #include <string>
 #include <iostream>
@@ -8,14 +8,14 @@ namespace MSLL
 	class ObjectsReader {
 	private:
 
-		void HandleLOSection(ObjectsInfo::static_bpointer bytes_buffer, std::shared_ptr<ObjectsInfo::LinkingState> state, size_t section_offset, size_t section_size);
-		void HandleConstantsSection(ObjectsInfo::static_bpointer  bytes_buffer, std::shared_ptr<ObjectsInfo::LinkingState> state, size_t section_offset, size_t section_size);
-		void HandleSymbolSection(ObjectsInfo::static_bpointer  bytes_buffer, std::shared_ptr<ObjectsInfo::LinkingState> state, size_t section_offset, size_t section_size);
-		void HandleDebugSection(ObjectsInfo::static_bpointer  bytes_buffer, std::shared_ptr<ObjectsInfo::LinkingState> state, size_t section_offset, size_t section_size);
+		void HandleLOSection(LinkDefinitions::static_bpointer bytes_buffer, std::shared_ptr<LinkDefinitions::LinkingState> state, size_t section_offset, size_t section_size);
+		void HandleConstantsSection(LinkDefinitions::static_bpointer  bytes_buffer, std::shared_ptr<LinkDefinitions::LinkingState> state, size_t section_offset, size_t section_size);
+		void HandleSymbolSection(LinkDefinitions::static_bpointer  bytes_buffer, std::shared_ptr<LinkDefinitions::LinkingState> state, size_t section_offset, size_t section_size);
+		void HandleDebugSection(LinkDefinitions::static_bpointer  bytes_buffer, std::shared_ptr<LinkDefinitions::LinkingState> state, size_t section_offset, size_t section_size);
 	public:
-		std::shared_ptr<ObjectsInfo::LinkingState> DeserializeMO(ObjectsInfo::static_bpointer  bytes_buffer);
-		std::shared_ptr<ObjectsInfo::CommandsPool> DeserializeCO(ObjectsInfo::static_bpointer  bytes_buffer);
+		std::shared_ptr<LinkDefinitions::LinkingState> DeserializeMO(LinkDefinitions::static_bpointer  bytes_buffer);
+		std::shared_ptr<LinkDefinitions::CommandsPool> DeserializeCO(LinkDefinitions::static_bpointer  bytes_buffer);
 
-		ObjectsInfo::static_bpointer  ReadFile(const std::string& path);
+		LinkDefinitions::static_bpointer  ReadFile(const std::string& path);
 	};
 }

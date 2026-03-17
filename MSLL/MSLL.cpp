@@ -3,6 +3,9 @@
 
 
 #include "include/Linker.hpp"
+
+#include <string>
+
 int main(int argc, char* argv[])    //argc - count of args, argv - array of arg-strings
 {
     MSLL::Linker linker;
@@ -21,18 +24,23 @@ int main(int argc, char* argv[])    //argc - count of args, argv - array of arg-
 
         
 
-        uint8_t index = 0;
+        uint8_t index = 1;
         for (const std::string& str : linker.GetVMList()) 
         {
-            std::cout << index << ") " << str << "\n";
+            std::cout << std::to_string(index) << ") " << str << "\n";
             index++;
         }
         std::cout << "Enter vm model version (number):";
-        uint8_t choice;
+        char choice;
         std::cin >> choice;
         linker.SetOutputMode(true);
-        bool result = linker.Link(path, (MSLL::VMs)choice);
-        if (!result) return 1;
+        bool result = linker.Link(path, (MSLL::LinkDefinitions::VMs)(choice - '0'));
+        if (!result)
+        {
+            std::cout << "Unnamed linking error";
+            std::cin;
+            return 1;
+        }
     }
     else if (argc > 1)
     {
@@ -59,7 +67,8 @@ int main(int argc, char* argv[])    //argc - count of args, argv - array of arg-
     
         std::string path = std::string(argv[1]);
         linker.SetOutputMode(false);//Without debug output(Loading and etc)
-        bool result = linker.Link(path, (MSLL::VMs)index);
+        bool result = linker.Link(path, (MSLL::LinkDefinitions::VMs)index);
+
         if (!result) return 1;
     }
 }

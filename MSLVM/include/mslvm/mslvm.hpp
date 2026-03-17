@@ -7,11 +7,14 @@ namespace MSLVM
 {
 	class VirtualMachine 
 	{
+	private:
+		VMState state;
 	public:
 
 		bool LoadScript(const std::string& path);
 
-	private:
-		VMState state;
+		VMState& GetState() { return state; }
+
+	
 	};
 }

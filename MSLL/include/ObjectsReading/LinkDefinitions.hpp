@@ -6,7 +6,7 @@
 #include <unordered_map>
 namespace MSLL 
 {
-	namespace ObjectsInfo 
+	namespace LinkDefinitions 
 	{
 		using moduleid = uint16_t;
 		using constantid = size_t;
@@ -250,11 +250,12 @@ namespace MSLL
 		{
 			constantid id;
 			size_t size_in_bytes;
-			char* data;
+			char* data = nullptr;
 			size_t memory_offset;
 			void Free() 
 			{
-				free(data);
+				if (data) free(data);
+				data = nullptr;
 			}
 			void InitBy(char* source, size_t bytes_count) 
 			{
@@ -329,6 +330,12 @@ namespace MSLL
 
 		};
 
+		enum class VMs : uint8_t
+		{
+			INVALID = 0,
+			MSLVM_1 = 1,
+		};
+
 		struct ExecutionData 
 		{
 			static_bpointer read_only_data = {};
@@ -336,6 +343,7 @@ namespace MSLL
 
 			size_t aligned_rod_size = 0;
 
+			VMs vm_type = VMs::MSLVM_1;
 
 			void Free() 
 			{
@@ -344,6 +352,7 @@ namespace MSLL
 			}
 		};
 
+		
 
 	}
 }
