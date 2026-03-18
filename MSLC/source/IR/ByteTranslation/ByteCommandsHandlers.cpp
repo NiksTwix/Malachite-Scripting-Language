@@ -488,7 +488,7 @@ namespace MSLC
 								CommandArgument(free_reg, Register),
 								CommandArgument(frame.dynamic_data_size, Immediate)),
 							current_line);
-						
+						TryMarkAsUnhandledSymbol(frame, b_state, 0b1);
 						frame.data = free_reg;
 						frame.source = ValueSource::Register;
 					}

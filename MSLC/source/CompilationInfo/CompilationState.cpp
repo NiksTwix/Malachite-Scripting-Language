@@ -113,6 +113,7 @@ namespace MSLC
 		{
 			Symbol symbol;
 			symbol.type = SymbolType::Variable;
+			description.module_id = current_module_id;
 			symbol.description_id = GetGST().AddVariable(description);
 			if (!frames_stack.empty())
 			{

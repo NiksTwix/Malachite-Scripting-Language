@@ -10,7 +10,7 @@ namespace MSLVM
 		state.error_stack.clear();
 		memset(state.registers, 0, TOTAL_REGISTERS * sizeof(Register));
 		state.registers[(uint64_t)SpecialRegister::SP].u = state.memory.GetStackStart();
-		state.registers[(uint64_t)SpecialRegister::FP].u = state.memory.GetStackStart();
+		state.registers[(uint64_t)SpecialRegister::FP].u = 0;	//On memory start (yes, the start of rod section)
 
 		if (clear_memory) 
 		{
@@ -255,6 +255,24 @@ namespace MSLVM
 				state.registers[SpecialRegister::SP].u = new_sp;
 				break;
 			}
+
+			case LOAD_ABSOLUTE:
+			{
+				uint64_t offset = REG_U(operation.arg1);
+				uint64_t size = REG_U(operation.arg2);
+
+				// Checking
+				if (!state.memory.CheckIntervals(0, state.memory.GetHeapStart(), offset, size)) {
+					errcode = ErrorCode::InvalidMemoryAccess;
+					break;
+				}
+
+				// Read little-endian
+				uint64_t value = state.memory.Read(offset, size);
+				state.registers[REG_U(operation.arg0)].u = value;
+				break;
+			}
+
 			case LOAD_LOCAL:
 			{
 				uint64_t offset = REG_U(operation.arg1);

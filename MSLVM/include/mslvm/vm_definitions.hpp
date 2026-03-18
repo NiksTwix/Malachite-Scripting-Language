@@ -117,8 +117,9 @@ namespace MSLVM
 		POP,                 // arg0[register to], arg1[size (not register)]
 
 		//Current scope
-		LOAD_LOCAL,          //arg0[register]            arg1[immediate value of memory-offset]          arg2[size in bytes]  
-		STORE_LOCAL,         //arg0[register]       arg1[immediate value of memory-offset]               arg2[size in bytes]  
+		LOAD_ABSOLUTE,			//arg0[register]            arg1[immediate value of memory-offset]          arg2[size in bytes] // independed by FP
+		LOAD_LOCAL,          //arg0[register]            arg1[immediate value of memory-offset]          arg2[size in bytes]  // depended by FP
+		STORE_LOCAL,         //arg0[register]       arg1[immediate value of memory-offset]               arg2[size in bytes]   // depended by FP
 
 		CALC_FRAME_ADDRESS,		//register(ARG0) offset(ARG1)
 		LOAD_BY_ADDRESS,			// register(ARG0), register - address(ARG1), size(ARG2)

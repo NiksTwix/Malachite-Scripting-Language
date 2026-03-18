@@ -182,7 +182,7 @@ namespace MSLL
 			case LinkDefinitions::ByteOpCode::LOAD_CONST_STATIC:
 			{
 				VMOperation operation;
-				operation.code = VMOperationCode::LOAD_LOCAL;
+				operation.code = VMOperationCode::LOAD_ABSOLUTE;
 				operation.arg0 = command.arg1.data;//REGISTER FOR SAVING
 				operation.arg1 = command.arg0.data;//ADDRESS IN ROD
 				operation.arg2 = command.arg2.data;//SIZE

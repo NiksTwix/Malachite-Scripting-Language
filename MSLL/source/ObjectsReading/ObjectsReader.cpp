@@ -203,7 +203,7 @@ namespace MSLL
 			memcpy(&source2, bytes_buffer.ptr + offset, sizeof(source2)); offset += sizeof(source2);
 			memcpy(&arg2, bytes_buffer.ptr + offset, sizeof(arg2)); offset += sizeof(arg2);
 			memcpy(&flags, bytes_buffer.ptr + offset, sizeof(flags)); offset += sizeof(flags);		
-			memcpy(&flags, bytes_buffer.ptr + offset, sizeof(source_line)); offset += sizeof(source_line);
+			memcpy(&source_line, bytes_buffer.ptr + offset, sizeof(source_line)); offset += sizeof(source_line);
 			LinkDefinitions::ByteCommand command(opcode, LinkDefinitions::CommandArgument(arg0, source0), LinkDefinitions::CommandArgument(arg1, source1), LinkDefinitions::CommandArgument(arg2, source2), flags, source_line);
 			result->commands.push_back(command);
 		}
@@ -228,7 +228,7 @@ namespace MSLL
 		LinkDefinitions::static_bpointer X(size);
 
 		file.read(X.ptr, size);
-
+		file.close();
 		return X;
 	}
 }

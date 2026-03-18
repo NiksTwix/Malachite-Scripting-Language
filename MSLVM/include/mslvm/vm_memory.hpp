@@ -81,7 +81,11 @@ namespace MSLVM
             return true;
         }
 
-        inline size_t ToNative(size_t address) {return code_size + address;}
+        inline size_t ToNative(size_t address) 
+        {
+            size_t result = code_size + address;
+            return result;
+        }
 
         void ClearDynamicPart();    //Stack + heap
 

@@ -77,6 +77,7 @@ namespace MSLL
 			POP,                 // arg0[register to], arg1[size (not register)]
 
 			//Current scope
+			LOAD_ABSOLUTE,			//arg0[register]            arg1[immediate value of memory-offset]          arg2[size in bytes] 
 			LOAD_LOCAL,          //arg0[register]            arg1[immediate value of memory-offset]          arg2[size in bytes]  
 			STORE_LOCAL,         //arg0[register]       arg1[immediate value of memory-offset]               arg2[size in bytes]  
 
