@@ -249,6 +249,7 @@ namespace MSLVM1
 			if (it != vm_opcode_to_string.end()) {
 				return it->second;
 			}
+			if (code == VMOperationCode::NOP) return "NOP";
 			return "UNKNOWN_OPCODE(" + std::to_string(static_cast<int>(code)) + ")";
 		}
 	};

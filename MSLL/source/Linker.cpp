@@ -22,6 +22,12 @@ namespace MSLL
 
 		auto state = reader.DeserializeMO(mo_bytes);
 
+		if (!state) 
+		{
+			std::cerr << "Invalid MO file.\n";
+			return false;
+		}
+
 		mo_bytes.release();
 
 		switch (vm_index)

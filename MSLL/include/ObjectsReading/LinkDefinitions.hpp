@@ -109,6 +109,7 @@ namespace MSLL
 			TC_ITU,
 
 			SYMBOL_LABEL,	//Symbol declaring (function), arg0 - symbol_id
+			SECTION_SPECIAL_ED,
 		};
 
 		enum Flag {
@@ -250,7 +251,12 @@ namespace MSLL
 		{
 			constantid id;
 			size_t size_in_bytes;
-			char* data = nullptr;
+			union 
+			{
+				char* data = nullptr;
+				size_t* uint64_ptr_interpretation;
+			};
+			
 			size_t memory_offset;
 			void Free() 
 			{

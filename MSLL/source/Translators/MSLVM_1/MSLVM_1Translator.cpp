@@ -60,23 +60,31 @@ namespace MSLL
 			{
 				check = check && HandleAL(cmd, state, result);
 			}
-			if (cmd.code > LinkDefinitions::ByteOpCode::SECTION_CONTROL_FLOW_ST && cmd.code < LinkDefinitions::ByteOpCode::SECTION_CONTROL_FLOW_ED)
+			else if (cmd.code > LinkDefinitions::ByteOpCode::SECTION_CONTROL_FLOW_ST && cmd.code < LinkDefinitions::ByteOpCode::SECTION_CONTROL_FLOW_ED)
 			{
 				check = check && HandleAL(cmd, state, result);
 			}
-			if (cmd.code > LinkDefinitions::ByteOpCode::SECTION_MEMORY_ST && cmd.code < LinkDefinitions::ByteOpCode::SECTION_MEMORY_ED)
+			else if (cmd.code > LinkDefinitions::ByteOpCode::SECTION_MEMORY_ST && cmd.code < LinkDefinitions::ByteOpCode::SECTION_MEMORY_ED)
 			{
 				check = check && HandleMR(cmd, state, result);
+			}
+			else if (cmd.code > LinkDefinitions::ByteOpCode::SECTION_SPECIAL_ST && cmd.code < LinkDefinitions::ByteOpCode::SECTION_SPECIAL_ED)
+			{
+				check = check && HandleSP(cmd, state, result);
 			}
 			else 
 			{
 				switch (cmd.code)
 				{
 				case LinkDefinitions::ByteOpCode::NOP:
-					break;
-				case LinkDefinitions::ByteOpCode::SYMBOL_LABEL:
+					std::cerr << "Not a operation. Byte code instruction's number:" << i << "\n";
 					break;
 				default:
+				{
+					std::cerr << "Unsupported operation. Byte operation code:" << (int)cmd.code << "\n";
+					return false;
+					
+				}
 					break;
 				}
 			}
@@ -94,14 +102,7 @@ namespace MSLL
 			}
 			
 			//Direct order of arguments
-
-			VMOperation operation;
-			operation.code = code;
-			operation.arg0 = command.arg0.data;
-			operation.arg1 = command.arg1.data;
-			operation.arg2 = command.arg2.data;
-			//command.source_line
-			result.push_back(operation);
+			PushVMCommand(code, command.arg0, command.arg1, command.arg2, result);
 			return true;
 		}
 
@@ -114,9 +115,23 @@ namespace MSLL
 		{
 			switch (command.code)
 			{
-			case LinkDefinitions::ByteOpCode::MOVRR://Unused
+			case LinkDefinitions::ByteOpCode::MOVRR:
+			{
+				VMOperation operation;
+				operation.code = VMOperationCode::MOV_RR;
+				operation.arg0 = command.arg0.data;
+				operation.arg1 = command.arg1.data;
+				result.push_back(operation);
+			}			
 				break;
-			case LinkDefinitions::ByteOpCode::MOVRI://Unused
+			case LinkDefinitions::ByteOpCode::MOVRI:
+			{
+				VMOperation operation;
+				operation.code = VMOperationCode::MOV_RI;
+				operation.arg0 = command.arg0.data;
+				operation.arg1 = command.arg1.data;
+				result.push_back(operation);
+			}
 				break;
 			case LinkDefinitions::ByteOpCode::STACK_UP://Direct order of arguments
 			{
@@ -153,75 +168,121 @@ namespace MSLL
 				operation.arg0 = command.arg1.data;
 				operation.arg1 = command.arg0.data;
 				result.push_back(operation);
+
 				break;
 			}	
 			case LinkDefinitions::ByteOpCode::LEA_DYNAMIC:
-				std::cerr << "Unsupported operation. Byte operation code:" << (uint8_t)command.code << "\n";
+				std::cerr << "Unsupported operation. Byte operation code:" << (int)command.code << "\n";
 				return false;
 
 			case LinkDefinitions::ByteOpCode::LOAD_DYNAMIC:
 			{
-				VMOperation operation;
-				operation.code = VMOperationCode::LOAD_BY_ADDRESS;
-				operation.arg0 = command.arg1.data;
-				operation.arg1 = command.arg0.data;
-				operation.arg2 = command.arg2.data;
-				result.push_back(operation);
+				PushVMCommand(VMOperationCode::LOAD_BY_ADDRESS, command.arg1, command.arg0, command.arg2, result);
 				break;
 			}	
 			case LinkDefinitions::ByteOpCode::STORE_DYNAMIC:
 			{
-				VMOperation operation;
-				operation.code = VMOperationCode::STORE_BY_ADDRESS;
-				operation.arg0 = command.arg1.data;
-				operation.arg1 = command.arg0.data;
-				operation.arg2 = command.arg2.data;
-				result.push_back(operation);
+				PushVMCommand(VMOperationCode::STORE_BY_ADDRESS, command.arg1, command.arg0, command.arg2, result);
 				break;
 			}
 			case LinkDefinitions::ByteOpCode::LOAD_CONST_STATIC:
 			{
-				VMOperation operation;
-				operation.code = VMOperationCode::LOAD_ABSOLUTE;
-				operation.arg0 = command.arg1.data;//REGISTER FOR SAVING
-				operation.arg1 = command.arg0.data;//ADDRESS IN ROD
-				operation.arg2 = command.arg2.data;//SIZE
-				result.push_back(operation);
+				PushVMCommand(VMOperationCode::LOAD_ABSOLUTE, command.arg1, command.arg0, command.arg2, result);//REGISTER FOR SAVING,ADDRESS IN ROD,SIZE
 				break;
 			}
 			case LinkDefinitions::ByteOpCode::LEA_CONST:
 			{
-				std::cerr << "Unsupported operation. Byte operation code:" << (uint8_t)command.code << "\n";
+				std::cerr << "Unsupported operation. Byte operation code:" << (int)command.code << "\n";
 				return false;
 			}
 			case LinkDefinitions::ByteOpCode::LOAD_STATIC:
 			{
-				VMOperation operation;
-				operation.code = VMOperationCode::LOAD_LOCAL;
-				operation.arg0 = command.arg1.data;
-				operation.arg1 = command.arg0.data;
-				operation.arg2 = command.arg2.data;
-				result.push_back(operation);
+				PushVMCommand(VMOperationCode::LOAD_LOCAL, command.arg1, command.arg0, command.arg2, result);
 				break;
 			}
 			case LinkDefinitions::ByteOpCode::STORE_STATIC:
 			{
-				VMOperation operation;
-				operation.code = VMOperationCode::STORE_LOCAL;
-				operation.arg0 = command.arg1.data;
-				operation.arg1 = command.arg0.data;
-				operation.arg2 = command.arg2.data;
-				result.push_back(operation);
+				PushVMCommand(VMOperationCode::STORE_LOCAL, command.arg1, command.arg0, command.arg2,result);
 				break;
 			}
 
 			default:
+				std::cerr << "Unsupported operation. Byte operation code:" << (int)command.code << "\n";
 				break;
 			}
 			return true;
 		}
 
+		bool TranslatorVM_1::HandleSP(LinkDefinitions::ByteCommand command, std::shared_ptr<LinkDefinitions::LinkingState> state, std::vector<VMOperation>& result)
+		{
+			switch (command.code)
+			{
+			case LinkDefinitions::ByteOpCode::TC_ITR:
+			{
+				VMOperation operation;
+				operation.code = VMOperationCode::TC_ITR_R;
+				operation.arg0 = command.arg0.data;
+				result.push_back(operation);
+				break;
+			}
+				
+			case LinkDefinitions::ByteOpCode::TC_RTI:
+			{
+				VMOperation operation;
+				operation.code = VMOperationCode::TC_RTI_R;
+				operation.arg0 = command.arg0.data;
+				result.push_back(operation);
+				break;
+			}
+			case LinkDefinitions::ByteOpCode::TC_UTR:
+			{
+				VMOperation operation;
+				operation.code = VMOperationCode::TC_UTR_R;
+				operation.arg0 = command.arg0.data;
+				result.push_back(operation);
+				break;
+			}
+			case LinkDefinitions::ByteOpCode::TC_UTI:
+			{
+				VMOperation operation;
+				operation.code = VMOperationCode::TC_UTI_R;
+				operation.arg0 = command.arg0.data;
+				result.push_back(operation);
+				break;
+			};
+			case LinkDefinitions::ByteOpCode::TC_RTU:
+			{
+				VMOperation operation;
+				operation.code = VMOperationCode::TC_RTU_R;
+				operation.arg0 = command.arg0.data;
+				result.push_back(operation);
+				break;
+			}
+			case LinkDefinitions::ByteOpCode::TC_ITU:
+			{
+				VMOperation operation;
+				operation.code = VMOperationCode::TC_ITU_R;
+				operation.arg0 = command.arg0.data;
+				result.push_back(operation);
+				break;
+			}
 
+			default:
+				std::cerr << "Unsupported operation. Byte operation code:" << (int)command.code << "\n";
+				return false;
+			}
+			return true;
+		}
+
+		void TranslatorVM_1::PushVMCommand(VMOperationCode code, LinkDefinitions::CommandArgument arg0, LinkDefinitions::CommandArgument arg1, LinkDefinitions::CommandArgument arg2, std::vector<VMOperation>& result)
+		{
+			VMOperation operation;
+			operation.code = code;
+			operation.arg0 = arg0.data;
+			operation.arg1 = arg1.data;
+			operation.arg2 = arg2.data;
+			result.push_back(operation);
+		}
 		LinkDefinitions::ExecutionData TranslatorVM_1::Translate(fs::path directory, std::shared_ptr<LinkDefinitions::LinkingState> state, ObjectsReader& reader)
 		{
 			LinkDefinitions::ExecutionData execution_data;
@@ -246,8 +307,12 @@ namespace MSLL
 
 				memcpy(execution_data.read_only_data.ptr + rod_offset, constant.data, constant.size_in_bytes); 
 				rod_offset += constant.size_in_bytes;
+
 				constant.Free();
 			}
+
+			
+
 			rod_offset = ((rod_offset + DEFAULT_ALIGNMENT - 1) / DEFAULT_ALIGNMENT) * DEFAULT_ALIGNMENT;
 			state->rod_offset_aligned = rod_offset;
 			state->global_memory_offset = rod_offset;

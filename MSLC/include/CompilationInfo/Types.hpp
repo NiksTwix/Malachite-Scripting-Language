@@ -46,8 +46,8 @@ namespace MSLC
 
 			enum PrimitiveAnalogs //with priority 0 - 2
 			{
-				UInt,
 				Int,
+				UInt,
 				Real,
 			};
 

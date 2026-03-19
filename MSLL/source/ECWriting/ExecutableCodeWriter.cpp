@@ -1,7 +1,7 @@
 #include "..\..\include\ECWriting\ExecutableCodeWriter.hpp"
 
 #include <fstream>
-
+#include <iostream>
 namespace MSLL
 {
 	bool ECWriter::SaveAsMSLI(fs::path directory, fs::path name, LinkDefinitions::ExecutionData& data, bool free_ed)
@@ -45,13 +45,17 @@ namespace MSLL
 		memcpy(buffer + offset, data.read_only_data.ptr, data.read_only_data.bytes_size); offset += data.aligned_rod_size;
 		memcpy(buffer + offset, data.code.ptr, data.code.bytes_size); offset += data.code.bytes_size;
 
-
+		//for (size_t i = 100; i < 116; i++) 
+		//{
+		//	std::cout << (size_t)*(buffer + i) << " ";
+		//
+		//}
 		if (free_ed) data.Free();
 
 		//File saving
 
 		
-		std::ofstream file_str(directory / name);
+		std::ofstream file_str(directory / name, std::ios::binary);
 
 		if (file_str.is_open()) {
 			

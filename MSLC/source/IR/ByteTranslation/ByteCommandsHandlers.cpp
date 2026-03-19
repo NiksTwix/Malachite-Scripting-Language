@@ -213,11 +213,14 @@ namespace MSLC
 							return;
 						}
 						ValueFrame right = GenerateLoadCommand(p_array,b_state);
+
+
+						bool left_is_pointer = b_state->value_stack.top().source == ValueSource::Pointer;
+
 						ValueFrame left = GenerateLoadCommand(p_array, b_state);
 
 						size_t converted_reg = left.data;
 						PrimitiveAnalogs common_type = left.dynamic_primitive_type;
-						size_t size = left.dynamic_data_size;
 						auto conv_cmd = GetTypeConvertionCommand(
 							left.dynamic_primitive_type, left.data,
 							right.dynamic_primitive_type, right.data,
@@ -225,6 +228,29 @@ namespace MSLC
 						);
 						if (conv_cmd.code != ByteOpCode::NOP) {
 							PushCommand(b_state, ByteCommand(conv_cmd), operation.debug_line);
+						}
+
+						if (left_is_pointer) 
+						{
+							auto free_register = b_state->registers_table.FindFreeGeneral();
+							PushCommand(b_state, ByteCommand(			//Move data size in register
+								ByteOpCode::MOVRI,
+								CommandArgument(free_register, CommandSource::Register),
+								CommandArgument(left.static_data_size, CommandSource::Immediate),
+								CommandArgument(0, CommandSource::Immediate)
+							), operation.debug_line);
+
+
+
+							PushCommand(b_state, ByteCommand(
+								GetTypedArithmeticCommandCode(Pseudo::PseudoOpCode::Multiply, common_type),
+								CommandArgument(right.data, CommandSource::Register),
+								CommandArgument(right.data, CommandSource::Register),
+								CommandArgument(free_register, CommandSource::Register)
+							), operation.debug_line);
+							b_state->registers_table.SetFree(free_register);
+
+							
 						}
 
 						PushCommand(b_state, ByteCommand(

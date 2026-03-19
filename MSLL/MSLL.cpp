@@ -41,6 +41,7 @@ int main(int argc, char* argv[])    //argc - count of args, argv - array of arg-
             std::cin;
             return 1;
         }
+        std::cin;
     }
     else if (argc > 1)
     {
@@ -71,5 +72,7 @@ int main(int argc, char* argv[])    //argc - count of args, argv - array of arg-
 
         if (!result) return 1;
     }
+
+    return 0;
 }
 
