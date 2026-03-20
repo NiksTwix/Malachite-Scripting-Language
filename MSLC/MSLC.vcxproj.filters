@@ -52,6 +52,15 @@
     <Filter Include="Файлы заголовков\Packing">
       <UniqueIdentifier>{98dee330-4776-4938-8a27-6687f6f18be4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Исходные файлы\IR\Pseudo\BS">
+      <UniqueIdentifier>{b94bb0a2-7579-49f7-bca0-77523a7275c1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы заголовков\IR\Pseudo\BS">
+      <UniqueIdentifier>{2757fd7c-17b0-4f91-825f-6a12ed71e269}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы заголовков\IR\Pseudo\Postfix">
+      <UniqueIdentifier>{8c57bdb6-ce11-4d22-b522-d2d29c200703}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MSLC.cpp">
@@ -111,6 +120,12 @@
     <ClCompile Include="source\Packing\Packer.cpp">
       <Filter>Исходные файлы\Packing</Filter>
     </ClCompile>
+    <ClCompile Include="source\IR\PseudoTranslation\OpCodeSectionTranslator.cpp">
+      <Filter>Исходные файлы\IR\Pseudo\BS</Filter>
+    </ClCompile>
+    <ClCompile Include="source\IR\PseudoTranslation\BasicSyntaxTranslator.cpp">
+      <Filter>Исходные файлы\IR\Pseudo\BS</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Preprocessing\AMGBuilder.hpp">
@@ -167,16 +182,7 @@
     <ClInclude Include="include\Compiler.hpp">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="include\IR\PseudoTranslation\Postfix\APSTBuilder.hpp">
-      <Filter>Файлы заголовков\IR\Pseudo</Filter>
-    </ClInclude>
     <ClInclude Include="include\IR\PseudoTranslation\ExpressionsTranslator.hpp">
-      <Filter>Файлы заголовков\IR\Pseudo</Filter>
-    </ClInclude>
-    <ClInclude Include="include\IR\PseudoTranslation\Postfix\PostfixBuilder.hpp">
-      <Filter>Файлы заголовков\IR\Pseudo</Filter>
-    </ClInclude>
-    <ClInclude Include="include\IR\PseudoTranslation\Postfix\PostfixInfo.hpp">
       <Filter>Файлы заголовков\IR\Pseudo</Filter>
     </ClInclude>
     <ClInclude Include="include\IR\PseudoTranslation\PseudoDebugInfo.hpp">
@@ -202,6 +208,21 @@
     </ClInclude>
     <ClInclude Include="include\Packing\Packer.hpp">
       <Filter>Файлы заголовков\Packing</Filter>
+    </ClInclude>
+    <ClInclude Include="include\IR\PseudoTranslation\OpCodeSectionTranslator.hpp">
+      <Filter>Файлы заголовков\IR\Pseudo\BS</Filter>
+    </ClInclude>
+    <ClInclude Include="include\IR\PseudoTranslation\BasicSyntaxTranslator.hpp">
+      <Filter>Файлы заголовков\IR\Pseudo\BS</Filter>
+    </ClInclude>
+    <ClInclude Include="include\IR\PseudoTranslation\Postfix\APSTBuilder.hpp">
+      <Filter>Файлы заголовков\IR\Pseudo\Postfix</Filter>
+    </ClInclude>
+    <ClInclude Include="include\IR\PseudoTranslation\Postfix\PostfixBuilder.hpp">
+      <Filter>Файлы заголовков\IR\Pseudo\Postfix</Filter>
+    </ClInclude>
+    <ClInclude Include="include\IR\PseudoTranslation\Postfix\PostfixInfo.hpp">
+      <Filter>Файлы заголовков\IR\Pseudo\Postfix</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
