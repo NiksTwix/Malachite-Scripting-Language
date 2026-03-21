@@ -4,7 +4,7 @@
 
 #include "..\..\Definitions\ChunkArray.hpp"
 #include "..\..\CompilationInfo\CompilationState.hpp"
-
+#include "..\..\AST\ASTBuilder.hpp"
 
 namespace MSLC 
 {
@@ -251,7 +251,7 @@ namespace MSLC
 
 			};
 
-
+			using recursive_handler = std::function<void(AST::ASTNode&, PseudoTranslationState&)>;
 		}
 	}
 }

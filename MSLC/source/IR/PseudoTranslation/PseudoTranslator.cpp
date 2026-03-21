@@ -28,6 +28,7 @@ namespace MSLC
 
 				if (children_count && node.tokens.size())	//MSL syntax construction
 				{
+					basic_syntax_translator.HandleBasicSyntax(node, pts, [this](AST::ASTNode& node, PseudoTranslationState& pts) -> void {this->AnalyzeRecursive(node, pts); });
 					//Basic constructions
 				}
 				else if (children_count && node.tokens.empty())				//Code block (without header)
@@ -43,25 +44,25 @@ namespace MSLC
 				}
 
 			}
-			POperationArray PseudoTranslator::AnalyzeTree(AST::ASTNode& root, CompilationInfo::CompilationState& cs)
+			std::shared_ptr<PseudoTranslationState> PseudoTranslator::AnalyzeTree(AST::ASTNode& root, CompilationInfo::CompilationState& cs)
 			{
-				PseudoTranslationState pts;
-				pts.cs_observer = &cs;
+				std::shared_ptr<PseudoTranslationState> pts = std::make_shared<PseudoTranslationState>();
+				pts->cs_observer = &cs;
 
 
 				for (auto node : root.children) 
 				{
-					AnalyzeRecursive(node, pts);
+					AnalyzeRecursive(node, *pts);
 				}
 				CompilationStateStringSerializator csss;
 				PseudoOperationsStringSerializator poss;
 
-				std::cout << csss.Serialize(*pts.cs_observer);
-				std::cout << "Count:" << pts.pseudo_code.Size() << "\n";
-				std::cout << poss.Serialize(pts.pseudo_code);
+				std::cout << csss.Serialize(*pts->cs_observer);
+				std::cout << "Count:" << pts->pseudo_code.Size() << "\n";
+				std::cout << poss.Serialize(pts->pseudo_code);
 
 
-				return pts.pseudo_code;
+				return pts;
 			}
 		}
 	}

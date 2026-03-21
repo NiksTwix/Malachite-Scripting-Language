@@ -120,9 +120,6 @@
     <ClCompile Include="source\Packing\Packer.cpp">
       <Filter>Исходные файлы\Packing</Filter>
     </ClCompile>
-    <ClCompile Include="source\IR\PseudoTranslation\OpCodeSectionTranslator.cpp">
-      <Filter>Исходные файлы\IR\Pseudo\BS</Filter>
-    </ClCompile>
     <ClCompile Include="source\IR\PseudoTranslation\BasicSyntaxTranslator.cpp">
       <Filter>Исходные файлы\IR\Pseudo\BS</Filter>
     </ClCompile>
@@ -208,9 +205,6 @@
     </ClInclude>
     <ClInclude Include="include\Packing\Packer.hpp">
       <Filter>Файлы заголовков\Packing</Filter>
-    </ClInclude>
-    <ClInclude Include="include\IR\PseudoTranslation\OpCodeSectionTranslator.hpp">
-      <Filter>Файлы заголовков\IR\Pseudo\BS</Filter>
     </ClInclude>
     <ClInclude Include="include\IR\PseudoTranslation\BasicSyntaxTranslator.hpp">
       <Filter>Файлы заголовков\IR\Pseudo\BS</Filter>

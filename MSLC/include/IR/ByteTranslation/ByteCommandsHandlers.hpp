@@ -31,7 +31,7 @@ namespace MSLC
 				void TryMarkAsUnhandledSymbol(ValueFrame& frame, std::shared_ptr<ByteTranslationState> b_state,uint8_t args_with_us); //args_with_us - bit mask. use 0 | (0,1,2)
 
 			public:
-				void HandleCommand(Pseudo::POperationArray& p_array, std::shared_ptr<ByteTranslationState>  b_state);
+				void HandleCommand(std::shared_ptr<ByteTranslationState>  b_state);
 			};
 			
 

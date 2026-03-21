@@ -13,7 +13,7 @@ namespace MSLC
 		{
 			None,
 			Expression,
-			CodeBlock,		//{}
+			CodeBlock,		//{} unnamed visible scope
 			Namespace,
 			If,
 			Elif,

@@ -734,9 +734,9 @@ namespace MSLC
 				}
 			}
 
-			void CommandsHandler::HandleCommand(Pseudo::POperationArray& p_array, std::shared_ptr<ByteTranslationState> b_state)
+			void CommandsHandler::HandleCommand(std::shared_ptr<ByteTranslationState> b_state)
 			{
-				Pseudo::PseudoOperation& operation = p_array.Get(b_state->pseudo_ip);
+				Pseudo::PseudoOperation& operation = b_state->pseudo_state_observer->pseudo_code.Get(b_state->pseudo_ip);
 
 				if (operation.op_code == Pseudo::PseudoOpCode::PushFrame)
 				{
@@ -756,19 +756,19 @@ namespace MSLC
 
 				if (operation.op_code > Pseudo::PseudoOpCode::ST_AL && operation.op_code < Pseudo::PseudoOpCode::ED_AL) 
 				{
-					HandleAL(p_array, b_state);
+					HandleAL(b_state->pseudo_state_observer->pseudo_code, b_state);
 				}
 				else if (operation.op_code > Pseudo::PseudoOpCode::ST_MEM && operation.op_code < Pseudo::PseudoOpCode::ED_MEM)
 				{
-					HandleMemory(p_array, b_state);
+					HandleMemory(b_state->pseudo_state_observer->pseudo_code, b_state);
 				}
 				else if (operation.op_code > Pseudo::PseudoOpCode::ST_USING && operation.op_code < Pseudo::PseudoOpCode::ED_USING) 
 				{
-					HandleUsing(p_array, b_state);
+					HandleUsing(b_state->pseudo_state_observer->pseudo_code, b_state);
 				}
 				else if (operation.op_code > Pseudo::PseudoOpCode::ST_DECL && operation.op_code < Pseudo::PseudoOpCode::ED_DEC)
 				{
-					HandleDeclaring(p_array, b_state);
+					HandleDeclaring(b_state->pseudo_state_observer->pseudo_code, b_state);
 				}
 			}
 		}

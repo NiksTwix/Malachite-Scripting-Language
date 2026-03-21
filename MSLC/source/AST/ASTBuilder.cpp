@@ -23,6 +23,7 @@ namespace MSLC
 				{std::string(Keywords::w_namespace), ASTNodeType::Namespace},
 				{std::string(Keywords::w_func), ASTNodeType::Function},
 				{std::string(Keywords::w_object_template), ASTNodeType::ObjectTemplate},
+				{std::string(Keywords::w_op_code), ASTNodeType::LowLevelCodeBlock},
 			};
 			ASTNodeType foundType = ASTNodeType::Expression;
 			int keywordCount = 0;

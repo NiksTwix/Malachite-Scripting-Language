@@ -383,6 +383,8 @@ namespace MSLC
 
 				ByteTranslationConfig config;
 
+				std::shared_ptr<Pseudo::PseudoTranslationState> pseudo_state_observer;
+
 				
 				CompilationInfo::CompilationState* cs_observer;
 

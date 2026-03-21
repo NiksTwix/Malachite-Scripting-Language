@@ -138,7 +138,6 @@
     <ClCompile Include="source\IR\ByteTranslation\ByteCommandsHandlers.cpp" />
     <ClCompile Include="source\IR\PseudoTranslation\BasicSyntaxTranslator.cpp" />
     <ClCompile Include="source\IR\PseudoTranslation\ExpressionsTranslator.cpp" />
-    <ClCompile Include="source\IR\PseudoTranslation\OpCodeSectionTranslator.cpp" />
     <ClCompile Include="source\IR\PseudoTranslation\Postfix\PostfixBuilder.cpp" />
     <ClCompile Include="source\IR\PseudoTranslation\Postfix\APSTBuilder.cpp" />
     <ClCompile Include="source\IR\PseudoTranslation\PseudoDebugInfo.cpp" />
@@ -168,7 +167,6 @@
     <ClInclude Include="include\IR\ByteTranslation\ByteCommandsHandlers.hpp" />
     <ClInclude Include="include\IR\PseudoTranslation\BasicSyntaxTranslator.hpp" />
     <ClInclude Include="include\IR\PseudoTranslation\ExpressionsTranslator.hpp" />
-    <ClInclude Include="include\IR\PseudoTranslation\OpCodeSectionTranslator.hpp" />
     <ClInclude Include="include\IR\PseudoTranslation\Postfix\PostfixBuilder.hpp" />
     <ClInclude Include="include\IR\PseudoTranslation\Postfix\PostfixInfo.hpp" />
     <ClInclude Include="include\IR\PseudoTranslation\Postfix\APSTBuilder.hpp" />

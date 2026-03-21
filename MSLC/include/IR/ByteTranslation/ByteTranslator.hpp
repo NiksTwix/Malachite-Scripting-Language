@@ -15,7 +15,7 @@ namespace MSLC
 				
 
 			public:
-				std::shared_ptr<ByteTranslationState> Translate(Pseudo::POperationArray& p_array, CompilationInfo::CompilationState* c_state, ByteTranslationConfig config);
+				std::shared_ptr<ByteTranslationState> Translate(std::shared_ptr<Pseudo::PseudoTranslationState> pseudo_state, CompilationInfo::CompilationState* c_state, ByteTranslationConfig config);
 			};
 		}
 

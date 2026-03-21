@@ -1,5 +1,6 @@
 #pragma once
 #include "ExpressionsTranslator.hpp"
+#include "BasicSyntaxTranslator.hpp"
 #include "..\..\AST\ASTBuilder.hpp"
 
 
@@ -9,7 +10,6 @@ namespace MSLC
 	{
 		namespace Pseudo
 		{
-
 			class PseudoTranslator 
 			{
 			private:
@@ -17,10 +17,10 @@ namespace MSLC
 				void AnalyzeRecursive(AST::ASTNode& node, PseudoTranslationState& pts);
 
 				ExpressionsTranslator expressions_translator;
-
+				BasicSyntaxTranslator basic_syntax_translator;
 			public:
 				PseudoTranslator() = default;
-				POperationArray AnalyzeTree(AST::ASTNode& root, CompilationInfo::CompilationState& cs);
+				std::shared_ptr<PseudoTranslationState> AnalyzeTree(AST::ASTNode& root, CompilationInfo::CompilationState& cs);
 
 			};
 		}

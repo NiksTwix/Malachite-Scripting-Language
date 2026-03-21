@@ -1,5 +1,6 @@
 #pragma once
-#include "OpCodeSectionTranslator.hpp"
+#include "PseudoTranslationsInfo.hpp"
+
 
 
 namespace MSLC
@@ -8,6 +9,12 @@ namespace MSLC
 	{
 		namespace Pseudo
 		{
+			class BasicSyntaxTranslator 
+			{
+			public:
+				BasicSyntaxTranslator() = default;
+				void HandleBasicSyntax(AST::ASTNode& node, PseudoTranslationState& pts, recursive_handler rhandler);
+			};
 		}
 	}
 }

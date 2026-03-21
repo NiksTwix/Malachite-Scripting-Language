@@ -53,12 +53,12 @@ namespace MSLC
 			ast_builder.Postprocess(tree);
 
 			Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Stage: Pseudo building."));
-			auto parray = preudo_translator.AnalyzeTree(tree, comp_state);
+			auto pseudo_state = preudo_translator.AnalyzeTree(tree, comp_state);
 
 
 			Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Stage: Byte building."));
 
-			auto b_state = byte_translator.Translate(parray, &comp_state,IntermediateRepresentation::Byte::ByteTranslationConfig());
+			auto b_state = byte_translator.Translate(pseudo_state, &comp_state,IntermediateRepresentation::Byte::ByteTranslationConfig());
 
 			Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Stage: Packing."));
 
