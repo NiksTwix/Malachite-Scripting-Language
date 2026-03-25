@@ -31,7 +31,6 @@ namespace MSLC
 			using VariableID = DescriptionID;
 		}
 
-
 		namespace Values 
 		{
 			enum ValueFlags: uint8_t

@@ -38,6 +38,8 @@ namespace MSLC
 			uint_desc.size = 8;
 			symbol.description_id = gst.AddType(uint_desc);
 			frames_stack.back()->lsl.Add(uint_desc.name, symbol);
+
+			//void type is forbidden. For pointers allowed "ptr char"
 		}
 		CompilationState::CompilationState()
 		{

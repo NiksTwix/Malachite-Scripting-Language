@@ -61,6 +61,12 @@
     <Filter Include="Файлы заголовков\IR\Pseudo\Postfix">
       <UniqueIdentifier>{8c57bdb6-ce11-4d22-b522-d2d29c200703}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Исходные файлы\IR\Pseudo\LowLevel">
+      <UniqueIdentifier>{2f80f824-3717-46fa-b012-297e2a548fa5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы заголовков\IR\Pseudo\LowLevel">
+      <UniqueIdentifier>{884260a3-b154-4a7e-8192-e2934c23972e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MSLC.cpp">
@@ -122,6 +128,9 @@
     </ClCompile>
     <ClCompile Include="source\IR\PseudoTranslation\BasicSyntaxTranslator.cpp">
       <Filter>Исходные файлы\IR\Pseudo\BS</Filter>
+    </ClCompile>
+    <ClCompile Include="source\IR\PseudoTranslation\LowLevelCode\LowLevelTranslator.cpp">
+      <Filter>Исходные файлы\IR\Pseudo\LowLevel</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -217,6 +226,12 @@
     </ClInclude>
     <ClInclude Include="include\IR\PseudoTranslation\Postfix\PostfixInfo.hpp">
       <Filter>Файлы заголовков\IR\Pseudo\Postfix</Filter>
+    </ClInclude>
+    <ClInclude Include="include\IR\PseudoTranslation\LowLevelCode\LowLevelInfo.hpp">
+      <Filter>Файлы заголовков\IR\Pseudo\LowLevel</Filter>
+    </ClInclude>
+    <ClInclude Include="include\IR\PseudoTranslation\LowLevelCode\LowLevelTranslator.hpp">
+      <Filter>Файлы заголовков\IR\Pseudo\LowLevel</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -1,6 +1,8 @@
 #pragma once
 #include "ByteTranslationInfo.hpp"
 
+
+
 namespace MSLC
 {
 	namespace IntermediateRepresentation

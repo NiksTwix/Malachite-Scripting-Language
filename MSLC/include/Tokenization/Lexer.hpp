@@ -18,6 +18,9 @@ namespace MSLC
 			bool in_string = false;
 			bool in_symbol_literal = false;
 			std::string text;
+
+
+			std::vector<Token> tokens;
 		};
 
 		enum class UnaryType {

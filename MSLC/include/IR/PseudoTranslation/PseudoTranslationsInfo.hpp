@@ -5,15 +5,11 @@
 #include "..\..\Definitions\ChunkArray.hpp"
 #include "..\..\CompilationInfo\CompilationState.hpp"
 #include "..\..\AST\ASTBuilder.hpp"
-
+#include "LowLevelCode\LowLevelInfo.hpp"
 namespace MSLC 
 {
 	namespace IntermediateRepresentation
 	{
-
-
-
-
 		namespace Pseudo
 		{
 			enum class PseudoOpCode : uint16_t
@@ -87,11 +83,20 @@ namespace MSLC
 				UseType,
 				UseField,
 				ED_USING,
+				ST_CONTROL_FLOW,
 				Call,
-				CreateArray,	//count of previous elements in stack
+				Jump,
+				JumpIf,
+				JumpNIf,
+				Label,
 
+				ET_CONTROL_FLOW,
+
+
+				CreateArray,	//count of previous elements in stack
 				PushFrame,
 				PopFrame,
+				PushLLOpers,		//argument - id (index in array) of low level pseudo code block
 			};
 
 
@@ -132,11 +137,12 @@ namespace MSLC
 
 			using POperationArray = Definitions::ChunkArray<PseudoOperation>;
 
-			
+			using LLOperationArray = Definitions::ChunkArray<LLOperation>;
 
 			struct PseudoTranslationState 
 			{
 				POperationArray pseudo_code = POperationArray();
+				std::vector<LLOperationArray> ll_operations_chunks;
 				CompilationInfo::CompilationState* cs_observer = nullptr;
 			};
 

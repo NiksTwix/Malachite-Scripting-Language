@@ -329,11 +329,10 @@ namespace MSLC
 		
 		std::vector<Token> Lexer::ToTokens(std::string text, size_t module_id)
 		{
-			std::vector<Token> result;
 			LexingState state;
 			state.current_line = 1;
 			bool in_string = false;
-			result.reserve(text.size() / 4);
+			state.tokens.reserve(text.size() / 4);
 			bool in_symbol_literal = false;
 
 			for (state.current_index = 0; state.current_index < text.size(); state.current_index++)
@@ -378,21 +377,21 @@ namespace MSLC
 					{
 						if (!state.undefined_token.empty())
 						{
-							result.push_back(CreateToken(state,state.undefined_token));
+							state.tokens.push_back(CreateToken(state,state.undefined_token));
 						}
 						state.undefined_token.clear();
 
 					}
 
-					auto t = InsertOpEnd(state,result, text);
+					auto t = InsertOpEnd(state, state.tokens, text);
 					if (t.type != TokenType::UNDEFINED)
 					{
 						if (!state.undefined_token.empty())
 						{
-							result.push_back(CreateToken(state,state.undefined_token));
+							state.tokens.push_back(CreateToken(state,state.undefined_token));
 							state.undefined_token.clear();
 						}
-						result.push_back(t);
+						state.tokens.push_back(t);
 						if (c == ';')continue;
 					}
 					if (state.was_comment) state.was_comment = false;
@@ -408,23 +407,23 @@ namespace MSLC
 						}
 						if (!state.undefined_token.empty())	//Сразу добавляем токен перед ним, если есть
 						{
-							result.push_back(CreateToken(state,state.undefined_token));
+							state.tokens.push_back(CreateToken(state,state.undefined_token));
 							state.undefined_token.clear();
 						}
 
-						if (state.current_index < text.size() - 1 && GetTokenType(state,std::string({ c, text[state.current_index + 1] })) == TokenType::LITERAL && (result.size() == 0 || (result.back().type != TokenType::LITERAL && result.back().type != TokenType::IDENTIFIER)))  //if its number
+						if (state.current_index < text.size() - 1 && GetTokenType(state,std::string({ c, text[state.current_index + 1] })) == TokenType::LITERAL && (state.tokens.size() == 0 || (state.tokens.back().type != TokenType::LITERAL && state.tokens.back().type != TokenType::IDENTIFIER)))  //if its number
 						{
 							state.was_neg_value = true;
 							continue;
 						}
-						Token t = ProcessOperator(state,text, result);
+						Token t = ProcessOperator(state,text, state.tokens);
 						state.current_index--;
 						if (t.type == TokenType::UNDEFINED)
 						{
 							Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Invalid operator \"" + t.value.strVal + "\".", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceCode, state.current_line));
 							continue;
 						}
-						result.push_back(t);
+						state.tokens.push_back(t);
 						continue;
 					}
 
@@ -439,7 +438,7 @@ namespace MSLC
 						}
 						if (!state.undefined_token.empty())	//Сразу добавляем токен перед ним, если есть
 						{
-							result.push_back(CreateToken(state,state.undefined_token));
+							state.tokens.push_back(CreateToken(state,state.undefined_token));
 							state.undefined_token.clear();
 						}
 						Token t;
@@ -453,7 +452,7 @@ namespace MSLC
 							state.current_depth--;
 						}
 
-						result.push_back(t);
+						state.tokens.push_back(t);
 						continue;
 					}
 				}
@@ -468,7 +467,7 @@ namespace MSLC
 				{
 					in_symbol_literal = false;
 					state.undefined_token.push_back(c);
-					result.push_back(CreateToken(state,state.undefined_token));
+					state.tokens.push_back(CreateToken(state,state.undefined_token));
 					state.undefined_token.clear();
 					continue;
 				}
@@ -482,7 +481,7 @@ namespace MSLC
 				{
 					in_string = false;
 					state.undefined_token.push_back(c);
-					result.push_back(CreateToken(state,state.undefined_token));
+					state.tokens.push_back(CreateToken(state,state.undefined_token));
 					state.undefined_token.clear();
 					continue;
 				}
@@ -497,11 +496,11 @@ namespace MSLC
 				t.type = GetTokenType(state,state.undefined_token);
 				t.value = GetTokenValue(state,state.undefined_token);
 				t.module_id = state.module_id;
-				result.push_back(t);
-				result.push_back(Token((uint64_t)CompilationLabel::OPERATION_END, TokenType::COMPILATION_LABEL, state.current_line, state.module_id));
+				state.tokens.push_back(t);
+				state.tokens.push_back(Token((uint64_t)CompilationLabel::OPERATION_END, TokenType::COMPILATION_LABEL, state.current_line, state.module_id));
 			}
 
-			return result;
+			return state.tokens;
 		}
 	}
 }

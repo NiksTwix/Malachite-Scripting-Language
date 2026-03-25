@@ -1,0 +1,173 @@
+#include "..\..\..\..\include\IR\PseudoTranslation\LowLevelCode\LowLevelTranslator.hpp"
+
+namespace MSLC
+{
+	namespace IntermediateRepresentation
+	{
+		namespace Pseudo
+		{
+			void LLTranslator::Handle(PseudoTranslationState& state, std::vector<Argument>& arguments, std::vector<Token>& op_code, size_t line)
+			{
+				LLOperation operation;
+				if (op_code.size() == 1)
+				{
+					LowLevelOpCode code = LLTranslationMap::Get().GetCode(op_code[0].value.strVal);
+					if (code == LowLevelOpCode::NOP) goto error;
+					operation.code = code;
+				}
+				else 
+				{
+					error:
+						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("In " + std::string(Keywords::w_op_code) + " section is invalid operation code.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, line));
+						return;
+				}
+
+				switch (operation.code)
+				{
+				case MSLC::IntermediateRepresentation::Pseudo::LEA:
+				case MSLC::IntermediateRepresentation::Pseudo::DLEA:
+				{
+					if (arguments.size() != 2) goto error1;
+
+					uint8_t reg_id1 = LLTranslationMap::Get().GetRegisterID(arguments[0].tokens[0].value.strVal);
+					CompilationInfo::Symbol* symbol = state.cs_observer->FindSymbolLocal(arguments[1].tokens[0].value.strVal);
+
+					if (reg_id1 == 0 || symbol == nullptr || symbol->type != CompilationInfo::SymbolType::Variable) goto error2;
+
+					operation.arg0 = reg_id1;
+					operation.arg1 = symbol->description_id;
+				}
+					break;
+				case MSLC::IntermediateRepresentation::Pseudo::STORE:
+				case MSLC::IntermediateRepresentation::Pseudo::LOAD:
+				{
+					if (arguments.size() != 3) goto error1;
+
+					uint8_t reg_id1 = LLTranslationMap::Get().GetRegisterID(arguments[0].tokens[0].value.strVal);
+					uint8_t reg_id2 = LLTranslationMap::Get().GetRegisterID(arguments[1].tokens[0].value.strVal);
+					uint8_t size = arguments[2].tokens[0].value.intVal;
+					if (reg_id1 == 0 || reg_id2 == 0 || size > MAX_VALUE_SIZE) goto error2;
+				
+					operation.arg0 = reg_id1;
+					operation.arg1 = reg_id2;
+					operation.arg2 = size;
+				}
+					break;
+				
+				case MSLC::IntermediateRepresentation::Pseudo::ADD:
+				case MSLC::IntermediateRepresentation::Pseudo::SUB:
+				case MSLC::IntermediateRepresentation::Pseudo::MUL:
+				case MSLC::IntermediateRepresentation::Pseudo::DIV:
+				case MSLC::IntermediateRepresentation::Pseudo::MOD:
+				{
+					if (arguments.size() != 3) goto error1;
+					uint8_t reg_id1 = LLTranslationMap::Get().GetRegisterID(arguments[0].tokens[0].value.strVal);
+					uint8_t reg_id2 = LLTranslationMap::Get().GetRegisterID(arguments[1].tokens[0].value.strVal);
+					uint8_t reg_id3 = LLTranslationMap::Get().GetRegisterID(arguments[2].tokens[0].value.strVal);
+					if (reg_id1 == 0 || reg_id2 == 0 || reg_id3 == 0) goto error2;
+					operation.arg0 = reg_id1;
+					operation.arg1 = reg_id2;
+					operation.arg2 = reg_id3;
+				}
+					break;
+				case MSLC::IntermediateRepresentation::Pseudo::NEG:
+				{
+					if (arguments.size() != 2) goto error1;
+					uint8_t reg_id1 = LLTranslationMap::Get().GetRegisterID(arguments[0].tokens[0].value.strVal);
+					uint8_t reg_id2 = LLTranslationMap::Get().GetRegisterID(arguments[1].tokens[0].value.strVal);
+					if (reg_id1 == 0 || reg_id2 == 0) goto error2;
+					operation.arg0 = reg_id1;
+					operation.arg1 = reg_id2;
+				}
+
+					break;
+				case MSLC::IntermediateRepresentation::Pseudo::MOVE:
+					break;
+				case MSLC::IntermediateRepresentation::Pseudo::PRINT:
+					break;
+				case MSLC::IntermediateRepresentation::Pseudo::LABEL:
+					break;
+				case MSLC::IntermediateRepresentation::Pseudo::JUMP:
+					break;
+				default:
+				{
+				error1:
+					Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Invalid \"" + op_code[0].value.strVal + "\" operation.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, line));
+					return;
+				error2:
+					Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Invalid arguments of \"" + op_code[0].value.strVal + "\" operation.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, line));
+					return;
+				}
+					break;
+				}
+
+				state.ll_operations_chunks.back().Pushback(operation);
+
+			}
+			void LLTranslator::Translate(PseudoTranslationState& state,const AST::ASTNode& node)
+			{
+				size_t chunks_id = state.ll_operations_chunks.size();
+				state.ll_operations_chunks.emplace_back();
+
+				state.pseudo_code.Pushback(PseudoOperation(PseudoOpCode::PushLLOpers, chunks_id,(uint32_t)node.line));
+
+				for (const AST::ASTNode& cnode : node.children)
+				{
+					if (cnode.type != AST::ASTNodeType::Expression)
+					{
+						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("In " + std::string(Keywords::w_op_code) + " section are allowed only simple instructions.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, cnode.line));
+						continue;
+					}
+					std::vector<Argument> arguments;
+
+					std::vector<Token> op_code;
+					bool arguments_ = false;
+
+					Argument current;
+
+					bool checking = true;
+
+					for (const Token& t : node.tokens) 
+					{
+						if (t.value.strVal == ":") 
+						{
+							if (arguments_) 
+							{
+								Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("In " + std::string(Keywords::w_op_code) + " section repeated using ':' for arguments separating is forbidden.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, cnode.line));
+								checking = false;
+							}
+							arguments_ = true;
+							continue;
+						}
+						if (t.value.strVal == ",") 
+						{
+							if (!current.valid) 
+							{
+								Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("In " + std::string(Keywords::w_op_code) + " section operation contains invalid argument.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, cnode.line));
+								checking = false;
+								continue;
+							}
+							arguments.push_back(current);
+							current = Argument();
+						}
+						if (!arguments_) op_code.push_back(t);
+						else
+						{
+							current.valid = true;
+							current.tokens.push_back(t);
+						}
+					}
+					if (!checking) continue;
+					if (!current.valid)
+					{
+						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("In " + std::string(Keywords::w_op_code) + " section operation contains invalid argument.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, cnode.line));
+						continue;
+					}
+					arguments.push_back(current);
+					
+					Handle(state, arguments, op_code, node.line);
+				}
+			}
+		}
+	}
+}

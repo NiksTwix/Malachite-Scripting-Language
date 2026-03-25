@@ -157,14 +157,14 @@ namespace MSLC
 						{
 							b_state->value_stack.push(ValueFrame(ValueSource::StaticAddress, vdesc->global_stack_offset,
 								vdesc->vinfo.isPointer() ? PrimitiveAnalogs::UInt : tdesc->primitive_analog,
-								vdesc->vinfo.isPointer() ? 8 : tdesc->size));
+								vdesc->vinfo.isPointer() ? POINTER_SIZE : tdesc->size));
 							b_state->value_stack.top().static_primitive_type = tdesc->primitive_analog;
 						}
 						else 
 						{
 							b_state->value_stack.push(ValueFrame(ValueSource::Symbol, b_state->cs_observer->AddUnhandledSymbol(CompilationInfo::SymbolType::Variable, operation.arg_0),
 								vdesc->vinfo.isPointer() ? PrimitiveAnalogs::UInt : tdesc->primitive_analog,
-								vdesc->vinfo.isPointer() ? 8 : tdesc->size));
+								vdesc->vinfo.isPointer() ? POINTER_SIZE : tdesc->size));
 							b_state->value_stack.top().static_primitive_type = tdesc->primitive_analog;
 						}
 						
@@ -468,10 +468,10 @@ namespace MSLC
 
 				if (frame.source == ValueSource::DynamicAddress) {
 					// Address is already in register  (reg_index)
-					if (frame.dynamic_data_size > 8) {
+					if (frame.dynamic_data_size > POINTER_SIZE) {
 						// Big data — leave a pointer (address in the register)
 						frame.source = ValueSource::Pointer;
-						frame.dynamic_data_size = 8;
+						frame.dynamic_data_size = POINTER_SIZE;
 						return frame;
 					}
 					else {
@@ -493,7 +493,7 @@ namespace MSLC
 
 					if (!CheckRegister(b_state, free_reg))return ValueFrame::Invalid();
 
-					if (frame.dynamic_data_size > 8) {
+					if (frame.dynamic_data_size > POINTER_SIZE) {
 						// Big data — load address
 						PushCommand(b_state,
 							ByteCommand(ByteOpCode::LEA_STATIC,
@@ -503,7 +503,7 @@ namespace MSLC
 						TryMarkAsUnhandledSymbol(frame, b_state,0b1);
 						frame.data = free_reg;
 						frame.source = ValueSource::Pointer;
-						frame.dynamic_data_size = 8;
+						frame.dynamic_data_size = POINTER_SIZE;
 						
 					}
 					else {
@@ -524,7 +524,7 @@ namespace MSLC
 				{
 					size_t free_reg = b_state->registers_table.AllocateFreeGeneral();
 					if (!CheckRegister(b_state, free_reg))return ValueFrame::Invalid();
-					if (frame.dynamic_data_size > 8) {
+					if (frame.dynamic_data_size > POINTER_SIZE) {
 						// Big data — load address of constant
 						PushCommand(b_state,
 							ByteCommand(ByteOpCode::LEA_CONST,
@@ -533,7 +533,7 @@ namespace MSLC
 							current_line);
 						frame.data = free_reg;
 						frame.source = ValueSource::Pointer;
-						frame.dynamic_data_size = 8;
+						frame.dynamic_data_size = POINTER_SIZE;
 					}
 					else {
 						// Small data — load value
