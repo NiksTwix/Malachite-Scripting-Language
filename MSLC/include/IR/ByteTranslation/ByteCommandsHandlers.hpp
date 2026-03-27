@@ -1,6 +1,6 @@
 #pragma once
 #include "ByteTranslationInfo.hpp"
-
+#include "ByteLLTranslator.hpp"
 
 
 namespace MSLC
@@ -32,8 +32,13 @@ namespace MSLC
 				
 				void TryMarkAsUnhandledSymbol(ValueFrame& frame, std::shared_ptr<ByteTranslationState> b_state,uint8_t args_with_us); //args_with_us - bit mask. use 0 | (0,1,2)
 
+				LLTranslator ll_translator;
+
 			public:
 				void HandleCommand(std::shared_ptr<ByteTranslationState>  b_state);
+
+				void FreeTempResources(std::shared_ptr<ByteTranslationState> b_state);
+
 			};
 			
 

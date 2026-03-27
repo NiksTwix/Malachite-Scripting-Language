@@ -15,6 +15,9 @@ namespace MSLC
 				{
 					commands_handler.HandleCommand(b_state);
 				}
+
+				commands_handler.FreeTempResources(b_state);
+
 				CommandStringSerializer css;
 				std::cout << "Size: " << b_state->result.Size() << "\n";
 				for (size_t i = 0; i < b_state->result.Size(); i++) 

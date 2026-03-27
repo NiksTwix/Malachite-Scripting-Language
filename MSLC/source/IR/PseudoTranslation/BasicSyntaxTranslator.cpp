@@ -17,7 +17,7 @@ namespace MSLC
 				case AST::ASTNodeType::Function: break;
 				case AST::ASTNodeType::ObjectTemplate: break;
 				case AST::ASTNodeType::LowLevelCodeBlock: 
-					//opcst.HandleLowLevelCode(node, pts, rhandler);
+					lltranslator.Translate(pts, node);
 					break;
 				default:
 					break;

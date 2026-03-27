@@ -1,4 +1,4 @@
-#include "..\..\..\..\include\IR\PseudoTranslation\LowLevelCode\LowLevelTranslator.hpp"
+#include "..\..\..\..\include\IR\PseudoTranslation\LowLevelCode\PseudoLLTranslator.hpp"
 
 namespace MSLC
 {
@@ -30,9 +30,28 @@ namespace MSLC
 					if (arguments.size() != 2) goto error1;
 
 					uint8_t reg_id1 = LLTranslationMap::Get().GetRegisterID(arguments[0].tokens[0].value.strVal);
+
+					if (arguments[1].tokens.size() > 1) 
+					{
+						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("In " + std::string(Keywords::w_op_code) + " section complex identificator's using is forbidden.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, line));
+						return;
+					
+					}
 					CompilationInfo::Symbol* symbol = state.cs_observer->FindSymbolLocal(arguments[1].tokens[0].value.strVal);
 
-					if (reg_id1 == 0 || symbol == nullptr || symbol->type != CompilationInfo::SymbolType::Variable) goto error2;
+					if (reg_id1 == LowLevelRegisters::Invalid || symbol == nullptr || symbol->type != CompilationInfo::SymbolType::Variable) goto error2;
+
+
+					if (operation.code == LowLevelOpCode::DLEA && !state.cs_observer->GetGST().GetVariable(symbol->description_id)->vinfo.isPointer()) 
+					{
+						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("In " + std::string(Keywords::w_op_code) + " section DLEA requires pointer variable.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, line));
+						return;
+					}
+					if (operation.code == LowLevelOpCode::LEA && state.cs_observer->GetGST().GetVariable(symbol->description_id)->vinfo.isPointer())
+					{
+						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("In " + std::string(Keywords::w_op_code) + " section LEA doesnt work with pointers.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, line));
+						return;
+					}
 
 					operation.arg0 = reg_id1;
 					operation.arg1 = symbol->description_id;
@@ -46,7 +65,7 @@ namespace MSLC
 					uint8_t reg_id1 = LLTranslationMap::Get().GetRegisterID(arguments[0].tokens[0].value.strVal);
 					uint8_t reg_id2 = LLTranslationMap::Get().GetRegisterID(arguments[1].tokens[0].value.strVal);
 					uint8_t size = arguments[2].tokens[0].value.intVal;
-					if (reg_id1 == 0 || reg_id2 == 0 || size > MAX_VALUE_SIZE) goto error2;
+					if (reg_id1 == LowLevelRegisters::Invalid || reg_id2 == LowLevelRegisters::Invalid || size > MAX_VALUE_SIZE) goto error2;
 				
 					operation.arg0 = reg_id1;
 					operation.arg1 = reg_id2;
@@ -54,28 +73,28 @@ namespace MSLC
 				}
 					break;
 				
-				case MSLC::IntermediateRepresentation::Pseudo::ADD:
-				case MSLC::IntermediateRepresentation::Pseudo::SUB:
-				case MSLC::IntermediateRepresentation::Pseudo::MUL:
-				case MSLC::IntermediateRepresentation::Pseudo::DIV:
-				case MSLC::IntermediateRepresentation::Pseudo::MOD:
+				case MSLC::IntermediateRepresentation::Pseudo::ADDI:
+				case MSLC::IntermediateRepresentation::Pseudo::SUBI:
+				case MSLC::IntermediateRepresentation::Pseudo::MULI:
+				case MSLC::IntermediateRepresentation::Pseudo::DIVI:
+				case MSLC::IntermediateRepresentation::Pseudo::MODI:
 				{
 					if (arguments.size() != 3) goto error1;
 					uint8_t reg_id1 = LLTranslationMap::Get().GetRegisterID(arguments[0].tokens[0].value.strVal);
 					uint8_t reg_id2 = LLTranslationMap::Get().GetRegisterID(arguments[1].tokens[0].value.strVal);
 					uint8_t reg_id3 = LLTranslationMap::Get().GetRegisterID(arguments[2].tokens[0].value.strVal);
-					if (reg_id1 == 0 || reg_id2 == 0 || reg_id3 == 0) goto error2;
+					if (reg_id1 == LowLevelRegisters::Invalid || reg_id2 == LowLevelRegisters::Invalid || reg_id3 == LowLevelRegisters::Invalid) goto error2;
 					operation.arg0 = reg_id1;
 					operation.arg1 = reg_id2;
 					operation.arg2 = reg_id3;
 				}
 					break;
-				case MSLC::IntermediateRepresentation::Pseudo::NEG:
+				case MSLC::IntermediateRepresentation::Pseudo::NEGI:
 				{
 					if (arguments.size() != 2) goto error1;
 					uint8_t reg_id1 = LLTranslationMap::Get().GetRegisterID(arguments[0].tokens[0].value.strVal);
 					uint8_t reg_id2 = LLTranslationMap::Get().GetRegisterID(arguments[1].tokens[0].value.strVal);
-					if (reg_id1 == 0 || reg_id2 == 0) goto error2;
+					if (reg_id1 == LowLevelRegisters::Invalid || reg_id2 == LowLevelRegisters::Invalid) goto error2;
 					operation.arg0 = reg_id1;
 					operation.arg1 = reg_id2;
 				}
@@ -83,8 +102,7 @@ namespace MSLC
 					break;
 				case MSLC::IntermediateRepresentation::Pseudo::MOVE:
 					break;
-				case MSLC::IntermediateRepresentation::Pseudo::PRINT:
-					break;
+
 				case MSLC::IntermediateRepresentation::Pseudo::LABEL:
 					break;
 				case MSLC::IntermediateRepresentation::Pseudo::JUMP:
@@ -113,6 +131,10 @@ namespace MSLC
 
 				for (const AST::ASTNode& cnode : node.children)
 				{
+					if (cnode.type == AST::ASTNodeType::None) 
+					{
+						continue;		
+					}
 					if (cnode.type != AST::ASTNodeType::Expression)
 					{
 						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("In " + std::string(Keywords::w_op_code) + " section are allowed only simple instructions.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, cnode.line));
@@ -127,7 +149,7 @@ namespace MSLC
 
 					bool checking = true;
 
-					for (const Token& t : node.tokens) 
+					for (const Token& t : cnode.tokens) 
 					{
 						if (t.value.strVal == ":") 
 						{
@@ -149,6 +171,7 @@ namespace MSLC
 							}
 							arguments.push_back(current);
 							current = Argument();
+							continue;
 						}
 						if (!arguments_) op_code.push_back(t);
 						else
@@ -165,7 +188,7 @@ namespace MSLC
 					}
 					arguments.push_back(current);
 					
-					Handle(state, arguments, op_code, node.line);
+					Handle(state, arguments, op_code, cnode.line);
 				}
 			}
 		}

@@ -141,14 +141,14 @@ namespace MSLC
 				LEA_STATIC,		// Static address calculating: MemoryAddress (static) -> reg 
 				LEA_DYNAMIC,	// Dynamic address calculating: register (with address) -> register_dest
 
-				LOAD_DYNAMIC,	//Loading by address in register
-				STORE_DYNAMIC,	//Storing by address in register
+				LOAD_DYNAMIC,	//Loading by address in register //Register With Loading Address,Register,Size
+				STORE_DYNAMIC,	//Storing by address in register //Register With Storing Address,Register,Size
 
 				LOAD_CONST_STATIC,	//load constant value to register. Linker will replace id on offset
 				LEA_CONST,	//Load constant pointer in register. ConstantID, register
 
-				LOAD_STATIC,	//Loading by address in register
-				STORE_STATIC,	//Storing by address in register
+				LOAD_STATIC,	//Loading by address in register //MemoryAddress,Register,Size
+				STORE_STATIC,	//Storing by address in register //MemoryAddress,Register,Size
 
 				SECTION_MEMORY_ED,
 				// Control flow arg0 = where
@@ -366,6 +366,7 @@ namespace MSLC
 				StackFrame(size_t start_address): start_address(start_address) {}
 				size_t NextFreeAddress() { return start_address + size; }
 			};
+
 
 
 			struct ByteTranslationState

@@ -751,6 +751,10 @@ namespace MSLC
 					}
 					return;
 				}
+				if (operation.op_code == Pseudo::PseudoOpCode::PushLLOpers) 
+				{
+					ll_translator.InsertLowLevel(b_state);
+				}
 
 				//Standart handling
 
@@ -770,6 +774,10 @@ namespace MSLC
 				{
 					HandleDeclaring(b_state->pseudo_state_observer->pseudo_code, b_state);
 				}
+			}
+			void CommandsHandler::FreeTempResources(std::shared_ptr<ByteTranslationState> b_state)
+			{
+				ll_translator.FreeAllocatedRegisters(b_state);
 			}
 		}
 	}

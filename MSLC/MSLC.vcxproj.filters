@@ -129,8 +129,11 @@
     <ClCompile Include="source\IR\PseudoTranslation\BasicSyntaxTranslator.cpp">
       <Filter>Исходные файлы\IR\Pseudo\BS</Filter>
     </ClCompile>
-    <ClCompile Include="source\IR\PseudoTranslation\LowLevelCode\LowLevelTranslator.cpp">
+    <ClCompile Include="source\IR\PseudoTranslation\LowLevelCode\PseudoLLTranslator.cpp">
       <Filter>Исходные файлы\IR\Pseudo\LowLevel</Filter>
+    </ClCompile>
+    <ClCompile Include="source\IR\ByteTranslation\ByteLLTranslator.cpp">
+      <Filter>Исходные файлы\IR\Byte</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -230,8 +233,11 @@
     <ClInclude Include="include\IR\PseudoTranslation\LowLevelCode\LowLevelInfo.hpp">
       <Filter>Файлы заголовков\IR\Pseudo\LowLevel</Filter>
     </ClInclude>
-    <ClInclude Include="include\IR\PseudoTranslation\LowLevelCode\LowLevelTranslator.hpp">
+    <ClInclude Include="include\IR\PseudoTranslation\LowLevelCode\PseudoLLTranslator.hpp">
       <Filter>Файлы заголовков\IR\Pseudo\LowLevel</Filter>
+    </ClInclude>
+    <ClInclude Include="include\IR\ByteTranslation\ByteLLTranslator.hpp">
+      <Filter>Файлы заголовков\IR\Byte</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

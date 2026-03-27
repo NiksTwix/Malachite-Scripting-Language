@@ -329,6 +329,7 @@ namespace MSLC
 		
 		std::vector<Token> Lexer::ToTokens(std::string text, size_t module_id)
 		{
+	
 			LexingState state;
 			state.current_line = 1;
 			bool in_string = false;
