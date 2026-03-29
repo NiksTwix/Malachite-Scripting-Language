@@ -228,7 +228,7 @@ namespace MSLVM
 				uint64_t size = REG_U(operation.arg1);
 				uint64_t current_sp = state.registers[SpecialRegister::SP].u;
 
-				if (!state.memory.CheckIntervals(state.memory.GetStackStart(),state.memory.GetHeapStart(),current_sp,size)) {
+				if (!state.memory.CheckIntervals(state.memory.GetStackStart(), state.memory.GetHeapStart(), current_sp, size)) {
 					errcode = ErrorCode::StackOverflow;
 					break;
 				}
@@ -244,13 +244,13 @@ namespace MSLVM
 				uint64_t size = REG_U(operation.arg1);
 				uint64_t current_sp = state.registers[SpecialRegister::SP].u;
 				uint64_t new_sp = current_sp - size;
-				if (!state.memory.CheckIntervals(state.memory.GetStackStart(), state.memory.GetHeapStart(),new_sp,0)) {
+				if (!state.memory.CheckIntervals(state.memory.GetStackStart(), state.memory.GetHeapStart(), new_sp, 0)) {
 					errcode = ErrorCode::StackUnderflow;
 					break;
 				}
 				uint64_t value = state.memory.Read(new_sp, size);
 				state.registers[REG_U(operation.arg0)].u = value;
-				
+
 				// Обновление SP
 				state.registers[SpecialRegister::SP].u = new_sp;
 				break;
@@ -293,7 +293,7 @@ namespace MSLVM
 				break;
 			}
 
-			case STORE_LOCAL: 
+			case STORE_LOCAL:
 			{
 				uint64_t offset = REG_U(operation.arg1);
 				uint64_t size = REG_U(operation.arg2);
@@ -330,7 +330,7 @@ namespace MSLVM
 				break;
 			}
 
-			case STORE_BY_ADDRESS: 
+			case STORE_BY_ADDRESS:
 			{
 				uint64_t value = state.registers[REG_U(operation.arg0)].u;
 				uint64_t address = state.registers[REG_U(operation.arg1)].u;
@@ -388,7 +388,7 @@ namespace MSLVM
 			//	state.registers[REG_U(operation.arg0)].u = value;
 			//	break;
 			//}
-			case CALC_FRAME_ADDRESS:        
+			case CALC_FRAME_ADDRESS:
 			{
 				uint64_t offset = REG_U(operation.arg1);
 
@@ -406,7 +406,7 @@ namespace MSLVM
 					break;
 				}
 				//!allocate_memory(state.HFI, address, state.registers[REG_U(operation.arg1)].u)
-				if (auto t  = state.HFI.Allocate(size,&address); t != ErrorCode::NoError)
+				if (auto t = state.HFI.Allocate(size, &address); t != ErrorCode::NoError)
 				{
 					errcode = t;
 					break;
@@ -418,7 +418,7 @@ namespace MSLVM
 			{
 				uint64_t address = state.registers[REG_U(operation.arg0)].u;
 				uint64_t size = state.registers[REG_U(operation.arg1)].u;
-				if (address < state.memory.GetHeapStart() ||  address + size > state.memory.GetEnd()) {
+				if (address < state.memory.GetHeapStart() || address + size > state.memory.GetEnd()) {
 					errcode = ErrorCode::InvalidMemoryAccess;
 					break;
 				}
@@ -447,7 +447,7 @@ namespace MSLVM
 					break;
 				}
 
-				if (new_fp < t.fp) {  
+				if (new_fp < t.fp) {
 					errcode = ErrorCode::FrameExpansionFailed;
 					break;
 				}
@@ -510,7 +510,7 @@ namespace MSLVM
 				//JUMPED flag doesnt be setted because we need to skip call instruction
 				break;
 			}
-			
+
 			case VMOperationCode::HALT:
 				state.registers[SpecialRegister::FL].u |= Flag::STOPPED;
 				break;
@@ -519,31 +519,30 @@ namespace MSLVM
 				//--------------------VM Calls Operations  
 				{
 			case VMOperationCode::VM_CALL:
-					handle_vm_call(state, operation);
-					break;
+				handle_vm_call(state, operation);
+				break;
 				}
 
 				//--------------------Type Convertion Operations  
 				{
-			case VMOperationCode::TC_ITR_R: 
+			case VMOperationCode::TC_ITR_R:
 				state.registers[REG_U(operation.arg0)].r = static_cast<register_real>(state.registers[REG_U(operation.arg0)].i);
 				break;
-			case VMOperationCode::TC_RTI_R: 
+			case VMOperationCode::TC_RTI_R:
 				state.registers[REG_U(operation.arg0)].i = static_cast<register_integer>(state.registers[REG_U(operation.arg0)].r);
 				break;
-			case VMOperationCode::TC_UTR_R: 
+			case VMOperationCode::TC_UTR_R:
 				state.registers[REG_U(operation.arg0)].r = static_cast<register_real>(state.registers[REG_U(operation.arg0)].u);
 				break;
-			case VMOperationCode::TC_UTI_R: 
+			case VMOperationCode::TC_UTI_R:
 				state.registers[REG_U(operation.arg0)].i = static_cast<register_integer>(state.registers[REG_U(operation.arg0)].u);
 				break;
-			case VMOperationCode::TC_RTU_R: 
+			case VMOperationCode::TC_RTU_R:
 				state.registers[REG_U(operation.arg0)].u = static_cast<register_unsigned>(state.registers[REG_U(operation.arg0)].r);
 				break;
-			case VMOperationCode::TC_ITU_R: 
+			case VMOperationCode::TC_ITU_R:
 				state.registers[REG_U(operation.arg0)].u = static_cast<register_unsigned>(state.registers[REG_U(operation.arg0)].i);
 				break;
-
 				}
 			default:
 				break;

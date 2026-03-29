@@ -9,13 +9,14 @@ namespace MSLC {
 		namespace Pseudo
 		{
 
+
 			enum LowLevelOpCode : uint8_t
 			{
 				NOP,
 				LEA,	//Register-dest, identificator Load address of variable to register (works only with static pointers (offsets))
 				DLEA,	//Register-dest, identificator Load in register dynamic pointer
-				STORE,	// Register-dest,Register-src, size
-				LOAD,	// Register-dest,Register-src	size
+				STORE,	//Register-dest,Register-src, size
+				LOAD,	//Register-dest,Register-src,size
 				ADDI,	//Register-dest,register-src0,register-src1
 				SUBI,	//Register-dest,register-src0,register-src1
 				MULI,	//Register-dest,register-src0,register-src1
@@ -23,15 +24,14 @@ namespace MSLC {
 				MODI,	//Register-dest,register-src0,register-src1
 				NEGI,	//Register-dest,register-src0
 				MOVE,	//Register-dest,register-src0
-				PRINT_REG,	//print_type(int,real), register-source
-				PRINT_MEM,	//print_type(int,real,char), register with address
+				//PRINT_REG,	//(char/int/real), register-source
 				LABEL,	//label id	-> ByteLowLevelTranslator will save it in labels table 
 				JUMP,	//label id
 			};
 
 			enum LowLevelRegisters : uint8_t 
 			{
-				Invalid = 0,
+				InvalidR = 0xff,
 				RA = 1,
 				RB,
 				RC,
@@ -69,10 +69,8 @@ namespace MSLC {
 					{"MODI",MODI},
 					{"NEGI",NEGI},
 					{"MOVE",MOVE},
-					{"PRINT_REG",PRINT_REG},
-					{"PRINT_MEM",PRINT_MEM},
 				};
-				std::unordered_map<std::string, uint8_t> registers_id =
+				std::unordered_map<std::string, LowLevelRegisters> registers_id =
 				{
 					{"RA",RA},
 					{"RB",RB},
@@ -91,10 +89,10 @@ namespace MSLC {
 					if (it == string_codes.end()) return LowLevelOpCode::NOP;
 					return it->second;
 				}
-				uint8_t GetRegisterID(const std::string& literal)
+				LowLevelRegisters GetRegisterID(const std::string& literal)
 				{
 					auto it = registers_id.find(literal);
-					if (it == registers_id.end()) return LowLevelRegisters::Invalid;
+					if (it == registers_id.end()) return LowLevelRegisters::InvalidR;
 					return it->second;
 				}
 				static LLTranslationMap& Get() 

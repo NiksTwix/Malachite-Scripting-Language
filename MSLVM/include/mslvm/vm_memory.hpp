@@ -56,6 +56,7 @@ namespace MSLVM
         void Allocate(size_t code_size, size_t rod_size);
 
         uint64_t Read(uint64_t address, size_t size);		//64 - max size of data/ Little Endian
+        uint8_t ReadByte(uint64_t address);
         void Write(uint64_t address, uint64_t value, size_t size);		//64 - max size of data/ Little Endian
 
         VMOperation& GetOperation(size_t index);

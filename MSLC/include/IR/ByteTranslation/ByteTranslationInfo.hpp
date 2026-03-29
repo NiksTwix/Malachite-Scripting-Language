@@ -153,6 +153,7 @@ namespace MSLC
 				SECTION_MEMORY_ED,
 				// Control flow arg0 = where
 				SECTION_CONTROL_FLOW_ST,
+				JMPLABEL,
 				JMP,
 				JMPCV,      //CV- Condition Valid - arg0[where], arg1[condition register]
 				JMPCNV,     //CNV - Condition Not Valid - arg0[where], arg1[condition register]
@@ -174,8 +175,14 @@ namespace MSLC
 
 
 				SYMBOL_LABEL,	//Symbol declaring (function), arg0 - symbol_id -> inserting GRAB_FRAME with positive in MSLVM_1
+
+				PRINT_MEM,		//Mode (char/int/real), register with address, register with count
+				PRINT_REG,		//Mode (char/int/real), register
+
 				SECTION_SPECIAL_ED,
 			};
+
+			
 
 
 

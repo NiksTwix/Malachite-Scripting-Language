@@ -70,6 +70,11 @@ namespace MSLVM
 		}
 		return value;
 	}
+	uint8_t DynamicMemory::ReadByte(uint64_t address)
+	{
+		uint64_t native_address = ToNative(address);
+		return m_pointer[native_address];
+	}
 	void DynamicMemory::Write(uint64_t address, uint64_t value, size_t size)
 	{
 		uint64_t native_address = ToNative(address);

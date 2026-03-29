@@ -19,7 +19,13 @@ namespace MSLL
 			Constant,         // index in the constants poop
 			Symbol,				//for linking with symbols table
 		};
-
+		enum OutputTypes : uint8_t
+		{
+			Invalid = 0xff,
+			Char = 0,
+			Int,
+			Real,
+		};
 
 		enum class ByteOpCode : uint8_t
 		{
@@ -27,7 +33,7 @@ namespace MSLL
 
 			COMP_FLG,	//CompilationFlag arg0  - CompilationFlag. In functions declarations
 
-			SECTION_ARITHMETIC_ST,
+			SECTION_ARITHMETIC_ST,	//reg0,reg1,reg2
 			ADDR,
 			SUBR,
 			DIVR,
@@ -73,27 +79,27 @@ namespace MSLL
 			STACK_DOWN,    //size - arg0 
 			PUSH,		//reg and size
 			POP,		//reg and size
-
 			LEA_STATIC,		// Static address calculating: MemoryAddress (static) -> reg 
 			LEA_DYNAMIC,	// Dynamic address calculating: register (with address) -> register_dest
 
-			LOAD_DYNAMIC,	//Loading by address in register
-			STORE_DYNAMIC,	//Storing by address in register
+			LOAD_DYNAMIC,	//Loading by address in register //Register With Loading Address,Register,Size
+			STORE_DYNAMIC,	//Storing by address in register //Register With Storing Address,Register,Size
 
 			LOAD_CONST_STATIC,	//load constant value to register. Linker will replace id on offset
-			LEA_CONST,	//load constant offset to register. Linker will replace id on offset
+			LEA_CONST,	//Load constant pointer in register. ConstantID, register
 
-			LOAD_STATIC,	//Loading by address in register
-			STORE_STATIC,	//Storing by address in register
+			LOAD_STATIC,	//Loading by address in register //MemoryAddress,Register,Size
+			STORE_STATIC,	//Storing by address in register //MemoryAddress,Register,Size
 
 			SECTION_MEMORY_ED,
 			// Control flow arg0 = where
 			SECTION_CONTROL_FLOW_ST,
+			JMPLABEL,
 			JMP,
 			JMPCV,      //CV- Condition Valid - arg0[where], arg1[condition register]
 			JMPCNV,     //CNV - Condition Not Valid - arg0[where], arg1[condition register]
 			CALL,
-			RET,
+			RET,		//-> inserting GRAB_FRAME with negative in MSLVM_1
 			EXT,	//EXIT
 			SECTION_CONTROL_FLOW_ED,
 
@@ -108,7 +114,9 @@ namespace MSLL
 			TC_RTU,    //Type Convertion Real To Unsigned Integer
 			TC_ITU,
 
-			SYMBOL_LABEL,	//Symbol declaring (function), arg0 - symbol_id
+
+			SYMBOL_LABEL,	//Symbol declaring (function), arg0 - symbol_id -> inserting GRAB_FRAME with positive in MSLVM_1
+
 			SECTION_SPECIAL_ED,
 		};
 

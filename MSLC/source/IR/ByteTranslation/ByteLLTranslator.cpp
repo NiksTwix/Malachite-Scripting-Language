@@ -97,10 +97,6 @@ namespace MSLC
 					break;
 				case Pseudo::LowLevelOpCode::MOVE:
 					break;
-				case Pseudo::LowLevelOpCode::PRINT_REG:
-					break;
-				case Pseudo::LowLevelOpCode::PRINT_MEM:
-					break;
 				case Pseudo::LowLevelOpCode::LABEL:
 					break;
 				case Pseudo::LowLevelOpCode::JUMP:
