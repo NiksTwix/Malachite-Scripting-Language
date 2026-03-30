@@ -33,13 +33,6 @@ namespace MSLVM
 		{
 			VMOperation& operation = state.memory.GetOperation(state.registers[SpecialRegister::IP].u);
 			ErrorCode errcode{};
-
-			std::cout << "\nRegisters:\n";
-			for (int i = 0; i < 8; i++)
-			{
-				std::cout << std::to_string(state.registers[i].u) << " ";
-			}
-
 			if (state.memory.GetStatus() != ErrorCode::NoError) 
 			{
 				ErrorFrame ef;
@@ -586,7 +579,7 @@ namespace MSLVM
 				std::cout << value;
 				break;
 			}
-			case  VMCallType::PRINT_CHAR:
+			case VMCallType::PRINT_CHAR:
 			{
 				putchar(state.registers[REG_U(operation.arg1)].i);//Take value from register
 				break;

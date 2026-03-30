@@ -266,7 +266,16 @@ namespace MSLL
 				result.push_back(operation);
 				break;
 			}
-
+			case LinkDefinitions::ByteOpCode::SPEC_CALL:
+			{
+				VMOperation operation;
+				operation.code = VMOperationCode::VM_CALL;
+				operation.arg0 = command.arg0.data;
+				operation.arg1 = command.arg1.data;
+				operation.arg2 = command.arg2.data;
+				result.push_back(operation);
+				break;
+			}
 			default:
 				std::cerr << "Unsupported operation. Byte operation code:" << (int)command.code << "\n";
 				return false;

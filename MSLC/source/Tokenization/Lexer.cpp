@@ -106,6 +106,10 @@ namespace MSLC
 			if (token.size() >= 2 && token[0] == '"' && token.back() == '"') {
 				return ProcessStringLiteral(lex_state,token.substr(1, token.size() - 2));
 			}
+			if (token[0] == '@' || token[0] == '#') 
+			{
+				return token.substr(1, token.size() - 1);
+			}
 			return token;
 		}
 		Token Lexer::CreateToken(LexingState& lex_state, std::string operand)

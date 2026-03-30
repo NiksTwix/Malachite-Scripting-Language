@@ -41,7 +41,7 @@ namespace MSLC
 
 			auto tokens = lexer.ToTokens(text);
 
-			
+			preprocessor.Preprocess(comp_state, tokens);
 
 			Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Stage: Preprocessing 1."));
 

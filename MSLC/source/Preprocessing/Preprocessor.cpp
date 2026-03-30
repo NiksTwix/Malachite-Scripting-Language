@@ -109,6 +109,7 @@ namespace MSLC
                         if (state.current_index + 1 < tokens.size() && tokens[state.current_index + 1].type == TokenType::LITERAL && tokens[state.current_index + 1].value.type == Definitions::ValueType::STRING)
                         {
                             tokens[state.current_index + 1].type = TokenType::UNDEFINED;
+                            tokens[state.current_index + 1].value.strVal = "";
                         }
                         else 
                         {

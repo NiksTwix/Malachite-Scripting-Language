@@ -79,7 +79,8 @@ namespace MSLC {
                     {ByteOpCode::TC_UTR, "TC_UTR"},
                     {ByteOpCode::TC_UTI, "TC_UTI"},
                     {ByteOpCode::TC_RTU, "TC_RTU"},
-                    {ByteOpCode::TC_ITU, "TC_ITU"}
+                    {ByteOpCode::TC_ITU, "TC_ITU"},
+                    {ByteOpCode::SPEC_CALL, "SPEC_CALL" },
                 };
 
                 sts_table_ = {

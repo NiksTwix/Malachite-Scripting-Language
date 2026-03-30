@@ -24,6 +24,7 @@ namespace MSLC {
 				MODI,	//Register-dest,register-src0,register-src1
 				NEGI,	//Register-dest,register-src0
 				MOVE,	//Register-dest,register-src0
+				SPEC_CALL,	//SPECIAL_CALL| call_id (depends by VM's version), arg0,arg1
 				//PRINT_REG,	//(char/int/real), register-source
 				LABEL,	//label id	-> ByteLowLevelTranslator will save it in labels table 
 				JUMP,	//label id
@@ -42,13 +43,32 @@ namespace MSLC {
 				RH,
 			};
 
+			enum class LLArgumentSource 
+			{
+				Immediate = 0,
+				RegisterID,
+				VariableID,
+				
+			};
+
+
+			struct LLArgument 
+			{
+				LLArgumentSource source = LLArgumentSource::Immediate;
+				size_t data = 0;
+
+				LLArgument() = default;
+				LLArgument(size_t data) : source(LLArgumentSource::Immediate), data(data) {}
+				LLArgument(LLArgumentSource src, size_t data) : source(src), data(data) {}
+			};
+
 
 			struct LLOperation
 			{
 				LowLevelOpCode code = LowLevelOpCode::NOP;
-				size_t arg0 = 0;
-				size_t arg1 = 0;
-				size_t arg2 = 0;
+				LLArgument arg0 = 0;
+				LLArgument arg1 = 0;
+				LLArgument arg2 = 0;
 				size_t source_line = 0;
 			};
 
@@ -69,6 +89,7 @@ namespace MSLC {
 					{"MODI",MODI},
 					{"NEGI",NEGI},
 					{"MOVE",MOVE},
+					{"SPEC_CALL",SPEC_CALL},
 				};
 				std::unordered_map<std::string, LowLevelRegisters> registers_id =
 				{

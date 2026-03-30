@@ -117,6 +117,8 @@ namespace MSLL
 
 			SYMBOL_LABEL,	//Symbol declaring (function), arg0 - symbol_id -> inserting GRAB_FRAME with positive in MSLVM_1
 
+			SPEC_CALL,	//VM_CALL/SYSTEM_CALL
+
 			SECTION_SPECIAL_ED,
 		};
 

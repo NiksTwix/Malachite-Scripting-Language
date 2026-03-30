@@ -53,8 +53,8 @@ namespace MSLC
 						return;
 					}
 
-					operation.arg0 = reg_id1;
-					operation.arg1 = symbol->description_id;
+					operation.arg0 = LLArgument(LLArgumentSource::RegisterID, reg_id1);
+					operation.arg1 = LLArgument(LLArgumentSource::VariableID, symbol->description_id);
 				}
 					break;
 				case MSLC::IntermediateRepresentation::Pseudo::STORE:
@@ -67,9 +67,9 @@ namespace MSLC
 					uint8_t size = arguments[2].tokens[0].value.intVal;
 					if (reg_id1 == LowLevelRegisters::InvalidR || reg_id2 == LowLevelRegisters::InvalidR || size > MAX_VALUE_SIZE) goto error2;
 				
-					operation.arg0 = reg_id1;
-					operation.arg1 = reg_id2;
-					operation.arg2 = size;
+					operation.arg0 = LLArgument(LLArgumentSource::RegisterID, reg_id1);
+					operation.arg1 = LLArgument(LLArgumentSource::RegisterID, reg_id2);
+					operation.arg2 = LLArgument(LLArgumentSource::Immediate, size);
 				}
 					break;
 				
@@ -84,9 +84,9 @@ namespace MSLC
 					LowLevelRegisters reg_id2 = LLTranslationMap::Get().GetRegisterID(arguments[1].tokens[0].value.strVal);
 					LowLevelRegisters reg_id3 = LLTranslationMap::Get().GetRegisterID(arguments[2].tokens[0].value.strVal);
 					if (reg_id1 == LowLevelRegisters::InvalidR || reg_id2 == LowLevelRegisters::InvalidR || reg_id3 == LowLevelRegisters::InvalidR) goto error2;
-					operation.arg0 = reg_id1;
-					operation.arg1 = reg_id2;
-					operation.arg2 = reg_id3;
+					operation.arg0 = LLArgument(LLArgumentSource::RegisterID,reg_id1);
+					operation.arg1 = LLArgument(LLArgumentSource::RegisterID,reg_id2);
+					operation.arg2 = LLArgument(LLArgumentSource::RegisterID,reg_id3);
 				}
 					break;
 				case MSLC::IntermediateRepresentation::Pseudo::NEGI:
@@ -95,14 +95,32 @@ namespace MSLC
 					LowLevelRegisters reg_id1 = LLTranslationMap::Get().GetRegisterID(arguments[0].tokens[0].value.strVal);
 					LowLevelRegisters reg_id2 = LLTranslationMap::Get().GetRegisterID(arguments[1].tokens[0].value.strVal);
 					if (reg_id1 == LowLevelRegisters::InvalidR || reg_id2 == LowLevelRegisters::InvalidR) goto error2;
-					operation.arg0 = reg_id1;
-					operation.arg1 = reg_id2;
+					operation.arg0 = LLArgument(LLArgumentSource::RegisterID,reg_id1);
+					operation.arg1 = LLArgument(LLArgumentSource::RegisterID,reg_id2);
 				}
 
 					break;
 				case MSLC::IntermediateRepresentation::Pseudo::MOVE:	//IF REG-REG, IF REG-IMP (checking values or something else)
 					break;
 				case MSLC::IntermediateRepresentation::Pseudo::LABEL:
+					break;
+				case MSLC::IntermediateRepresentation::Pseudo::SPEC_CALL: 
+				{
+					size_t id = arguments[0].tokens[0].value.uintVal;
+					operation.arg0 = LLArgument(LLArgumentSource::Immediate, id);
+					if (arguments.size() >= 2) 
+					{
+						LowLevelRegisters reg_id = LLTranslationMap::Get().GetRegisterID(arguments[1].tokens[0].value.strVal);
+						if (reg_id != LowLevelRegisters::InvalidR) operation.arg1 = LLArgument(LLArgumentSource::RegisterID, reg_id);
+						else operation.arg1 = LLArgument(LLArgumentSource::Immediate, arguments[1].tokens[0].value.uintVal);
+					}
+					if (arguments.size() >= 3)
+					{
+						LowLevelRegisters reg_id = LLTranslationMap::Get().GetRegisterID(arguments[2].tokens[0].value.strVal);
+						if (reg_id != LowLevelRegisters::InvalidR) operation.arg2 = LLArgument(LLArgumentSource::RegisterID, reg_id);
+						else operation.arg2 = LLArgument(LLArgumentSource::Immediate, arguments[2].tokens[0].value.uintVal);
+					}
+				}
 					break;
 				case MSLC::IntermediateRepresentation::Pseudo::JUMP:
 					break;

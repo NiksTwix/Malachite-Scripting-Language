@@ -71,6 +71,17 @@ struct InterpretationState
 	size_t code_offset = 0;
 	bool broken_file = false;
 
+	void Reset() 
+	{
+		rod_section.release();
+		code_section.release();
+		vm_type = VMs::INVALID;
+		file_version = 1.0f;
+		code_offset = 0;
+		broken_file = false;
+		rod_offset = 0;
+	}
+
 };
 
 

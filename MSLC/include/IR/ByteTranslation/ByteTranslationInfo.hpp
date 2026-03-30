@@ -176,8 +176,7 @@ namespace MSLC
 
 				SYMBOL_LABEL,	//Symbol declaring (function), arg0 - symbol_id -> inserting GRAB_FRAME with positive in MSLVM_1
 
-				PRINT_MEM,		//Mode (char/int/real), register with address, register with count
-				PRINT_REG,		//Mode (char/int/real), register
+				SPEC_CALL,	//VM_CALL/SYSTEM_CALL
 
 				SECTION_SPECIAL_ED,
 			};

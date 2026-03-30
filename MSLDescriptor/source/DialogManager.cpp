@@ -40,7 +40,7 @@ void DialogManager::DialogI()
 
 		std::cout << "1) Code view.\n";
 		std::cout << "2) ROD view.\n";
-
+		std::cout << "3) Reload.\n";
 		std::cout << ">";
 
 		char choice;
@@ -81,6 +81,19 @@ void DialogManager::DialogI()
 		
 		}
 			break;
+		case 3:
+		{
+			state.Reset();	//Clear resources;
+			state = desc.LoadI(path);
+
+			if (state.broken_file)
+			{
+				std::cerr << "File is broken.\n";
+				return;
+			}
+			std::cout << "Reloaded.\n";
+			continue;
+		}
 		default:
 			std::cerr << "Invalid operation.\n";
 			break;
@@ -88,8 +101,7 @@ void DialogManager::DialogI()
 		
 	}
 
-	state.code_section.release();
-	state.rod_section.release();
+	state.Reset();
 
 }
 
