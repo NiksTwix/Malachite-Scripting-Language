@@ -127,35 +127,57 @@ namespace MSLC
 
 		size_t CompilationState::AddUnhandledSymbol(SymbolType type, size_t desc_id)
 		{
+			return gst.AddUnhandledSymbol(type, desc_id, current_module_id);
+		}
+
+		UnhandledSymbol* CompilationState::GetUnhandledSymbol(size_t global_id)
+		{
+			return gst.GetUnhandledSymbol(global_id);
+		}
+
+		size_t CompilationState::GetUnhandledSymbolsCount() const
+		{
+			return gst.GetUnhandledSymbolsCount();
+		}
+
+
+		//GST
+
+		size_t GlobalSymbolTable::AddUnhandledSymbol(SymbolType type, size_t desc_id, moduleid current_module)
+		{
 			auto it = local_desc_to_global_id.find({ type,desc_id });
 			if (it != local_desc_to_global_id.end()) return it->second;
 			UnhandledSymbol symbol;
 
 			symbol.desc_id = desc_id;
-			
+
 			symbol.global_id = global_us_id++;
 			symbol.symbol_type = type;
 			unhandled_symbols[symbol.global_id] = symbol;
 			local_desc_to_global_id[{ type, desc_id }] = symbol.global_id;
-			symbol.module_id = current_module_id;
+			symbol.module_id = current_module;
 			return symbol.global_id;
 		}
 
-		UnhandledSymbol* CompilationState::GetUnhandledSymbol(size_t global_id)
+		UnhandledSymbol* GlobalSymbolTable::GetUnhandledSymbol(size_t global_id)
 		{
 			auto it = unhandled_symbols.find(global_id);
 			if (it == unhandled_symbols.end()) return nullptr;
-			
+
 			return &it->second;
 		}
 
-		size_t CompilationState::GetUnhandledSymbolsCount() const
+		size_t GlobalSymbolTable::GetUnhandledSymbolsCount() const
 		{
 			return unhandled_symbols.size();
 		}
 
+		LabelID GlobalSymbolTable::GetNewLabelID()
+		{
+			return global_label_id++;
+		}
 
-		//GST
+
 		NamespaceID GlobalSymbolTable::AddNamespace(std::shared_ptr<VisibleFrame> frame)
 		{
 			if (frame == nullptr) return INVALID_ID;

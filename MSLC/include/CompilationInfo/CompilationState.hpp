@@ -9,6 +9,7 @@ namespace MSLC
 	namespace CompilationInfo
 	{
 		using NamespaceID = DescriptionID;
+		using LabelID = DescriptionID;
 		enum class SymbolType : uint8_t
 		{
 			Undefined,
@@ -53,6 +54,24 @@ namespace MSLC
 
 		struct VisibleFrame;
 
+		struct UnhandledSymbol
+		{
+			size_t global_id = 0;
+			SymbolType symbol_type = SymbolType::Undefined;
+			size_t desc_id = 0;
+			uint32_t module_id = 0;
+		};
+
+		struct pair_hash {
+			template <class T1, class T2>
+			std::size_t operator()(const std::pair<T1, T2>& p) const {
+				auto h1 = std::hash<T1>{}(p.first);
+				auto h2 = std::hash<T2>{}(p.second);
+				return h1 ^ (h2 << 1);
+			}
+		};
+
+
 		struct GlobalSymbolTable 
 		{
 		private:
@@ -60,6 +79,9 @@ namespace MSLC
 			Functions::FunctionID global_function_id = START_COUNTER_ID;
 			Variables::VariableID global_variable_id = START_COUNTER_ID;
 			NamespaceID global_namespace_id = START_COUNTER_ID;
+			LabelID global_label_id = START_COUNTER_ID;
+
+
 
 			std::unordered_map<Types::TypeID, Types::TypeDescription> types_descriptions{};
 			std::unordered_map<Functions::FunctionID, Functions::FunctionDescription> functions_descriptions{};
@@ -68,7 +90,12 @@ namespace MSLC
 			std::vector<Definitions::ValueContainer> constants_pool{};
 
 			std::unordered_map<NamespaceID, std::shared_ptr<VisibleFrame>> namespaces{};		//just contains lsl as namespace
+			
 
+			//Unhandled Symbols
+			std::unordered_map<std::pair<SymbolType, size_t>, size_t, pair_hash> local_desc_to_global_id;
+			std::unordered_map<size_t, UnhandledSymbol> unhandled_symbols;
+			size_t global_us_id = 0;
 		public:
 
 			NamespaceID AddNamespace(std::shared_ptr<VisibleFrame> frame);
@@ -89,6 +116,15 @@ namespace MSLC
 			Variables::VariableID GetLastVariableID() { return global_variable_id - 1; }
 			Functions::FunctionID GetLastFunctionID() { return global_function_id - 1; }
 			NamespaceID GetLastNamespaceID() { return global_namespace_id - 1; }
+
+
+			size_t AddUnhandledSymbol(SymbolType type, size_t desc_id, moduleid current_module);
+			UnhandledSymbol* GetUnhandledSymbol(size_t global_id);
+
+			size_t GetUnhandledSymbolsCount() const;
+
+			LabelID GetNewLabelID();
+
 		};
 
 		enum class VisibleFrameType 
@@ -104,14 +140,7 @@ namespace MSLC
 			VisibleFrameType type;	//If namespace - after handling lsl will be copied in global table
 		};
 
-		struct UnhandledSymbol
-		{
-			size_t global_id = 0;
-			SymbolType symbol_type = SymbolType::Undefined;
-			size_t desc_id = 0;
-			uint32_t module_id = 0;
-		};
-
+		
 		struct ConstantInfo 
 		{
 			size_t stack_offset;
@@ -119,20 +148,11 @@ namespace MSLC
 		};
 
 
-		struct pair_hash {
-			template <class T1, class T2>
-			std::size_t operator()(const std::pair<T1, T2>& p) const {
-				auto h1 = std::hash<T1>{}(p.first);
-				auto h2 = std::hash<T2>{}(p.second);
-				return h1 ^ (h2 << 1); 
-			}
-		};
+		
 
 		class CompilationState 
 		{
 			GlobalSymbolTable gst;
-
-			size_t global_us_id = 0;
 
 			Values::ImmediateConstantsTable ict;
 
@@ -143,9 +163,6 @@ namespace MSLC
 			Preprocessing::MacrosTable macros_table;
 
 			void InitBasics();
-			std::unordered_map<size_t, UnhandledSymbol> unhandled_symbols;
-
-			std::unordered_map<std::pair<SymbolType,size_t>, size_t, pair_hash> local_desc_to_global_id;
 
 			std::unordered_map<Values::ConstantID, ConstantInfo> constants_info;
 
