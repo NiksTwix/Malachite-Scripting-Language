@@ -22,6 +22,6 @@ namespace MSLL
 		bool Link(std::string& path, LinkDefinitions::VMs vm_index);
 
 		void SetOutputMode(bool new_output_mode) { output_mode = new_output_mode; }
-
+		void SetConstantAlignment(bool value) { reader.SetConstantAlignment(value); }
 	};
 }

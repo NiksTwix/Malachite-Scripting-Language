@@ -306,7 +306,7 @@ namespace MSLL
 			{
 				constant.memory_offset = rod_offset;
 
-				if (constant.size_in_bytes + rod_offset > execution_data.read_only_data.bytes_size) 
+				if (constant.real_size_in_bytes + rod_offset > execution_data.read_only_data.bytes_size) 
 				{
 					std::cerr << "Invalid size calculating in the constants handling process.";
 					execution_data.Free();
@@ -314,8 +314,9 @@ namespace MSLL
 					return LinkDefinitions::ExecutionData();
 				}
 
-				memcpy(execution_data.read_only_data.ptr + rod_offset, constant.data, constant.size_in_bytes); 
-				rod_offset += constant.size_in_bytes;
+				memcpy(execution_data.read_only_data.ptr + rod_offset, constant.data, constant.real_size_in_bytes); 
+				rod_offset += constant.using_size_in_bytes;
+				
 
 				constant.Free();
 			}

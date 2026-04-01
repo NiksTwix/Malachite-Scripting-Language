@@ -149,9 +149,6 @@
     <ClInclude Include="include\Tokenization\TokensInfo.hpp">
       <Filter>Файлы заголовков\Frontend</Filter>
     </ClInclude>
-    <ClInclude Include="include\Definitions\ValueContainer.hpp">
-      <Filter>Файлы заголовков\Frontend</Filter>
-    </ClInclude>
     <ClInclude Include="include\Tokenization\Lexer.hpp">
       <Filter>Файлы заголовков\Frontend</Filter>
     </ClInclude>
@@ -238,6 +235,9 @@
     </ClInclude>
     <ClInclude Include="include\IR\ByteTranslation\ByteLLTranslator.hpp">
       <Filter>Файлы заголовков\IR\Byte</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Definitions\ValueContainer.hpp">
+      <Filter>Файлы заголовков\Info</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

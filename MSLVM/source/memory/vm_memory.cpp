@@ -8,7 +8,7 @@ namespace MSLVM
 	void DynamicMemory::TransferData(size_t new_stack_size, size_t new_heap_size)
 	{
 		size_t new_size = code_size + rod_size + new_stack_size + new_heap_size;
-		auto pointer_p = static_cast<uint8_t*>(calloc(new_size, sizeof(uint8_t)));
+		auto pointer_p = static_cast<uint8_t*>(malloc(new_size));
 		if (pointer_p == nullptr)
 		{
 			status = ErrorCode::FailedMemoryAllocation;
@@ -105,7 +105,7 @@ namespace MSLVM
 		this->code_size = code_size;
 		this->rod_size = rod_size;
 
-		m_pointer = static_cast<uint8_t*>(calloc(size, sizeof(uint8_t)));
+		m_pointer = static_cast<uint8_t*>(malloc(size));
 
 		if (m_pointer == nullptr)
 		{

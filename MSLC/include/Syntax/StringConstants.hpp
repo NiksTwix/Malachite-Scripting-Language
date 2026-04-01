@@ -40,16 +40,18 @@ namespace MSLC
 		constexpr std::string_view 	w_boolean	= "bool";
 		constexpr std::string_view 	w_void		= "void";
 
-		constexpr std::string_view 	w_const = "const";
-		constexpr std::string_view 	w_gc = "gc";
-		constexpr std::string_view 	w_ptr = "ptr";
-		constexpr std::string_view 	w_ref = "ref";
-		constexpr std::string_view 	w_var = "var";
+		constexpr std::string_view 	w_const		= "const";
+		constexpr std::string_view 	w_gc		= "gc";
+		constexpr std::string_view 	w_ptr		= "ptr";
+		constexpr std::string_view 	w_ref		= "ref";
+		constexpr std::string_view 	w_var		= "var";
 	}
-	namespace Literals
+	namespace ConstLiterals
 	{
-		constexpr std::string_view w_true	= "true";
-		constexpr std::string_view w_false = "false";
+		constexpr std::string_view w_true		= "true";
+		constexpr std::string_view w_false		= "false";
+		constexpr std::string_view w_nullptr	= "nullptr";
+		constexpr std::string_view w_null		= "null";
 
 	}
 	namespace Attributes	//@ + attribute name

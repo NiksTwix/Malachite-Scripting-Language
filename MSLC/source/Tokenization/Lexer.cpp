@@ -53,13 +53,13 @@ namespace MSLC
 		}
 		TokenType Lexer::GetTokenType(LexingState& lex_state, const std::string& token) //Простой и быстрый способ для получения токенов
 		{
-			auto type = TokensTypeTable::Get().GetTokenType(token);
+			auto type = TokensInfoTable::Get().GetTokenType(token);
 			if (type != TokenType::UNDEFINED)
 			{
 				return type;
 			}
 
-			if (token[0] == '@' || token[0] == '#') return TokensTypeTable::Get().GetTokenType(token.substr(1,token.size()-1));	// Attribute or directive
+			if (token[0] == '@' || token[0] == '#') return TokensInfoTable::Get().GetTokenType(token.substr(1,token.size()-1));	// Attribute or directive
 
 			if (Strings::StringOperations::IsNumber(token)) return TokenType::LITERAL;
 
@@ -68,11 +68,13 @@ namespace MSLC
 
 			return TokenType::IDENTIFIER;
 		}
-		Definitions::ValueContainer Lexer::GetTokenValue(LexingState& lex_state, const std::string& token)		//Транслирует в строки/цифры и тд
+		Definitions::ValueContainer Lexer::GetTokenValue(LexingState& lex_state, const std::string& token, TokenType& type)	//Транслирует в строки/цифры и тд
 		{
-			if (token == Literals::w_true) return true;
-			else if (token == Literals::w_false) return false;
-
+			if (type == TokenType::CONST_LITERAL) 
+			{
+				type = TokenType::LITERAL;	//false -> 0| CONST_LITERAL -> LITERAL
+				return TokensInfoTable::Get().GetConstLiteralValue(token);
+			}
 			if (Strings::StringOperations::IsNumber(token))	//TODO type management
 			{
 				auto value_type = GetNumberValueType(lex_state,token);
@@ -118,7 +120,7 @@ namespace MSLC
 			t.line = lex_state.current_line;
 			t.module_id = lex_state.module_id;
 			t.type = GetTokenType(lex_state,operand);
-			t.value = GetTokenValue(lex_state,operand);
+			t.value = GetTokenValue(lex_state,operand,t.type);
 			
 			return t;
 		}
@@ -243,9 +245,9 @@ namespace MSLC
 							std::string potential_op = operator_ + next_c;
 							// Check: does this operator exist in the tokens table?
 							// (in any formе: prefix, postfix, binary)
-							if (TokensTypeTable::Get().GetTokenType(potential_op) != TokenType::UNDEFINED ||
-								TokensTypeTable::Get().GetTokenType(potential_op + "u") != TokenType::UNDEFINED ||
-								TokensTypeTable::Get().GetTokenType("u" + potential_op) != TokenType::UNDEFINED) {
+							if (TokensInfoTable::Get().GetTokenType(potential_op) != TokenType::UNDEFINED ||
+								TokensInfoTable::Get().GetTokenType(potential_op + "u") != TokenType::UNDEFINED ||
+								TokensInfoTable::Get().GetTokenType("u" + potential_op) != TokenType::UNDEFINED) {
 								// Continue building
 								continue;
 							}
@@ -273,14 +275,14 @@ namespace MSLC
 			switch (unary_type) {
 			case UnaryType::Prefix:
 				// Check: Does exist operator with postfix 'u' in the tokens table?
-				if (TokensTypeTable::Get().GetTokenType(operator_ + "u") != TokenType::UNDEFINED) {
+				if (TokensInfoTable::Get().GetTokenType(operator_ + "u") != TokenType::UNDEFINED) {
 					final_op = operator_ + "u";
 				}
 				break;
 
 			case UnaryType::Postfix:
 				// Check: Does exist operator with prefix 'u' in the tokens table?
-				if (TokensTypeTable::Get().GetTokenType("u" + operator_) != TokenType::UNDEFINED) {
+				if (TokensInfoTable::Get().GetTokenType("u" + operator_) != TokenType::UNDEFINED) {
 					final_op = "u" + operator_;
 				}
 				break;
@@ -291,11 +293,11 @@ namespace MSLC
 			}
 
 			// Find in the tokens table
-			TokenType token_type = TokensTypeTable::Get().GetTokenType(final_op);
+			TokenType token_type = TokensInfoTable::Get().GetTokenType(final_op);
 
 			if (token_type == TokenType::UNDEFINED) {
 				// Try to find operator without modifier
-				token_type = TokensTypeTable::Get().GetTokenType(operator_);
+				token_type = TokensInfoTable::Get().GetTokenType(operator_);
 				if (token_type != TokenType::UNDEFINED) {
 					final_op = operator_;
 				}
@@ -499,7 +501,7 @@ namespace MSLC
 				Token t;
 				t.line = state.current_line;
 				t.type = GetTokenType(state,state.undefined_token);
-				t.value = GetTokenValue(state,state.undefined_token);
+				t.value = GetTokenValue(state,state.undefined_token,t.type);
 				t.module_id = state.module_id;
 				state.tokens.push_back(t);
 				state.tokens.push_back(Token((uint64_t)CompilationLabel::OPERATION_END, TokenType::COMPILATION_LABEL, state.current_line, state.module_id));

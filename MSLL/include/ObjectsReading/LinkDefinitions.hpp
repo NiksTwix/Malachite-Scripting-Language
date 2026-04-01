@@ -260,7 +260,8 @@ namespace MSLL
 		struct ConstantData 
 		{
 			constantid id;
-			size_t size_in_bytes;
+			size_t real_size_in_bytes;
+			size_t using_size_in_bytes;
 			union 
 			{
 				char* data = nullptr;
@@ -279,7 +280,8 @@ namespace MSLL
 
 				data = static_cast<char*>(calloc(bytes_count,1));
 				memcpy(data, source, bytes_count);
-				size_in_bytes = bytes_count;
+				real_size_in_bytes = bytes_count;
+				using_size_in_bytes = bytes_count;
 			}
 		};
 
@@ -296,6 +298,8 @@ namespace MSLL
 			SymbolData(symbolid id,size_t ir_cbo, moduleid module_id, SymbolType type):id(id), offset_m_c(ir_cbo),module_id(module_id),type(type){}
 		};
 
+
+		constexpr size_t DefaultAlignment = 8;
 
 		struct LinkingState 
 		{
@@ -314,6 +318,9 @@ namespace MSLL
 
 			uint16_t compilation_flags;
 			float version = 1.0f;
+
+			bool using_constant_alignment = false;
+
 
 			std::string module_prefix;
 			std::string module_extention;

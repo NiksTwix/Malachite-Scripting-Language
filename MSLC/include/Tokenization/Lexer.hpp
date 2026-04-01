@@ -1,6 +1,7 @@
 #pragma once
 #include "TokensInfo.hpp"
 #include "..\Definitions\ValueContainer.hpp"
+
 namespace MSLC 
 {
 	namespace Tokenization 
@@ -40,7 +41,7 @@ namespace MSLC
 
 			TokenType GetTokenType(LexingState& lex_state, const std::string& token);
 
-			Definitions::ValueContainer GetTokenValue(LexingState& lex_state, const std::string& token);
+			Definitions::ValueContainer GetTokenValue(LexingState& lex_state, const std::string& token, TokenType& type);
 
 			Token CreateToken(LexingState& lex_state,std::string operand);
 			char ProcessCharLiteral(LexingState& lex_state,const std::string& str);
@@ -54,19 +55,16 @@ namespace MSLC
 			UnaryType IsUnary(const LexingState& state, const std::string& text, const std::vector<Token>& tokens, const std::string& operator_str);
 
 			bool IsOperatorChar(char c) {
-				return TokensTypeTable::Get().GetTokenType(std::string(1, c)) == TokenType::OPERATOR;
+				return TokensInfoTable::Get().GetTokenType(std::string(1, c)) == TokenType::OPERATOR;
 			}
 
 			bool IsPostfixOperator(const std::string& op) {
-				return TokensTypeTable::Get().GetTokenType("u" + op) == TokenType::OPERATOR;
+				return TokensInfoTable::Get().GetTokenType("u" + op) == TokenType::OPERATOR;
 			}
 
 			bool IsPrefixOperator(const std::string& op) {
-				return TokensTypeTable::Get().GetTokenType(op + "u") == TokenType::OPERATOR;
+				return TokensInfoTable::Get().GetTokenType(op + "u") == TokenType::OPERATOR;
 			}
-
-			Token GetNext(LexingState& state, const std::string& text);
-
 		public:
 			std::vector<Token> ToTokens(std::string text, size_t module_id = 0);
 		};

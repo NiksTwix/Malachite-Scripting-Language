@@ -12,10 +12,20 @@ namespace MSLL
 		void HandleConstantsSection(LinkDefinitions::static_bpointer  bytes_buffer, std::shared_ptr<LinkDefinitions::LinkingState> state, size_t section_offset, size_t section_size);
 		void HandleSymbolSection(LinkDefinitions::static_bpointer  bytes_buffer, std::shared_ptr<LinkDefinitions::LinkingState> state, size_t section_offset, size_t section_size);
 		void HandleDebugSection(LinkDefinitions::static_bpointer  bytes_buffer, std::shared_ptr<LinkDefinitions::LinkingState> state, size_t section_offset, size_t section_size);
+
+
+		bool constants_alignment_flag = false;
+
 	public:
 		std::shared_ptr<LinkDefinitions::LinkingState> DeserializeMO(LinkDefinitions::static_bpointer  bytes_buffer);
 		std::shared_ptr<LinkDefinitions::CommandsPool> DeserializeCO(LinkDefinitions::static_bpointer  bytes_buffer);
 
 		LinkDefinitions::static_bpointer  ReadFile(const std::string& path);
+
+		void SetConstantAlignment(bool value) 
+		{
+			constants_alignment_flag = value;
+		}
+
 	};
 }

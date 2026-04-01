@@ -1,4 +1,5 @@
 #pragma once
+#include "..\Definitions\Common.hpp"
 #include "..\Definitions\ValueContainer.hpp"
 #include "..\Syntax\StringConstants.hpp"
 
@@ -13,7 +14,8 @@ namespace MSLC
 			UNDEFINED = 0,
 			IDENTIFIER,
 			OPERATOR, 
-			LITERAL,   //false/true
+			LITERAL,   //STRINGS, NUMBER AND ETC
+			CONST_LITERAL,   //false/true
 			DELIMITER,
 			TYPE_MARKER,
 			KEYWORD,
@@ -60,7 +62,7 @@ namespace MSLC
 		};
 
 
-		class TokensTypeTable 
+		class TokensInfoTable 
 		{
 			std::unordered_map<std::string, TokenType> table;
 			
@@ -100,8 +102,10 @@ namespace MSLC
 					//{std::string(BasicTypeMarkers::w_character),TokenType::TYPE_MARKER},
 					//{std::string(BasicTypeMarkers::w_boolean),TokenType::TYPE_MARKER},
 					//{std::string(BasicTypeMarkers::w_void),TokenType::TYPE_MARKER},
-					{std::string(Literals::w_true),TokenType::LITERAL},
-					{std::string(Literals::w_false),TokenType::LITERAL},
+					{std::string(ConstLiterals::w_true),TokenType::CONST_LITERAL},
+					{std::string(ConstLiterals::w_false),TokenType::CONST_LITERAL},
+					{std::string(ConstLiterals::w_null),TokenType::CONST_LITERAL},
+					{std::string(ConstLiterals::w_nullptr),TokenType::CONST_LITERAL},
 					{std::string(Attributes::w_access_mode),TokenType::ATTRIBUTE},
 					{std::string(Attributes::w_override),TokenType::ATTRIBUTE},
 					{std::string(Attributes::w_static),TokenType::ATTRIBUTE},
@@ -186,15 +190,25 @@ namespace MSLC
 				};
 			}
 
-			TokensTypeTable()
+			std::unordered_map<std::string, Definitions::ValueContainer> const_literals_values =
+			{
+				{std::string(ConstLiterals::w_true),Definitions::ValueContainer(Definitions::TRUE_VALUE)},
+				{std::string(ConstLiterals::w_false),Definitions::ValueContainer(Definitions::FALSE_VALUE)},
+				{std::string(ConstLiterals::w_null),Definitions::ValueContainer(Definitions::NULL_VALUE)},
+				{std::string(ConstLiterals::w_nullptr),Definitions::ValueContainer(Definitions::NULLPTR_VALUE)},
+
+			};
+
+
+			TokensInfoTable()
 			{
 				Init();
 			}
 
 		public:
-			static TokensTypeTable& Get() 
+			static TokensInfoTable& Get() 
 			{
-				static TokensTypeTable table;
+				static TokensInfoTable table;
 				return table;
 			}
 
@@ -202,6 +216,11 @@ namespace MSLC
 			{
 				auto it = table.find(str_token);
 				return it != table.end() ? it->second : TokenType::UNDEFINED;
+			}
+			Definitions::ValueContainer GetConstLiteralValue(const std::string& str_token)
+			{
+				auto it = const_literals_values.find(str_token);
+				return it != const_literals_values.end() ? it->second : Definitions::ValueContainer((size_t)0);
 			}
 		};
 

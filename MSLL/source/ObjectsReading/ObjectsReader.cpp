@@ -27,12 +27,19 @@ namespace MSLL
 			offset += sizeof(size_t);
 			size_t data_size;
 			memcpy(&data_size, bytes_buffer.ptr + offset, sizeof(size_t));
+			
 			offset += sizeof(size_t);
 			LinkDefinitions::ConstantData constant;
 			constant.InitBy(bytes_buffer.ptr + offset, data_size);
 			offset += data_size;
+			if (constants_alignment_flag)
+			{
+				constant.using_size_in_bytes = ((data_size + LinkDefinitions::DefaultAlignment - 1) / LinkDefinitions::DefaultAlignment) * LinkDefinitions::DefaultAlignment;
+			}
+			
 			constant.id = c_id;
-			state->constants_size += data_size;
+
+			state->constants_size += constant.using_size_in_bytes;
 			state->constants.push_back(constant);
 		}
 	}
@@ -140,7 +147,7 @@ namespace MSLL
 			}
 		}
 		
-
+		linking_state->using_constant_alignment = constants_alignment_flag;
 		return linking_state;
 	}
 	std::shared_ptr<LinkDefinitions::CommandsPool> ObjectsReader::DeserializeCO(LinkDefinitions::static_bpointer bytes_buffer)

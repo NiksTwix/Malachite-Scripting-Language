@@ -20,7 +20,7 @@ int main()
     while (!machine.GetState().error_stack.empty()) 
     {
         auto error = machine.GetState().error_stack.pop();
-        std::cout << error.code << ";";
+        std::cout << '0' + error.code << ";";
     }
 
 

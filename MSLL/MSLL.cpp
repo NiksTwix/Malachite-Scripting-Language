@@ -14,34 +14,43 @@ int main(int argc, char* argv[])    //argc - count of args, argv - array of arg-
     if (argc < 2) 
     {
         std::cout << "Interactive mode\n";
-
-        std::cout << "Enter path to file:";
-
-        std::string path;
-
-        std::getline(std::cin, path);
-
-
-        
-
-        uint8_t index = 1;
-        for (const std::string& str : linker.GetVMList()) 
+    
+        while (true) 
         {
-            std::cout << std::to_string(index) << ") " << str << "\n";
-            index++;
+            std::cout << "Enter path to file:";
+
+            std::string path;
+
+            std::getline(std::cin, path);
+
+            if (path.empty())
+            {
+                std::cout << "Invalid path.";
+                continue;
+            }
+            else if (path.front() == '"' && path.back() == '"')
+            {
+                path = path.substr(1, path.size() - 2);
+            }
+            std::cout << path << "\n"; //Control output
+            uint8_t index = 1;
+            for (const std::string& str : linker.GetVMList())
+            {
+                std::cout << std::to_string(index) << ") " << str << "\n";
+                index++;
+            }
+            std::cout << "Enter vm model version (number):";
+            std::string choice;
+            std::getline(std::cin, choice);
+            linker.SetOutputMode(true);
+            linker.SetConstantAlignment(true);
+            bool result = linker.Link(path, (MSLL::LinkDefinitions::VMs)(choice[0] - '0'));
+            if (!result)
+            {
+                std::cout << "Unnamed linking error";
+                return 1;
+            }
         }
-        std::cout << "Enter vm model version (number):";
-        char choice;
-        std::cin >> choice;
-        linker.SetOutputMode(true);
-        bool result = linker.Link(path, (MSLL::LinkDefinitions::VMs)(choice - '0'));
-        if (!result)
-        {
-            std::cout << "Unnamed linking error";
-            std::cin;
-            return 1;
-        }
-        std::cin;
     }
     else if (argc > 1)
     {
