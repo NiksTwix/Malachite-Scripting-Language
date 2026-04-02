@@ -9,7 +9,7 @@ namespace MSLVM
 		//MSLI reading
 		std::ifstream file(path, std::ios::binary);
 		if (!file) {
-			state.error_stack.push(ErrorFrame(0, ErrorCode::InvalidFile));
+			state.error_stack.push(ErrorFrame(0, ErrorCode::InvalidFilePath));
 			return false;
 		}
 		file.seekg(0, std::ios::end);
@@ -51,7 +51,7 @@ namespace MSLVM
 
 		if (vm_version_check)
 		{
-			state.error_stack.push(ErrorFrame(0, ErrorCode::IncorrectVMVCode));
+			state.error_stack.push(ErrorFrame(0, ErrorCode::AnotherVMVersion));
 			return false;
 		}
 

@@ -80,7 +80,7 @@ namespace MSLVM
 		uint64_t native_address = ToNative(address);
 		if (native_address < stack_sa)
 		{
-			status = ErrorCode::ChangingConstantData;
+			status = ErrorCode::AttemptOfRODRewriting;
 			return;
 		}
 		size = size > VALID_MEMORY_ACCESS_SIZE ? VALID_MEMORY_ACCESS_SIZE : size;

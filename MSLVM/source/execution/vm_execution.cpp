@@ -21,27 +21,24 @@ namespace MSLVM
 	{
 		if (!state.memory.IsValid())
 		{
-			ErrorFrame ef;
-			ef.code = ErrorCode::InvalidVMMemory;
-			ef.instruction_counter = state.registers[SpecialRegister::IP].u;
-			state.error_stack.push(ef);
-			state.registers[SpecialRegister::FL].u |= (uint64_t)Flag::STOPPED;
+			state.Raise(ErrorCode::InvalidVMMemory);
 			return;
 		}
 			
 		while (state.registers[SpecialRegister::IP].u < state.memory.GetOperationsCount())
 		{
-			VMOperation& operation = state.memory.GetOperation(state.registers[SpecialRegister::IP].u);
-			ErrorCode errcode{};
-			if (state.memory.GetStatus() != ErrorCode::NoError) 
+			
+			if (state.memory.GetStatus() != ErrorCode::NoError)
 			{
-				ErrorFrame ef;
-				ef.code = state.memory.GetStatus();
-				ef.instruction_counter = state.registers[SpecialRegister::IP].u - 1;	//previous instruction
-				state.error_stack.push(ef);
-				state.registers[SpecialRegister::FL].u |= (uint64_t)Flag::STOPPED;
+				state.registers[SpecialRegister::IP].u -= 1;	//previous instruction
+				state.Raise(state.memory.GetStatus());
+				state.registers[SpecialRegister::IP].u += 1;
+			}
+			if (state.registers[SpecialRegister::FL].u & Flag::STOPPED)
+			{
 				break;
 			}
+			VMOperation& operation = state.memory.GetOperation(state.registers[SpecialRegister::IP].u);
 
 			switch (operation.code)
 			{
@@ -71,20 +68,20 @@ namespace MSLVM
 			case VMOperationCode::DIV_RRR_REAL:
 			{
 				if (state.registers[REG_U(operation.arg2)].r == 0) {
-					errcode = ErrorCode::ZeroDivision; break;
+					state.Raise(ErrorCode::ZeroDivision);break;
 				}
 				state.registers[REG_U(operation.arg0)].r = state.registers[REG_U(operation.arg1)].r / state.registers[REG_U(operation.arg2)].r; break;
 			}
 			case VMOperationCode::DIV_RRR_UNSIGNED:
 			{
 				if (state.registers[REG_U(operation.arg2)].u == 0) {
-					errcode = ErrorCode::ZeroDivision; break;
+					state.Raise(ErrorCode::ZeroDivision); break;
 				}
 				state.registers[REG_U(operation.arg0)].u = state.registers[REG_U(operation.arg1)].u / state.registers[REG_U(operation.arg2)].u; break;
 			}
 			case VMOperationCode::DIV_RRR_INTEGER: {
 				if (state.registers[REG_U(operation.arg2)].i == 0) {
-					errcode = ErrorCode::ZeroDivision; break;
+					state.Raise(ErrorCode::ZeroDivision); break;
 				}
 				state.registers[REG_U(operation.arg0)].i = state.registers[REG_U(operation.arg1)].i / state.registers[REG_U(operation.arg2)].i; break;
 			}
@@ -96,12 +93,12 @@ namespace MSLVM
 
 			case VMOperationCode::MOD_RRR_UNSIGNED:
 				if (state.registers[REG_U(operation.arg2)].u == 0) {
-					errcode = ErrorCode::ZeroDivision; break;
+					state.Raise(ErrorCode::ZeroDivision); break;
 				}
 				state.registers[REG_U(operation.arg0)].u = state.registers[REG_U(operation.arg1)].u % state.registers[REG_U(operation.arg2)].u; break;
 			case VMOperationCode::MOD_RRR_INTEGER:
 				if (state.registers[REG_U(operation.arg2)].i == 0) {
-					errcode = ErrorCode::ZeroDivision; break;
+					state.Raise(ErrorCode::ZeroDivision); break;
 				}
 				state.registers[REG_U(operation.arg0)].i = state.registers[REG_U(operation.arg1)].i % state.registers[REG_U(operation.arg2)].i; break;
 				}
@@ -189,9 +186,19 @@ namespace MSLVM
 					uint64_t mantissa = bits & 0xFFFFFFFFFFFFF; // 52 bits for mantissa
 					return (exponent == 0x7FF) && (mantissa != 0);
 					};
+				auto is_inf = [](double value) -> bool {
+					uint64_t bits = *reinterpret_cast<const uint64_t*>(&value);
+					uint64_t exponent = (bits >> 52) & 0x7FF;  // 11 bits for exponent
+					uint64_t mantissa = bits & 0xFFFFFFFFFFFFF;
+					if (exponent == 0x7FF && mantissa == 0) return true; // Inf
+					};
 				if (is_nan(state.registers[REG_U(operation.arg0)].r) || is_nan(state.registers[REG_U(operation.arg1)].r)) {
 					// NaN detected - don't set comparison flags
-					errcode = ErrorCode::NanValue; break;
+					state.Raise(ErrorCode::NanValue); break;
+				}
+				if (is_inf(state.registers[REG_U(operation.arg0)].r) || is_inf(state.registers[REG_U(operation.arg1)].r)) {
+					// NaN detected - don't set comparison flags
+					state.Raise(ErrorCode::InfValue); 
 				}
 				if (state.registers[REG_U(operation.arg0)].r == state.registers[REG_U(operation.arg1)].r) {
 					state.registers[SpecialRegister::FL].u |= Flag::ZERO;
@@ -222,7 +229,7 @@ namespace MSLVM
 				uint64_t current_sp = state.registers[SpecialRegister::SP].u;
 
 				if (!state.memory.CheckIntervals(state.memory.GetStackStart(), state.memory.GetHeapStart(), current_sp, size)) {
-					errcode = ErrorCode::StackOverflow;
+					state.Raise(ErrorCode::StackOverflow);
 					break;
 				}
 
@@ -238,7 +245,7 @@ namespace MSLVM
 				uint64_t current_sp = state.registers[SpecialRegister::SP].u;
 				uint64_t new_sp = current_sp - size;
 				if (!state.memory.CheckIntervals(state.memory.GetStackStart(), state.memory.GetHeapStart(), new_sp, 0)) {
-					errcode = ErrorCode::StackUnderflow;
+					state.Raise(ErrorCode::StackOverflow);
 					break;
 				}
 				uint64_t value = state.memory.Read(new_sp, size);
@@ -256,7 +263,7 @@ namespace MSLVM
 
 				// Checking
 				if (!state.memory.CheckIntervals(0, state.memory.GetHeapStart(), offset, size)) {
-					errcode = ErrorCode::InvalidMemoryAccess;
+					state.Raise(ErrorCode::InvalidMemoryAccess);
 					break;
 				}
 
@@ -276,7 +283,7 @@ namespace MSLVM
 
 				// Checking
 				if (!state.memory.CheckIntervals(0, state.memory.GetHeapStart(), address, size)) {
-					errcode = ErrorCode::InvalidMemoryAccess;
+					state.Raise(ErrorCode::InvalidMemoryAccess);
 					break;
 				}
 
@@ -296,7 +303,7 @@ namespace MSLVM
 
 				// Checking of access interval
 				if (!state.memory.CheckIntervals(state.memory.GetStackStart(), state.memory.GetHeapStart(), address, size)) {
-					errcode = ErrorCode::InvalidMemoryAccess;
+					state.Raise(ErrorCode::InvalidMemoryAccess);
 					break;
 				}
 				// Write little-endian
@@ -314,7 +321,7 @@ namespace MSLVM
 				}
 
 				if (!state.memory.CheckIntervals(0, state.memory.GetEnd(), address, size)) {
-					errcode = ErrorCode::InvalidMemoryAccess;
+					state.Raise(ErrorCode::InvalidMemoryAccess);
 					break;
 				}
 				// Read little-endian
@@ -333,7 +340,7 @@ namespace MSLVM
 					break;
 				}
 				if (!state.memory.CheckIntervals(state.memory.GetStackStart(), state.memory.GetEnd(), address, size)) {
-					errcode = ErrorCode::InvalidMemoryAccess;
+					state.Raise(ErrorCode::InvalidMemoryAccess);
 					break;
 				}
 
@@ -395,13 +402,13 @@ namespace MSLVM
 				uint64_t address = state.memory.GetHeapStart();
 				uint64_t size = state.registers[REG_U(operation.arg1)].u;
 				if (size == 0) {
-					errcode = ErrorCode::FailedMemoryAllocation;
+					state.Raise(ErrorCode::FailedMemoryAllocation);
 					break;
 				}
 				//!allocate_memory(state.HFI, address, state.registers[REG_U(operation.arg1)].u)
 				if (auto t = state.HFI.Allocate(size, &address); t != ErrorCode::NoError)
 				{
-					errcode = t;
+					state.Raise(t);
 					break;
 				}
 				state.registers[REG_U(operation.arg0)].u = address;
@@ -412,12 +419,12 @@ namespace MSLVM
 				uint64_t address = state.registers[REG_U(operation.arg0)].u;
 				uint64_t size = state.registers[REG_U(operation.arg1)].u;
 				if (address < state.memory.GetHeapStart() || address + size > state.memory.GetEnd()) {
-					errcode = ErrorCode::InvalidMemoryAccess;
+					state.Raise(ErrorCode::FailedMemoryAllocation);
 					break;
 				}
 				if (auto t = state.HFI.Free(address, size); t != ErrorCode::NoError)
 				{
-					errcode = t;
+					state.Raise(t);
 					break;
 				}
 				break;
@@ -428,7 +435,7 @@ namespace MSLVM
 				uint64_t expanded_bytes = REG_I(operation.arg0);
 
 				if (state.call_stack.empty()) {
-					errcode = ErrorCode::FrameExpansionFailed;
+					state.Raise(ErrorCode::FrameExpansionFailed);
 					break;
 				}
 
@@ -436,12 +443,12 @@ namespace MSLVM
 				uint64_t new_fp = state.registers[SpecialRegister::FP].u - expanded_bytes;
 
 				if (new_fp > state.memory.GetHeapStart()) {	//STACK_START = 0 -> underflow -> new_fp > STACK_END
-					errcode = ErrorCode::StackUnderflow;
+					state.Raise(ErrorCode::StackUnderflow);
 					break;
 				}
 
 				if (new_fp < t.fp) {
-					errcode = ErrorCode::FrameExpansionFailed;
+					state.Raise(ErrorCode::FrameExpansionFailed);
 					break;
 				}
 
@@ -474,7 +481,7 @@ namespace MSLVM
 			case VMOperationCode::CALL:
 				if (state.call_stack.size() >= CALL_STACK_SIZE)
 				{
-					errcode = ErrorCode::StackOverflow;
+					state.Raise(ErrorCode::StackOverflow);
 					break;
 				}
 				//Save current state
@@ -491,7 +498,7 @@ namespace MSLVM
 			case VMOperationCode::RET:
 			{
 				if (state.call_stack.empty()) {
-					errcode = ErrorCode::StackUnderflow;
+					state.Raise(ErrorCode::StackUnderflow);
 					break;
 				}
 				CallFrame cf = state.call_stack.pop();
@@ -537,19 +544,26 @@ namespace MSLVM
 				state.registers[REG_U(operation.arg0)].u = static_cast<register_unsigned>(state.registers[REG_U(operation.arg0)].i);
 				break;
 				}
+
+				//--------------------Another
+			case VMOperationCode::GET_ERROR:
+			{
+				if (state.error_stack.empty()) 
+				{
+					state.registers[REG_U(operation.arg0)].u = static_cast<register_unsigned>(ErrorCode::NoError);
+				}
+				else 
+				{
+					state.registers[REG_U(operation.arg0)].u = static_cast<register_unsigned>(state.error_stack.top().code);
+					state.error_stack.pop();
+				}
+				break;
+			}
+					
 			default:
 				break;
 			}
 
-			if (errcode != ErrorCode::NoError)
-			{
-				ErrorFrame ef;
-				ef.code = errcode;
-				ef.instruction_counter = state.registers[SpecialRegister::IP].u;
-				state.error_stack.push(ef);
-				state.registers[SpecialRegister::FL].u |= (uint64_t)Flag::STOPPED;
-				break;
-			}
 			if (state.registers[SpecialRegister::FL].u & JUMPED) continue;
 			if (state.registers[SpecialRegister::FL].u & STOPPED) break;	//flags reset in "clear_vm_state" function
 

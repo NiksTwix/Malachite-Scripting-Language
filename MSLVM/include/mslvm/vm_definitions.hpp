@@ -151,6 +151,8 @@ namespace MSLVM
 		TC_RTU_R,    //Type Convertion Real To Unsigned Integer
 		TC_ITU_R,    //Type Convertion Integer To Unsigned Integer
 
+		GET_ERROR,	//Register-dest
+
 	};
 
 

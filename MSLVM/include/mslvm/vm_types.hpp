@@ -8,19 +8,6 @@
 
 namespace MSLVM
 {
-	//struct alignas(8) LinearMemory
-	//{
-	//	memory_cell memory[STACK_SIZE + HEAP_SIZE]{};
-	//	HeapFreeIntervals HFI{HEAP_START, HEAP_END};
-	//
-	//	size_t rod_size = 0;
-	//	uint8_t* rod_memory = nullptr;		//Allocates by loader
-	//};
-
-		   
-
-
-
 	
 	struct CallFrame
 	{
@@ -48,6 +35,19 @@ namespace MSLVM
 			registers[SpecialRegister::FP].u = 0;
 			registers[SpecialRegister::FL].u = 0;
 
+		}
+
+		void Raise(ErrorCode ecode) 
+		{
+			ErrorType etype = ErrorsMap::Get().GetType(ecode);
+			ErrorFrame frame = ErrorFrame(registers[SpecialRegister::IP].u, registers[SpecialRegister::FP].u, registers[SpecialRegister::SP].u, ecode, etype);
+			
+			error_stack.push(frame);
+
+			if (etype == ErrorType::CRITICAL)
+			{
+				registers[SpecialRegister::FL].u |= Flag::STOPPED;
+			}
 		}
 
 	};

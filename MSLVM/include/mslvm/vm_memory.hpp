@@ -72,7 +72,7 @@ namespace MSLVM
         inline size_t GetHeapStart() { return heap_sa; }
         inline size_t GetEnd() { return end; }
         inline size_t GetSize() { return size; }
-        inline bool IsValid() { return m_pointer != nullptr; }
+        inline bool IsValid() { return m_pointer != nullptr && status == NoError; }
 
         inline bool CheckIntervals(size_t start, size_t end, size_t address, size_t size) //end = last_valid address + 1
         {
