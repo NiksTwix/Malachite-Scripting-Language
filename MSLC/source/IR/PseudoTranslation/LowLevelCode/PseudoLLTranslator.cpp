@@ -9,6 +9,7 @@ namespace MSLC
 			void LLTranslator::Handle(PseudoTranslationState& state, std::vector<Argument>& arguments, std::vector<Token>& op_code, size_t line)
 			{
 				LLOperation operation;
+				operation.source_line = line;
 				if (op_code.size() == 1)
 				{
 					LowLevelOpCode code = LLTranslationMap::Get().GetCode(op_code[0].value.strVal);

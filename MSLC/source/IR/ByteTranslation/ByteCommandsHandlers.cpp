@@ -691,14 +691,29 @@ namespace MSLC
 				case Pseudo::PseudoOpCode::BitOffsetRight:
 					return ByteOpCode::BIT_OFFSET_RIGHT;
 				case Pseudo::PseudoOpCode::Equal:
+					if (type == PrimitiveAnalogs::Int)return ByteOpCode::EQUALI;
+					if (type == PrimitiveAnalogs::UInt)return ByteOpCode::EQUALU;
+					if (type == PrimitiveAnalogs::Real)return ByteOpCode::EQUALR;
 				case Pseudo::PseudoOpCode::NotEqual:
+					if (type == PrimitiveAnalogs::Int)return ByteOpCode::NOT_EQUALI;
+					if (type == PrimitiveAnalogs::UInt)return ByteOpCode::NOT_EQUALU;
+					if (type == PrimitiveAnalogs::Real)return ByteOpCode::NOT_EQUALR;
 				case Pseudo::PseudoOpCode::Greater:
+					if (type == PrimitiveAnalogs::Int)return ByteOpCode::GREATERI;
+					if (type == PrimitiveAnalogs::UInt)return ByteOpCode::GREATERU;
+					if (type == PrimitiveAnalogs::Real)return ByteOpCode::GREATERR;
 				case Pseudo::PseudoOpCode::Less:
+					if (type == PrimitiveAnalogs::Int)return ByteOpCode::LESSI;
+					if (type == PrimitiveAnalogs::UInt)return ByteOpCode::LESSU;
+					if (type == PrimitiveAnalogs::Real)return ByteOpCode::LESSR;
 				case Pseudo::PseudoOpCode::GreaterEqual:
+					if (type == PrimitiveAnalogs::Int)return ByteOpCode::EGREATERI;
+					if (type == PrimitiveAnalogs::UInt)return ByteOpCode::EGREATERU;
+					if (type == PrimitiveAnalogs::Real)return ByteOpCode::EGREATERR;
 				case Pseudo::PseudoOpCode::LessEqual:
-					if (type == PrimitiveAnalogs::Int)return ByteOpCode::CMPI;
-					if (type == PrimitiveAnalogs::UInt)return ByteOpCode::CMPU;
-					if (type == PrimitiveAnalogs::Real)return ByteOpCode::CMPR;
+					if (type == PrimitiveAnalogs::Int)return ByteOpCode::ELESSI;
+					if (type == PrimitiveAnalogs::UInt)return ByteOpCode::ELESSU;
+					if (type == PrimitiveAnalogs::Real)return ByteOpCode::ELESSR;
 					break;
 				default:
 					break;

@@ -69,7 +69,7 @@ namespace MSLC {
 				LLArgument arg0 = 0;
 				LLArgument arg1 = 0;
 				LLArgument arg2 = 0;
-				size_t source_line = 0;
+				uint32_t source_line = 0;
 			};
 
 
