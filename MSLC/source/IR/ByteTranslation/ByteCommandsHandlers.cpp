@@ -107,7 +107,16 @@ namespace MSLC
 						b_state->pseudo_ip = 0;
 						HandleAL(temp_array, b_state);
 						b_state->pseudo_ip = temp_pseudo_ip;
-						right = GenerateLoadCommand(p_array, b_state);	//New register value! Left we saved, right was used in operation
+						right = GenerateLoadCommand(p_array, b_state);	
+						if (operation.op_code == Pseudo::PseudoOpCode::AssignR)
+						{
+							b_state->value_stack.push(left);	
+							/*
+								When we took values from stack right has been removed and left has been saved. 
+								When we computed complex assign left and right have been removed from stack by arithmetic/logic operation (loading operation)
+								We should return left value frame to stack for AssignR working
+							*/
+						}
 					}
 
 					auto conv_cmd = GetConversionCommand(right.dynamic_primitive_type, left.dynamic_primitive_type, right.data);
