@@ -10,7 +10,8 @@ int main()
     VirtualMachine machine;
 
     bool loading = machine.LoadScript("D:\\Games\\MSLCTests\\AST\\first\\first.msli");
-    std::cout << loading << "\n";
+    auto message = (loading ? "Script is loaded" : "Script isnt loaded");
+    std::cout << message << "\n";
     clear_vm_state(machine.GetState(),false);
     execute_code_switch(machine.GetState());
     std::cout << "\n";
@@ -20,7 +21,7 @@ int main()
     while (!machine.GetState().error_stack.empty()) 
     {
         auto error = machine.GetState().error_stack.pop();
-        std::cout << '0' + error.code << ";";
+        std::cout <<  error.code << ";";
     }
 
 

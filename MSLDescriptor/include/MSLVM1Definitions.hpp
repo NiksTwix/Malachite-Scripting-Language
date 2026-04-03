@@ -56,6 +56,7 @@ namespace MSLVM1
 		CMP_RR_INTEGER,          //arg0 - first, arg1 - second, arg2 - null
 		CMP_RR_UNSIGNED,          //arg0 - first, arg1 - first, arg2 - null
 		CMP_RR_REAL,     //arg0 - first, arg1 - second, arg2 - null; For double with nan checking
+		GET_FLAG,		//arg0 - dest, arg1 - FLAG_NUMBER 
 		//Memory
 
 		//LOAD_RM,    //register-arg0,             address loading from - arg1, size [1-8 bytes] - arg2
@@ -112,8 +113,28 @@ namespace MSLVM1
 		PRINT_REAL,			//arg0[VMCall], arg1[register_from]
 		PRINT_UNSIGNED,		//arg0[VMCall], arg1[register_from]
 		PRINT_CHAR,			//arg0[VMCall], arg1[register_from]
+		//DIAGNOSTIC
+		GET_ERROR,			//arg0[VMCall], arg1[register_to]
 	};
-
+	enum Flag : uint64_t
+	{
+		NONE = 0,
+		ZERO = 1 << 0,		//EQUAL
+		GREATER = 1 << 1,
+		LESS = 1 << 2,
+		JUMPED = 1 << 3,
+		STOPPED = 1 << 4,
+	};
+	enum SpecialRegister : uint8_t {
+		SP = 120,    // Stack Pointer (R120)
+		FP = 121,    // Frame Pointer (R121)
+		IP = 122,    // Instruction Pointer (R122)
+		FL = 123,    // Flags (R123)
+		A0 = 124,    // Argument/Accumulator 0 (R124)
+		A1 = 125,    // Argument/Accumulator 1 (R125)
+		A2 = 126,    // Argument/Accumulator 2 (R126)
+		RT = 127     // Return Value Temporary (R127)
+	};
 	struct alignas(8) Register
 	{
 		union
@@ -195,7 +216,7 @@ namespace MSLVM1
 			{VMOperationCode::CMP_RR_INTEGER, "CMP_RR_INTEGER"},
 			{VMOperationCode::CMP_RR_UNSIGNED, "CMP_RR_UNSIGNED"},
 			{VMOperationCode::CMP_RR_REAL, "CMP_RR_REAL"},
-
+			{VMOperationCode::GET_FLAG, "GET_FLAG"},
 			// Перемещения
 			{VMOperationCode::MOV_RR, "MOV_RR"},
 			{VMOperationCode::MOV_RI, "MOV_RI"},
@@ -243,6 +264,34 @@ namespace MSLVM1
 			{VMOperationCode::TC_RTU_R, "TC_RTU_R"},
 			{VMOperationCode::TC_ITU_R, "TC_ITU_R"}
 		};
+		std::unordered_map<VMCallType, std::string> vm_calls = {
+			{VMCallType::PRINT_CHAR, "PRINT_CHAR"},
+			{VMCallType::PRINT_INTEGER, "PRINT_INTEGER"},
+			{VMCallType::PRINT_REAL, "PRINT_REAL"},
+			{VMCallType::PRINT_UNSIGNED, "PRINT_UNSIGNED"},
+			{VMCallType::GET_ERROR, "GET_ERROR"},
+		};
+
+		std::unordered_map<Flag, std::string> vm_flags = {
+			{Flag::NONE, "NONE"},
+			{Flag::GREATER, "GREATER"},
+			{Flag::JUMPED, "JUMPED"},
+			{Flag::LESS, "LESS"},
+			{Flag::ZERO, "ZERO"},
+			{Flag::STOPPED, "STOPPED"},
+		};
+		std::unordered_map<SpecialRegister, std::string> vm_sregs = {
+			{SP , "Stack pointer"},
+			{FP	, "Frame pointer"},
+			{IP	, "Instruction pointer"},
+			{FL , "Flags"},
+			{A0 , "Accumulator 0"},
+			{A1	, "Accumulator 1"},
+			{A2	, "Accumulator 2"},
+			{RT	, "Returned temporary value"},
+		};
+
+
 
 		std::string opcode_to_string(VMOperationCode code) {
 			auto it = vm_opcode_to_string.find(code);
@@ -251,6 +300,20 @@ namespace MSLVM1
 			}
 			if (code == VMOperationCode::NOP) return "NOP";
 			return "UNKNOWN_OPCODE(" + std::to_string(static_cast<int>(code)) + ")";
+		}
+		std::string flag_to_string(Flag flag) {
+			auto it = vm_flags.find(flag);
+			if (it != vm_flags.end()) {
+				return it->second;
+			}
+			return "UNKNOWN_FLAG(" + std::to_string(static_cast<int>(flag)) + ")";
+		}
+		std::string vmcall_to_string(VMCallType type) {
+			auto it = vm_calls.find(type);
+			if (it != vm_calls.end()) {
+				return it->second;
+			}
+			return "UNKNOWN_VMCALL(" + std::to_string(static_cast<int>(type)) + ")";
 		}
 	};
 
@@ -275,10 +338,45 @@ namespace MSLVM1
 		{
 			VMOperation* oper = reinterpret_cast<VMOperation*>(pointer) + index;
 
-			std::cout << index << "|" << cmap.opcode_to_string(oper->code) << "|" << oper->arg0.u << "\t(" << oper->arg0.r << ";" << oper->arg0.i << ")" <<
-				"|" << oper->arg1.u << "\t(" << oper->arg1.r << ";" << oper->arg1.i << ")" <<
-				"|" << oper->arg2.u << "\t(" << oper->arg2.r << ";" << oper->arg2.i << ")" <<
-				"\n";
+			std::cout << index << "|" << cmap.opcode_to_string(oper->code) << "|";
+
+			if (oper->code == VMOperationCode::VM_CALL) 
+			{
+				std::cout << cmap.vmcall_to_string((VMCallType)oper->arg0.u) <<
+					"|" << oper->arg1.u << "\t(" << oper->arg1.r << ";" << oper->arg1.i << ")" <<
+					"|" << oper->arg2.u << "\t(" << oper->arg2.r << ";" << oper->arg2.i << ")" <<
+					"\n";
+			}
+			else 
+			{
+				std::cout << oper->arg0.u << "\t(" << oper->arg0.r << ";" << oper->arg0.i << ")" <<
+					"|" << oper->arg1.u << "\t(" << oper->arg1.r << ";" << oper->arg1.i << ")" <<
+					"|" << oper->arg2.u << "\t(" << oper->arg2.r << ";" << oper->arg2.i << ")" <<
+					"\n";
+			}
+		}
+		void PrintVMInfo()
+		{
+			std::cout << "MSLVM_1 info.\n";
+
+			std::cout << "VM version: "<< (int)vm_index <<".\n";
+			std::cout << "Count of general registers: " << GENERAL_REGISTERS << ".\n";
+			std::cout << "Count of special registers: " << SPECIAL_REGISTERS << ".\n";
+			std::cout << "Special registers:\n";
+			for (auto p : cmap.vm_sregs)
+			{
+				std::cout << "\t" << p.second << " (" << (int)p.first << ").\n";
+			}
+			std::cout << "VMCalls:\n";
+			for (auto p : cmap.vm_calls) 
+			{
+				std::cout << "\t" << p.second << " (" << (int)p.first << ").\n";
+			}
+			std::cout << "VMFlags:\n";
+			for (auto p : cmap.vm_flags)
+			{
+				std::cout << "\t" << p.second << " (" << (int)p.first << ").\n";
+			}
 		}
 	};
 }

@@ -57,8 +57,9 @@ namespace MSLVM
 	};
 
 
-	enum Flag
+	enum Flag: uint64_t
 	{
+		NONE = 0,
 		ZERO = 1 << 0,		//EQUAL
 		GREATER = 1 << 1,
 		LESS = 1 << 2,
@@ -104,6 +105,7 @@ namespace MSLVM
 		CMP_RR_INTEGER,          //arg0 - first, arg1 - second, arg2 - null
 		CMP_RR_UNSIGNED,          //arg0 - first, arg1 - first, arg2 - null
 		CMP_RR_REAL,     //arg0 - first, arg1 - second, arg2 - null; For double with nan checking
+		GET_FLAG,		//arg0 - dest, arg1 - FLAG_NUMBER0 , arg1 - FLAG_NUMBER1 In variable flag mode, the OR operation is used.
 		//Memory
 
 		//LOAD_RM,    //register-arg0,             address loading from - arg1, size [1-8 bytes] - arg2
@@ -150,9 +152,6 @@ namespace MSLVM
 
 		TC_RTU_R,    //Type Convertion Real To Unsigned Integer
 		TC_ITU_R,    //Type Convertion Integer To Unsigned Integer
-
-		GET_ERROR,	//Register-dest
-
 	};
 
 
@@ -163,6 +162,8 @@ namespace MSLVM
 		PRINT_REAL,			//arg0[VMCall], arg1[register_from]
 		PRINT_UNSIGNED,		//arg0[VMCall], arg1[register_from]
 		PRINT_CHAR,			//arg0[VMCall], arg1[register_from]
+		//DIAGNOSTIC
+		GET_ERROR,			//arg0[VMCall], arg1[register_to]
 	};
 
 	struct alignas(8) Register

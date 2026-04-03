@@ -187,6 +187,24 @@ void DialogManager::PrintCode(InterpretationState& state)
 	}
 }
 
+void DialogManager::PrintVMInfo(InterpretationState& state)
+{
+	switch (state.vm_type)
+	{
+	case VMs::MSLVM_1:
+	{
+		MSLVM1::CodeChecker checker;
+
+		checker.PrintVMInfo();
+		break;
+	}
+
+	default:
+		std::cerr << "Invalid virtual machine.\n";
+		break;
+	}
+}
+
 void DialogManager::DialogI()
 {
 
@@ -197,6 +215,17 @@ void DialogManager::DialogI()
 	std::getline(std::cin, path);
 
 	std::cout << "Attemp of loading started.\n";
+
+	if (path.empty())
+	{
+		std::cout << "Invalid path.";
+		return;
+	}
+	else if (path.front() == '"' && path.back() == '"')
+	{
+		path = path.substr(1, path.size() - 2);
+	}
+
 
 	InterpretationState state = desc.LoadI(path);
 
@@ -227,6 +256,7 @@ void DialogManager::DialogI()
 		std::cout << "1) Code view.\n";
 		std::cout << "2) ROD view.\n";
 		std::cout << "3) Reload.\n";
+		std::cout << "4) VM info.\n";
 		std::cout << ">";
 
 		char choice;
@@ -244,7 +274,6 @@ void DialogManager::DialogI()
 		case 1:
 		{
 			PrintCode(state);
-		
 		}
 			break;
 
@@ -267,6 +296,11 @@ void DialogManager::DialogI()
 
 			info(state);
 
+			continue;
+		}
+		case 4:
+		{
+			PrintVMInfo(state);
 			continue;
 		}
 		default:

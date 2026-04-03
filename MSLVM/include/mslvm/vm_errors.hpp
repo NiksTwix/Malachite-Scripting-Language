@@ -45,6 +45,7 @@ namespace MSLVM
 		MAJOR,		//Doesnt stop vm
 		MINOR,		//
 		NO_ERROR,
+		USER_EXCEPTION,	//for try-catch and throw	
 	};
 
 	struct ErrorFrame

@@ -66,11 +66,31 @@ namespace MSLL
 			BIT_AND,
 			BIT_OFFSET_LEFT,
 			BIT_OFFSET_RIGHT,
-
-			CMPI,       // destination|source0|source1 If VM using flag system destination can be ignored by linker  
-			CMPU,       // destination|source0|source1 If VM using flag system destination can be ignored by linker  
-			CMPR,   	// destination|source0|source1 If VM using flag system destination can be ignored by linker
 			SECTION_LOGIC_ED,
+			//Comparing
+			SECTION_COMPARING_ST,
+			EQUALI,			// destination|source0|source1
+			NOT_EQUALI,		// destination|source0|source1
+			GREATERI,		// destination|source0|source1
+			LESSI,			// destination|source0|source1
+			EGREATERI,		// destination|source0|source1
+			ELESSI,			// destination|source0|source1
+
+			EQUALU,			// destination|source0|source1
+			NOT_EQUALU,		// destination|source0|source1
+			GREATERU,		// destination|source0|source1
+			LESSU,			// destination|source0|source1
+			EGREATERU,		// destination|source0|source1
+			ELESSU,			// destination|source0|source1
+
+			EQUALR,			// destination|source0|source1
+			NOT_EQUALR,		// destination|source0|source1
+			GREATERR,		// destination|source0|source1
+			LESSR,			// destination|source0|source1
+			EGREATERR,		// destination|source0|source1
+			ELESSR,			// destination|source0|source1
+			SECTION_COMPARING_ED,
+			
 			//Memory
 			SECTION_MEMORY_ST,
 			MOVRR,

@@ -27,7 +27,15 @@ namespace MSLL
 			A2 = 126,    // Argument/Accumulator 2 (R126)
 			RT = 127     // Return Value Temporary (R127)
 		};
-
+		enum Flag : uint64_t
+		{
+			NONE = 0,
+			ZERO = 1 << 0,		//EQUAL
+			GREATER = 1 << 1,
+			LESS = 1 << 2,
+			JUMPED = 1 << 3,
+			STOPPED = 1 << 4,
+		};
 		enum VMOperationCode : uint8_t
 		{
 			NOP = 0,
@@ -66,6 +74,7 @@ namespace MSLL
 			CMP_RR_INTEGER,          //arg0 - first, arg1 - second, arg2 - null
 			CMP_RR_UNSIGNED,          //arg0 - first, arg1 - first, arg2 - null
 			CMP_RR_REAL,     //arg0 - first, arg1 - second, arg2 - null; For double with nan checking
+			GET_FLAG,		//arg0 - dest, arg1 - FLAG_NUMBER 
 			//Memory
 
 			//LOAD_RM,    //register-arg0,             address loading from - arg1, size [1-8 bytes] - arg2
@@ -122,6 +131,7 @@ namespace MSLL
 			PRINT_REAL,			//arg0[VMCall], arg1[register_from]
 			PRINT_UNSIGNED,		//arg0[VMCall], arg1[register_from]
 			PRINT_CHAR,			//arg0[VMCall], arg1[register_from]
+			GET_ERROR,
 		};
 
 		struct alignas(8) Register
@@ -195,10 +205,6 @@ namespace MSLL
 				{LinkDefinitions::ByteOpCode::BIT_AND,			VMOperationCode::BIT_AND_RRR},
 				{LinkDefinitions::ByteOpCode::BIT_OFFSET_LEFT,	VMOperationCode::BIT_OFFSET_LEFT_RRR},
 				{LinkDefinitions::ByteOpCode::BIT_OFFSET_RIGHT,	VMOperationCode::BIT_OFFSET_RIGHT_RRR},
-
-				{LinkDefinitions::ByteOpCode::CMPI,VMOperationCode::CMP_RR_INTEGER},
-				{LinkDefinitions::ByteOpCode::CMPU,VMOperationCode::CMP_RR_UNSIGNED},
-				{LinkDefinitions::ByteOpCode::CMPR,VMOperationCode::CMP_RR_REAL}
 			};
 		public:
 			static OpCodeTable& Get()

@@ -60,9 +60,13 @@ namespace MSLL
 			{
 				check = check && HandleAL(cmd, state, result);
 			}
+			else if ((cmd.code > LinkDefinitions::ByteOpCode::SECTION_COMPARING_ST && cmd.code < LinkDefinitions::ByteOpCode::SECTION_COMPARING_ED))
+			{
+				check = check && HandleCOMP(cmd, state, result);
+			}
 			else if (cmd.code > LinkDefinitions::ByteOpCode::SECTION_CONTROL_FLOW_ST && cmd.code < LinkDefinitions::ByteOpCode::SECTION_CONTROL_FLOW_ED)
 			{
-				check = check && HandleAL(cmd, state, result);
+				check = check && HandleCF(cmd, state, result);
 			}
 			else if (cmd.code > LinkDefinitions::ByteOpCode::SECTION_MEMORY_ST && cmd.code < LinkDefinitions::ByteOpCode::SECTION_MEMORY_ED)
 			{
@@ -100,9 +104,165 @@ namespace MSLL
 				std::cerr << "Unsupported operation. Byte operation code:" << (uint8_t)command.code << "\n";
 				return false;
 			}
-			
+		
+
 			//Direct order of arguments
 			PushVMCommand(code, command.arg0, command.arg1, command.arg2, result);
+			return true;
+		}
+
+		bool TranslatorVM_1::HandleCOMP(LinkDefinitions::ByteCommand command, std::shared_ptr<LinkDefinitions::LinkingState> state, std::vector<VMOperation>& result)
+		{
+			size_t dest = command.arg0.data;
+			size_t src0 = command.arg1.data;
+			size_t src1 = command.arg2.data;
+
+			VMOperation cmp_operation;
+
+			cmp_operation.arg0 = src0;
+			cmp_operation.arg1 = src1;
+
+			VMOperation flag_operation;
+
+			flag_operation.code = MSLVM_1::GET_FLAG;
+			flag_operation.arg0 = dest;
+			flag_operation.arg1 = MSLVM_1::Flag::NONE;
+			flag_operation.arg2 = MSLVM_1::Flag::NONE;
+
+			bool use_not = false;
+			VMOperation not_operation;	
+			not_operation.code = MSLVM_1::NOT_RR;
+			not_operation.arg0 = dest;
+			not_operation.arg1 = dest;
+			//Flag's numbers will be defined in switch-case block
+
+			switch (command.code)
+			{
+			case LinkDefinitions::ByteOpCode::EQUALI:
+			{
+				cmp_operation.code = MSLVM_1::CMP_RR_INTEGER;
+				flag_operation.arg1 = MSLVM_1::Flag::ZERO;
+			}
+				break;
+			case LinkDefinitions::ByteOpCode::NOT_EQUALI:
+			{
+				cmp_operation.code = MSLVM_1::CMP_RR_INTEGER;
+				flag_operation.arg1 = MSLVM_1::Flag::ZERO;
+				use_not = true;
+			}
+				break;
+			case LinkDefinitions::ByteOpCode::GREATERI:
+			{
+				cmp_operation.code = MSLVM_1::CMP_RR_INTEGER;
+				flag_operation.arg1 = MSLVM_1::Flag::GREATER;
+			}
+				break;
+			case LinkDefinitions::ByteOpCode::LESSI:
+			{
+				cmp_operation.code = MSLVM_1::CMP_RR_INTEGER;
+				flag_operation.arg1 = MSLVM_1::Flag::LESS;
+			}
+				break;
+			case LinkDefinitions::ByteOpCode::EGREATERI:
+			{
+				cmp_operation.code = MSLVM_1::CMP_RR_INTEGER;
+				flag_operation.arg1 = MSLVM_1::Flag::GREATER;
+				flag_operation.arg2 = MSLVM_1::Flag::ZERO;
+			}
+				break;
+			case LinkDefinitions::ByteOpCode::ELESSI:
+			{
+				cmp_operation.code = MSLVM_1::CMP_RR_INTEGER;
+				flag_operation.arg1 = MSLVM_1::Flag::LESS;
+				flag_operation.arg2 = MSLVM_1::Flag::ZERO;
+			}
+				break;
+			case LinkDefinitions::ByteOpCode::EQUALU:
+			{
+				cmp_operation.code = MSLVM_1::CMP_RR_UNSIGNED;
+				flag_operation.arg1 = MSLVM_1::Flag::ZERO;
+			}
+				break;
+			case LinkDefinitions::ByteOpCode::NOT_EQUALU:
+			{
+				cmp_operation.code = MSLVM_1::CMP_RR_UNSIGNED;
+				flag_operation.arg1 = MSLVM_1::Flag::ZERO;
+				use_not = true;
+			}
+				break;
+			case LinkDefinitions::ByteOpCode::GREATERU:
+			{
+				cmp_operation.code = MSLVM_1::CMP_RR_UNSIGNED;
+				flag_operation.arg1 = MSLVM_1::Flag::GREATER;
+			}
+				break;
+			case LinkDefinitions::ByteOpCode::LESSU:
+			{
+				cmp_operation.code = MSLVM_1::CMP_RR_UNSIGNED;
+				flag_operation.arg1 = MSLVM_1::Flag::LESS;
+			}
+				break;
+			case LinkDefinitions::ByteOpCode::EGREATERU:
+			{
+				cmp_operation.code = MSLVM_1::CMP_RR_UNSIGNED;
+				flag_operation.arg1 = MSLVM_1::Flag::GREATER;
+				flag_operation.arg2 = MSLVM_1::Flag::ZERO;
+			}
+				break;
+			case LinkDefinitions::ByteOpCode::ELESSU:
+			{
+				cmp_operation.code = MSLVM_1::CMP_RR_UNSIGNED;
+				flag_operation.arg1 = MSLVM_1::Flag::LESS;
+				flag_operation.arg2 = MSLVM_1::Flag::ZERO;
+			}
+				break;
+			case LinkDefinitions::ByteOpCode::EQUALR:
+			{
+				cmp_operation.code = MSLVM_1::CMP_RR_REAL;
+				flag_operation.arg1 = MSLVM_1::Flag::ZERO;
+			}
+			break;
+			case LinkDefinitions::ByteOpCode::NOT_EQUALR:
+			{
+				cmp_operation.code = MSLVM_1::CMP_RR_REAL;
+				flag_operation.arg1 = MSLVM_1::Flag::ZERO;
+				use_not = true;
+			}
+				break;
+			case LinkDefinitions::ByteOpCode::GREATERR:
+			{
+				cmp_operation.code = MSLVM_1::CMP_RR_REAL;
+				flag_operation.arg1 = MSLVM_1::Flag::GREATER;
+			}
+				break;
+			case LinkDefinitions::ByteOpCode::LESSR:
+			{
+				cmp_operation.code = MSLVM_1::CMP_RR_REAL;
+				flag_operation.arg1 = MSLVM_1::Flag::LESS;
+			}
+				break;
+			case LinkDefinitions::ByteOpCode::EGREATERR:
+			{
+				cmp_operation.code = MSLVM_1::CMP_RR_REAL;
+				flag_operation.arg1 = MSLVM_1::Flag::GREATER;
+				flag_operation.arg2 = MSLVM_1::Flag::ZERO;
+			}
+				break;
+			case LinkDefinitions::ByteOpCode::ELESSR:
+			{
+				cmp_operation.code = MSLVM_1::CMP_RR_REAL;
+				flag_operation.arg1 = MSLVM_1::Flag::LESS;
+				flag_operation.arg2 = MSLVM_1::Flag::ZERO;
+			}
+				break;
+			default:
+				std::cerr << "Unsupported operation. Byte operation code:" << (int)command.code << "\n";
+				return false;
+			}
+
+			result.push_back(cmp_operation);
+			result.push_back(flag_operation);
+			if (use_not) result.push_back(not_operation);
 			return true;
 		}
 

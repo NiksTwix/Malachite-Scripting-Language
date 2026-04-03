@@ -190,7 +190,7 @@ namespace MSLVM
 					uint64_t bits = *reinterpret_cast<const uint64_t*>(&value);
 					uint64_t exponent = (bits >> 52) & 0x7FF;  // 11 bits for exponent
 					uint64_t mantissa = bits & 0xFFFFFFFFFFFFF;
-					if (exponent == 0x7FF && mantissa == 0) return true; // Inf
+					return (exponent == 0x7FF && mantissa == 0); // Inf
 					};
 				if (is_nan(state.registers[REG_U(operation.arg0)].r) || is_nan(state.registers[REG_U(operation.arg1)].r)) {
 					// NaN detected - don't set comparison flags
@@ -213,7 +213,14 @@ namespace MSLVM
 				}
 				break;
 			}
-			break;
+			case GET_FLAG:
+			{
+				bool flag = (state.registers[SpecialRegister::FL].u & REG_U(operation.arg1)) | (state.registers[SpecialRegister::FL].u & REG_U(operation.arg2));
+
+				state.registers[REG_U(operation.arg0)] = flag;
+				break;
+			}
+			
 				}
 				//--------------------Memory Operations                                      
 				{
@@ -544,21 +551,6 @@ namespace MSLVM
 				state.registers[REG_U(operation.arg0)].u = static_cast<register_unsigned>(state.registers[REG_U(operation.arg0)].i);
 				break;
 				}
-
-				//--------------------Another
-			case VMOperationCode::GET_ERROR:
-			{
-				if (state.error_stack.empty()) 
-				{
-					state.registers[REG_U(operation.arg0)].u = static_cast<register_unsigned>(ErrorCode::NoError);
-				}
-				else 
-				{
-					state.registers[REG_U(operation.arg0)].u = static_cast<register_unsigned>(state.error_stack.top().code);
-					state.error_stack.pop();
-				}
-				break;
-			}
 					
 			default:
 				break;
@@ -602,6 +594,19 @@ namespace MSLVM
 			{
 				double value = state.registers[REG_U(operation.arg1)].r;	//Take value from register
 				std::cout << value;
+				break;
+			}
+			case VMCallType::GET_ERROR:
+			{
+				if (state.error_stack.empty())
+				{
+					state.registers[REG_U(operation.arg1)].u = static_cast<register_unsigned>(ErrorCode::NoError);
+				}
+				else
+				{
+					state.registers[REG_U(operation.arg1)].u = static_cast<register_unsigned>(state.error_stack.top().code);
+					state.error_stack.pop();
+				}
 				break;
 			}
 			default: break;

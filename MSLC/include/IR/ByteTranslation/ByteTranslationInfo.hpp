@@ -88,7 +88,7 @@ namespace MSLC
 
 			enum class ByteOpCode : uint8_t
 			{
-				NOP,
+				NOP = 0,
 
 				COMP_FLG,	//CompilationFlag arg0  - CompilationFlag. In functions declarations
 
@@ -125,8 +125,10 @@ namespace MSLC
 				BIT_AND,
 				BIT_OFFSET_LEFT,
 				BIT_OFFSET_RIGHT,
+				SECTION_LOGIC_ED,
 
-
+				//Comparing
+				SECTION_COMPARING_ST,
 				EQUALI,			// destination|source0|source1
 				NOT_EQUALI,		// destination|source0|source1
 				GREATERI,		// destination|source0|source1
@@ -147,8 +149,9 @@ namespace MSLC
 				LESSR,			// destination|source0|source1
 				EGREATERR,		// destination|source0|source1
 				ELESSR,			// destination|source0|source1
+				SECTION_COMPARING_ED,
 
-				SECTION_LOGIC_ED,
+				
 				//Memory
 				SECTION_MEMORY_ST,
 				MOVRR,

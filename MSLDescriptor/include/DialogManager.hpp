@@ -50,6 +50,7 @@ private:
 	void DialogROD(InterpretationState& state);
 	void PrintDump(InterpretationState& state);
 	void PrintCode(InterpretationState& state);
+	void PrintVMInfo(InterpretationState& state);
 public:
 
 
