@@ -104,9 +104,14 @@ namespace MSLC
 					push_command(state, operation.source_line, ByteCommand(op_code_conversions[operation.code], CommandArgument(reg0, CommandSource::Register), CommandArgument(reg1, CommandSource::Register), CommandArgument(reg2, CommandSource::Register)));
 				}
 					break;
+
 				case Pseudo::LowLevelOpCode::NEGI:
-					break;
 				case Pseudo::LowLevelOpCode::MOVE:
+				{
+					uint8_t reg0 = GetAllocatedRegister(state, (Pseudo::LowLevelRegisters)operation.arg0.data);
+					uint8_t reg1 = GetAllocatedRegister(state, (Pseudo::LowLevelRegisters)operation.arg1.data);
+					push_command(state, operation.source_line, ByteCommand(op_code_conversions[operation.code], CommandArgument(reg0, CommandSource::Register), CommandArgument(reg1, CommandSource::Register)));
+				}
 					break;
 				case Pseudo::LowLevelOpCode::SPEC_CALL:
 				{
@@ -148,6 +153,19 @@ namespace MSLC
 				
 				}
 					break;
+
+				case Pseudo::LowLevelOpCode::JMP_IF:
+				case Pseudo::LowLevelOpCode::JMP_NIF:
+				{
+					ByteCommand command;
+					command.code = operation.code == Pseudo::LowLevelOpCode::JMP_IF ? ByteOpCode::JMPCV: ByteOpCode::JMPCNV;
+					command.arg0 = CommandArgument(operation.arg0.data, CommandSource::Immediate); //Label id
+					command.arg1 = CommandArgument(GetAllocatedRegister(state, (Pseudo::LowLevelRegisters)operation.arg1.data), CommandSource::Register); //Register id
+					push_command(state, operation.source_line, command);
+
+				}
+					break;
+
 				case Pseudo::LowLevelOpCode::JMP:
 				{
 					ByteCommand command;
@@ -157,6 +175,29 @@ namespace MSLC
 					push_command(state, operation.source_line, command);
 				}
 				break;
+
+				case Pseudo::LowLevelOpCode::ALLOC:
+				{
+					ByteCommand command;
+					command.code = ByteOpCode::ALLOC;
+					command.arg0 = CommandArgument(GetAllocatedRegister(state, (Pseudo::LowLevelRegisters)operation.arg0.data), CommandSource::Register);
+					command.arg1 =  CommandArgument(GetAllocatedRegister(state, (Pseudo::LowLevelRegisters)operation.arg1.data), CommandSource::Register);
+					command.arg2 = CommandArgument(operation.arg2.data, CommandSource::Immediate);
+					push_command(state, operation.source_line, command);
+				}
+				break;
+
+				case Pseudo::LowLevelOpCode::FREE:
+				{
+					ByteCommand command;
+					command.code = ByteOpCode::FREE;
+					command.arg0 = CommandArgument(GetAllocatedRegister(state, (Pseudo::LowLevelRegisters)operation.arg0.data), CommandSource::Register);
+					command.arg1 = CommandArgument(GetAllocatedRegister(state, (Pseudo::LowLevelRegisters)operation.arg1.data), CommandSource::Register);
+					push_command(state, operation.source_line, command);
+				}
+				break;
+
+
 				default:
 					break;
 				}

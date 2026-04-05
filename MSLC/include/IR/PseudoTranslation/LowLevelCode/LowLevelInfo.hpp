@@ -14,7 +14,7 @@ namespace MSLC {
 			{
 				NOP,
 				LEA,	//Register-dest, identificator Load address of variable to register (works only with static pointers (offsets))
-				DLEA,	//Register-dest, identificator Load in register dynamic pointer
+				DLEA,	//Register-dest, identificator Load in register dynamic pointer| Its  LEA + LOAD
 				STORE,	//Register-dest,Register-src, size
 				LOAD,	//Register-dest,Register-src,size
 				ADDI,	//Register-dest,register-src0,register-src1
@@ -28,6 +28,12 @@ namespace MSLC {
 				//PRINT_REG,	//(char/int/real), register-source
 				LABEL,	//label id	-> ByteLowLevelTranslator will save it in labels table 
 				JMP,	//label id
+				JMP_IF, //label id, register
+				JMP_NIF, //label id, register
+				ALLOC,	//register for pointer, register with size in bytes, reset memory (1 or 0). If is third arg is null - automaticaly sets to 1
+				FREE,	//register with pointer, register with size in bytes
+
+
 			};
 
 			enum LowLevelRegisters : uint8_t 
@@ -92,6 +98,10 @@ namespace MSLC {
 					{"SPEC_CALL",SPEC_CALL},
 					{"LABEL",LABEL},
 					{"JMP",JMP},
+					{"JMP_IF",JMP_IF}, //label id, register
+					{"JMP_NIF",JMP_NIF}, //label id, register
+					{"ALLOC",ALLOC},
+					{"FREE",FREE},
 				};
 				std::unordered_map<std::string, LowLevelRegisters> registers_id =
 				{

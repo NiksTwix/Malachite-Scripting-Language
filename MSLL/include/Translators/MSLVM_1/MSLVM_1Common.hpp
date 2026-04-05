@@ -98,7 +98,7 @@ namespace MSLL
 			LOAD_CONST_BY_ADDRESS,	//register-dest, reg with address, size
 
 			ALLOCATE_MEMORY,		//arg0[register of address's saving], arg1[register with size of memory's interval]
-			FREE_MEMORY,			//arg0[register with address], arg1[register with size of memory's interval]
+			FREE_MEMORY,			//arg0[register with address]
 			GRAB_FRAME,				//arg0[bytes] If bytes < 0 => grab to up, else - grab to down 
 			// Control flow arg0 = where
 			JMP,

@@ -172,6 +172,9 @@ namespace MSLC
 				LOAD_STATIC,	//Loading by address in register //MemoryAddress,Register,Size
 				STORE_STATIC,	//Storing by address in register //MemoryAddress,Register,Size
 
+				ALLOC,		//register for allocation's pointer, size in bytes, reset memory (1 or 0). If is third arg is null - automaticaly sets to 1
+				FREE,	  //register with pointer
+
 				SECTION_MEMORY_ED,
 				// Control flow arg0 = where
 				SECTION_CONTROL_FLOW_ST,

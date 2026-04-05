@@ -45,13 +45,12 @@ namespace MSLC
 
 					if (operation.code == LowLevelOpCode::DLEA && !state.cs_observer->GetGST().GetVariable(symbol->description_id)->vinfo.isPointer()) 
 					{
-						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("In " + std::string(Keywords::w_op_code) + " section DLEA requires pointer variable.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, line));
+						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("In " + std::string(Keywords::w_op_code) + " section DLEA requires pointer variable. DLEA loads pointer which containes in variable straightaway to register. DLEA = LEA + LOAD.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, line));
 						return;
 					}
 					if (operation.code == LowLevelOpCode::LEA && state.cs_observer->GetGST().GetVariable(symbol->description_id)->vinfo.isPointer())
 					{
-						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("In " + std::string(Keywords::w_op_code) + " section LEA doesnt work with pointers.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, line));
-						return;
+						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("In " + std::string(Keywords::w_op_code) + " section LEA can be replaced on DLEA for straightaway pointer's loading.", Diagnostics::MessageType::Info, Diagnostics::SourceType::SourceCode, line));
 					}
 
 					operation.arg0 = LLArgument(LLArgumentSource::RegisterID, reg_id1);
@@ -106,16 +105,58 @@ namespace MSLC
 
 
 				case MSLC::IntermediateRepresentation::Pseudo::JMP:
+				case MSLC::IntermediateRepresentation::Pseudo::JMP_IF:
+				case MSLC::IntermediateRepresentation::Pseudo::JMP_NIF:
 				case MSLC::IntermediateRepresentation::Pseudo::LABEL:
 				{
-					if (arguments.size() != 1) goto error2;
+					if (arguments.size() < 1 && arguments.size() > 2) goto error2;
 					std::string argument = arguments[0].tokens[0].value.strVal;
 					if (argument.empty()) goto error2;
 
 					CompilationInfo::LabelID id = state.cs_observer->GetGST().RegisterOrGetLabelID(argument);
 
 					operation.arg0 = LLArgument(LLArgumentSource::Immediate, id);
+
+					if (operation.code == JMP_IF || operation.code == JMP_NIF) 
+					{
+						if (arguments.size() < 2) goto error2;
+						LowLevelRegisters reg_id = LLTranslationMap::Get().GetRegisterID(arguments[1].tokens[0].value.strVal);
+						if (reg_id == LowLevelRegisters::InvalidR) goto error2;
+						operation.arg1 = LLArgument(LLArgumentSource::RegisterID, reg_id);
+					}
+					break;
 				}
+				
+				case MSLC::IntermediateRepresentation::Pseudo::ALLOC:
+				{
+					if (arguments.size() < 2 || arguments.size() > 3) goto error2;
+
+					LowLevelRegisters reg_id0 = LLTranslationMap::Get().GetRegisterID(arguments[0].tokens[0].value.strVal);
+					LowLevelRegisters reg_id1 = LLTranslationMap::Get().GetRegisterID(arguments[1].tokens[0].value.strVal);
+					if (reg_id0 == LowLevelRegisters::InvalidR || reg_id1 == LowLevelRegisters::InvalidR) goto error2;
+
+					operation.arg0 = reg_id0;
+					operation.arg1 = reg_id1;
+					operation.arg2 = true;
+
+					if (arguments.size() == 3) 
+					{
+						operation.arg2 = arguments[2].tokens[0].value.uintVal != 0 ? true: false;
+					}
+
+				}
+					break;
+
+				case MSLC::IntermediateRepresentation::Pseudo::FREE:
+				{
+					if (arguments.size() != 1) goto error2;
+					LowLevelRegisters reg_id0 = LLTranslationMap::Get().GetRegisterID(arguments[0].tokens[0].value.strVal);
+					LowLevelRegisters reg_id1 = LLTranslationMap::Get().GetRegisterID(arguments[1].tokens[0].value.strVal);
+					if (reg_id0 == LowLevelRegisters::InvalidR || reg_id1 == LowLevelRegisters::InvalidR) goto error2;
+
+					operation.arg0 = reg_id0;
+					operation.arg1 = reg_id1;	//size
+				}	
 					break;
 
 

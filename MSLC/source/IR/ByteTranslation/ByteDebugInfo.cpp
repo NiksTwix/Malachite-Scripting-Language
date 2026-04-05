@@ -83,6 +83,8 @@ namespace MSLC {
                     {ByteOpCode::LOAD_STATIC, "LOAD_STATIC"},
                     {ByteOpCode::STORE_STATIC, "STORE_STATIC"},
 
+                    {ByteOpCode::ALLOC, "ALLOC"},
+                    {ByteOpCode::FREE, "FREE"},
 
                     {ByteOpCode::JMP, "JMP"},
                     {ByteOpCode::JMP_LABEL, "JMP_LABEL" },

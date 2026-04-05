@@ -271,7 +271,7 @@ namespace MSLL
 			VMOperation operation;
 			switch (command.code)
 			{
-			case LinkDefinitions::ByteOpCode::JMPLABEL:
+			case LinkDefinitions::ByteOpCode::JMP_LABEL:
 			{
 				LinkDefinitions::jmplabelid id = command.arg0.data;
 				size_t current_ip = result.size();
@@ -417,7 +417,16 @@ namespace MSLL
 				PushVMCommand(VMOperationCode::STORE_LOCAL, command.arg1, command.arg0, command.arg2,result);
 				break;
 			}
-
+			case LinkDefinitions::ByteOpCode::ALLOC:
+			{
+				PushVMCommand(VMOperationCode::ALLOCATE_MEMORY, command.arg0, command.arg1, command.arg2, result);
+				break;
+			}
+			case LinkDefinitions::ByteOpCode::FREE:
+			{
+				PushVMCommand(VMOperationCode::FREE_MEMORY, command.arg0, command.arg1, command.arg2, result);
+				break;
+			}
 			default:
 				std::cerr << "Unsupported operation. Byte operation code:" << (int)command.code << "\n";
 				break;

@@ -29,7 +29,7 @@ namespace MSLL
 
 		enum class ByteOpCode : uint8_t
 		{
-			NOP,
+			NOP = 0,
 
 			COMP_FLG,	//CompilationFlag arg0  - CompilationFlag. In functions declarations
 
@@ -67,6 +67,7 @@ namespace MSLL
 			BIT_OFFSET_LEFT,
 			BIT_OFFSET_RIGHT,
 			SECTION_LOGIC_ED,
+
 			//Comparing
 			SECTION_COMPARING_ST,
 			EQUALI,			// destination|source0|source1
@@ -90,7 +91,8 @@ namespace MSLL
 			EGREATERR,		// destination|source0|source1
 			ELESSR,			// destination|source0|source1
 			SECTION_COMPARING_ED,
-			
+
+
 			//Memory
 			SECTION_MEMORY_ST,
 			MOVRR,
@@ -111,10 +113,13 @@ namespace MSLL
 			LOAD_STATIC,	//Loading by address in register //MemoryAddress,Register,Size
 			STORE_STATIC,	//Storing by address in register //MemoryAddress,Register,Size
 
+			ALLOC,		//register for allocation's pointer, register with size in bytes, reset memory (1 or 0). If is third arg is null - automaticaly sets to 1
+			FREE,	  //register with pointer
+
 			SECTION_MEMORY_ED,
 			// Control flow arg0 = where
 			SECTION_CONTROL_FLOW_ST,
-			JMPLABEL,
+			JMP_LABEL,
 			JMP,
 			JMPCV,      //CV- Condition Valid - arg0[where], arg1[condition register]
 			JMPCNV,     //CNV - Condition Not Valid - arg0[where], arg1[condition register]
@@ -141,7 +146,6 @@ namespace MSLL
 
 			SECTION_SPECIAL_ED,
 		};
-
 		enum Flag {
 			UnhandledSymbol = 1 << 0,
 		};
