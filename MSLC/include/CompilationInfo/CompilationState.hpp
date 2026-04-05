@@ -96,6 +96,9 @@ namespace MSLC
 			std::unordered_map<std::pair<SymbolType, size_t>, size_t, pair_hash> local_desc_to_global_id;
 			std::unordered_map<size_t, UnhandledSymbol> unhandled_symbols;
 			size_t global_us_id = 0;
+
+			//Labels
+			std::unordered_map<std::string, CompilationInfo::LabelID> label_ids;
 		public:
 
 			NamespaceID AddNamespace(std::shared_ptr<VisibleFrame> frame);
@@ -122,9 +125,7 @@ namespace MSLC
 			UnhandledSymbol* GetUnhandledSymbol(size_t global_id);
 
 			size_t GetUnhandledSymbolsCount() const;
-
-			LabelID GetNewLabelID();
-
+			LabelID RegisterOrGetLabelID(std::string str_id);
 		};
 
 		enum class VisibleFrameType 

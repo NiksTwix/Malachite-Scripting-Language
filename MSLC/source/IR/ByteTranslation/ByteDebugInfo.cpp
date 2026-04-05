@@ -85,6 +85,7 @@ namespace MSLC {
 
 
                     {ByteOpCode::JMP, "JMP"},
+                    {ByteOpCode::JMP_LABEL, "JMP_LABEL" },
                     {ByteOpCode::JMPCV, "JMPCV"},
                     {ByteOpCode::JMPCNV, "JMPCNV"},
                     {ByteOpCode::CALL, "CALL"},

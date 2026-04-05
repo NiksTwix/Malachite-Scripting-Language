@@ -268,7 +268,59 @@ namespace MSLL
 
 		bool TranslatorVM_1::HandleCF(LinkDefinitions::ByteCommand command, std::shared_ptr<LinkDefinitions::LinkingState> state, std::vector<VMOperation>& result)
 		{
-			return false;
+			VMOperation operation;
+			switch (command.code)
+			{
+			case LinkDefinitions::ByteOpCode::JMPLABEL:
+			{
+				LinkDefinitions::jmplabelid id = command.arg0.data;
+				size_t current_ip = result.size();
+
+				auto it = state->except_handling_jmps.find(id);
+				if (it != state->except_handling_jmps.end()) 
+				{
+					for (size_t ip : it->second) 
+					{
+						result[ip].arg0 = current_ip;	//Sets currect jump id
+					}
+					state->except_handling_jmps.erase(id);
+				}
+				state->label_jmp_ip[id] = current_ip;
+
+				return true;
+			}
+				break;
+			case LinkDefinitions::ByteOpCode::JMP:
+			{
+				LinkDefinitions::jmplabelid id = command.arg0.data;
+				size_t current_ip = result.size();
+				operation.code = VMOperationCode::JMP;
+				if (auto it = state->label_jmp_ip.find(id); it != state->label_jmp_ip.end())
+				{
+					operation.arg0 = it->second;
+				
+				}
+				else 
+				{
+					state->except_handling_jmps[id].push_back(current_ip);
+				}
+			}
+				break;
+			case LinkDefinitions::ByteOpCode::JMPCV:
+				break;
+			case LinkDefinitions::ByteOpCode::JMPCNV:
+				break;
+			case LinkDefinitions::ByteOpCode::CALL:
+				break;
+			case LinkDefinitions::ByteOpCode::RET:
+				break;
+			case LinkDefinitions::ByteOpCode::EXT:
+				break;
+			default:
+				break;
+			}
+			result.push_back(operation);
+			return true;
 		}
 
 		bool TranslatorVM_1::HandleMR(LinkDefinitions::ByteCommand command, std::shared_ptr<LinkDefinitions::LinkingState> state, std::vector<VMOperation>& result)
@@ -454,6 +506,9 @@ namespace MSLL
 		}
 		LinkDefinitions::ExecutionData TranslatorVM_1::Translate(fs::path directory, std::shared_ptr<LinkDefinitions::LinkingState> state, ObjectsReader& reader)
 		{
+
+
+
 			LinkDefinitions::ExecutionData execution_data;
 
 			execution_data.read_only_data.allocate(state->constants_size);
@@ -506,6 +561,14 @@ namespace MSLL
 			execution_data.code.allocate(commands.size() * sizeof(VMOperation));
 
 			::memcpy(execution_data.code.ptr,commands.data(), commands.size() * sizeof(VMOperation));
+
+			if (!state->except_handling_jmps.empty()) 
+			{
+				std::cerr << "The source code contains unhandled jump commands.\n";
+				execution_data.Free();
+				return LinkDefinitions::ExecutionData();
+			}
+
 
 			return execution_data;
 		}

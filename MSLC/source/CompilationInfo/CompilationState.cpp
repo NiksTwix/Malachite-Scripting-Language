@@ -172,11 +172,16 @@ namespace MSLC
 			return unhandled_symbols.size();
 		}
 
-		LabelID GlobalSymbolTable::GetNewLabelID()
+		LabelID GlobalSymbolTable::RegisterOrGetLabelID(std::string str_id)
 		{
-			return global_label_id++;
-		}
+			if (label_ids.count(str_id)) 
+			{
+				return label_ids[str_id];
+			}
+			label_ids[str_id] = global_label_id++;
 
+			return label_ids[str_id];
+		}
 
 		NamespaceID GlobalSymbolTable::AddNamespace(std::shared_ptr<VisibleFrame> frame)
 		{

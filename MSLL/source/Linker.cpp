@@ -37,6 +37,7 @@ namespace MSLL
 			MSLVM_1::TranslatorVM_1 translator;
 			auto execution_data = translator.Translate(directory_path, state, reader);
 
+			if (!execution_data.code.is_valid()) break;
 			execution_data.vm_type = LinkDefinitions::VMs::MSLVM_1;
 
 			bool result = ec_writer.SaveAsMSLI(directory_path, name.string() + ".msli", execution_data, true);

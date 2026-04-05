@@ -1,5 +1,6 @@
 #pragma once
 #include "..\PseudoTranslationsInfo.hpp"
+#include <unordered_map>
 namespace MSLC
 {
 	namespace IntermediateRepresentation
@@ -15,6 +16,8 @@ namespace MSLC
 					std::vector<Token> tokens;
 					bool valid = false;
 				};
+
+				
 
 				void Handle(PseudoTranslationState& state, std::vector<Argument>& arguments, std::vector<Token>& op_code, size_t line);
 			public:

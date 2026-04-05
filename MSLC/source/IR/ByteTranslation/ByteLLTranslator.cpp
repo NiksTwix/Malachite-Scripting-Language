@@ -139,9 +139,24 @@ namespace MSLC
 					
 					break;
 				case Pseudo::LowLevelOpCode::LABEL:
+				{
+					ByteCommand command;
+					command.code = ByteOpCode::JMP_LABEL;
+					command.arg0 = CommandArgument(operation.arg0.data, CommandSource::Immediate); //Label id
+
+					push_command(state, operation.source_line, command);
+				
+				}
 					break;
-				case Pseudo::LowLevelOpCode::JUMP:
-					break;
+				case Pseudo::LowLevelOpCode::JMP:
+				{
+					ByteCommand command;
+					command.code = ByteOpCode::JMP;
+					command.arg0 = CommandArgument(operation.arg0.data, CommandSource::Immediate); //Label id
+
+					push_command(state, operation.source_line, command);
+				}
+				break;
 				default:
 					break;
 				}

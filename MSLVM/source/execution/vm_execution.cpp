@@ -27,7 +27,7 @@ namespace MSLVM
 			
 		while (state.registers[SpecialRegister::IP].u < state.memory.GetOperationsCount())
 		{
-			
+			if (state.registers[SpecialRegister::FL].u & Flag::JUMPED) state.registers[SpecialRegister::FL].u &= ~Flag::JUMPED;
 			if (state.memory.GetStatus() != ErrorCode::NoError)
 			{
 				state.registers[SpecialRegister::IP].u -= 1;	//previous instruction

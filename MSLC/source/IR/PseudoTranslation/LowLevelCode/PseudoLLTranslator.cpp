@@ -103,8 +103,22 @@ namespace MSLC
 					break;
 				case MSLC::IntermediateRepresentation::Pseudo::MOVE:	//IF REG-REG, IF REG-IMP (checking values or something else)
 					break;
+
+
+				case MSLC::IntermediateRepresentation::Pseudo::JMP:
 				case MSLC::IntermediateRepresentation::Pseudo::LABEL:
+				{
+					if (arguments.size() != 1) goto error2;
+					std::string argument = arguments[0].tokens[0].value.strVal;
+					if (argument.empty()) goto error2;
+
+					CompilationInfo::LabelID id = state.cs_observer->GetGST().RegisterOrGetLabelID(argument);
+
+					operation.arg0 = LLArgument(LLArgumentSource::Immediate, id);
+				}
 					break;
+
+
 				case MSLC::IntermediateRepresentation::Pseudo::SPEC_CALL: 
 				{
 					size_t id = arguments[0].tokens[0].value.uintVal;
@@ -123,8 +137,7 @@ namespace MSLC
 					}
 				}
 					break;
-				case MSLC::IntermediateRepresentation::Pseudo::JUMP:
-					break;
+				
 				default:
 				{
 				error1:

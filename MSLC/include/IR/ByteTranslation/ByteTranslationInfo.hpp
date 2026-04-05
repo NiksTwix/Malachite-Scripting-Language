@@ -175,7 +175,7 @@ namespace MSLC
 				SECTION_MEMORY_ED,
 				// Control flow arg0 = where
 				SECTION_CONTROL_FLOW_ST,
-				JMPLABEL,
+				JMP_LABEL,
 				JMP,
 				JMPCV,      //CV- Condition Valid - arg0[where], arg1[condition register]
 				JMPCNV,     //CNV - Condition Not Valid - arg0[where], arg1[condition register]

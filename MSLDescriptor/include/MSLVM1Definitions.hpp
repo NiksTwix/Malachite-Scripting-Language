@@ -56,7 +56,7 @@ namespace MSLVM1
 		CMP_RR_INTEGER,          //arg0 - first, arg1 - second, arg2 - null
 		CMP_RR_UNSIGNED,          //arg0 - first, arg1 - first, arg2 - null
 		CMP_RR_REAL,     //arg0 - first, arg1 - second, arg2 - null; For double with nan checking
-		GET_FLAG,		//arg0 - dest, arg1 - FLAG_NUMBER 
+		GET_FLAG,		//arg0 - dest, arg1 - FLAG_NUMBER0 , arg1 - FLAG_NUMBER1 In variable flag mode, the OR operation is used.
 		//Memory
 
 		//LOAD_RM,    //register-arg0,             address loading from - arg1, size [1-8 bytes] - arg2
@@ -68,9 +68,9 @@ namespace MSLVM1
 		POP,                 // arg0[register to], arg1[size (not register)]
 
 		//Current scope
-		LOAD_ABSOLUTE,			//arg0[register]            arg1[immediate value of memory-offset]          arg2[size in bytes] 
-		LOAD_LOCAL,          //arg0[register]            arg1[immediate value of memory-offset]          arg2[size in bytes]  
-		STORE_LOCAL,         //arg0[register]       arg1[immediate value of memory-offset]               arg2[size in bytes]  
+		LOAD_ABSOLUTE,			//arg0[register]            arg1[immediate value of memory-offset]          arg2[size in bytes] // independed by FP
+		LOAD_LOCAL,          //arg0[register]            arg1[immediate value of memory-offset]          arg2[size in bytes]  // depended by FP
+		STORE_LOCAL,         //arg0[register]       arg1[immediate value of memory-offset]               arg2[size in bytes]   // depended by FP
 
 		CALC_FRAME_ADDRESS,		//register(ARG0) offset(ARG1)
 		LOAD_BY_ADDRESS,			// register(ARG0), register - address(ARG1), size(ARG2)

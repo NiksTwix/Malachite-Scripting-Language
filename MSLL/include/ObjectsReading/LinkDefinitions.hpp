@@ -11,7 +11,7 @@ namespace MSLL
 		using moduleid = uint16_t;
 		using constantid = size_t;
 		using symbolid = size_t;
-
+		using jmplabelid = size_t;
 		enum CommandSource : uint8_t {
 			Register = 1,        // register (index), can contain a dynamic memory address
 			MemoryAddress,   // address in memory (offset/static)
@@ -355,7 +355,8 @@ namespace MSLL
 				constants.clear();
 			}
 
-
+			std::unordered_map<LinkDefinitions::jmplabelid, size_t> label_jmp_ip;
+			std::unordered_map<LinkDefinitions::jmplabelid, std::vector<size_t>> except_handling_jmps;	//ips
 
 		};
 

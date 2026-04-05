@@ -27,7 +27,7 @@ namespace MSLC {
 				SPEC_CALL,	//SPECIAL_CALL| call_id (depends by VM's version), arg0,arg1
 				//PRINT_REG,	//(char/int/real), register-source
 				LABEL,	//label id	-> ByteLowLevelTranslator will save it in labels table 
-				JUMP,	//label id
+				JMP,	//label id
 			};
 
 			enum LowLevelRegisters : uint8_t 
@@ -90,6 +90,8 @@ namespace MSLC {
 					{"NEGI",NEGI},
 					{"MOVE",MOVE},
 					{"SPEC_CALL",SPEC_CALL},
+					{"LABEL",LABEL},
+					{"JMP",JMP},
 				};
 				std::unordered_map<std::string, LowLevelRegisters> registers_id =
 				{
