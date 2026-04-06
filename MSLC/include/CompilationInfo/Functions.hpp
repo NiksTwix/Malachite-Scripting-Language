@@ -31,16 +31,12 @@ namespace MSLC
 				Values::ValueInfo vinfo;
 			};
 
-			struct FunctionDescription
+			class FunctionDescription : public SymbolDescription
 			{
-				std::string name;
+			public:
 				std::vector<FunctionArgument> arguments;
-				FunctionID id;
 
 				Values::ValueInfo return_vinfo;
-
-
-				Definitions::AccessMode access_mode = Definitions::AccessMode::Public;
 
 				FunctionFlags flags;
 
@@ -50,9 +46,6 @@ namespace MSLC
 
 				size_t start_byte_ip = INVALID_ID;
 
-				//Meta
-				size_t definition_line = 0;
-				moduleid module_id = INVALID_ID;
 
 				
 			};

@@ -70,6 +70,7 @@ namespace MSLVM
 
         inline size_t GetStackStart() { return stack_sa; }
         inline size_t GetHeapStart() { return heap_sa; }
+        inline size_t GetHeapEnd() { return heap_sa + heap_size; }
         inline size_t GetEnd() { return end; }
         inline size_t GetSize() { return size; }
         inline bool IsValid() { return m_pointer != nullptr && status == NoError; }

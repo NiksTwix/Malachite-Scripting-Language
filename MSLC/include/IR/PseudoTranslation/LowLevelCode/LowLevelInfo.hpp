@@ -13,8 +13,8 @@ namespace MSLC {
 			enum LowLevelOpCode : uint8_t
 			{
 				NOP,
-				LEA,	//Register-dest, identificator Load address of variable to register (works only with static pointers (offsets))
-				DLEA,	//Register-dest, identificator Load in register dynamic pointer| Its  LEA + LOAD
+				LEA,	//Register-dest, identificator Load address of variable to register
+				DLEA,	//Register-dest, identificator Load straightaway in register pointer which contains in variable
 				STORE,	//Register-dest,Register-src, size
 				LOAD,	//Register-dest,Register-src,size
 				ADDI,	//Register-dest,register-src0,register-src1
@@ -23,7 +23,8 @@ namespace MSLC {
 				DIVI,	//Register-dest,register-src0,register-src1
 				MODI,	//Register-dest,register-src0,register-src1
 				NEGI,	//Register-dest,register-src0
-				MOVE,	//Register-dest,register-src0
+				MOVRI,	//Register-dest, immediate-src 
+				MOV,	//Register-dest,register-src0
 				SPEC_CALL,	//SPECIAL_CALL| call_id (depends by VM's version), arg0,arg1
 				//PRINT_REG,	//(char/int/real), register-source
 				LABEL,	//label id	-> ByteLowLevelTranslator will save it in labels table 
@@ -84,7 +85,7 @@ namespace MSLC {
 				std::unordered_map<std::string, LowLevelOpCode> string_codes =
 				{
 					{"NOP",NOP},
-					{"LEA",LEA },
+					{"LEA",LEA},
 					{"DLEA",DLEA},
 					{"STORE",STORE},
 					{"LOAD",LOAD},
@@ -94,7 +95,8 @@ namespace MSLC {
 					{"DIVI",DIVI},
 					{"MODI",MODI},
 					{"NEGI",NEGI},
-					{"MOVE",MOVE},
+					{"MOV",MOV},
+					{"MOVRI",MOVRI},
 					{"SPEC_CALL",SPEC_CALL},
 					{"LABEL",LABEL},
 					{"JMP",JMP},

@@ -1,17 +1,19 @@
 #pragma once
+#include "..\Definitions\Common.hpp"
+#include <unordered_set>
 #include <unordered_map>
 #include <string>
 #include <filesystem>
 #include <sstream>
-#include <unordered_set>
-#include "..\Definitions\Common.hpp"
+
+
 
 namespace MSLC 
 {
 	namespace Preprocessing 
 	{
 
-		using file_identificator = Definitions::moduleid;
+		using file_identificator = Definitions::ModuleId;
 
 		struct FileInfo 
 		{

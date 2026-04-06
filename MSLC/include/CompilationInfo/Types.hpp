@@ -40,8 +40,8 @@ namespace MSLC
 				std::string name;		//name of field
 				Values::ValueInfo vinfo;
 				uint32_t offset = 0;	//Offset from start of object
-				Definitions::AccessMode read_access_mode = Definitions::AccessMode::Public;
-				Definitions::AccessMode write_access_mode = Definitions::AccessMode::Public;
+				AccessMode read_access_mode = AccessMode::Public;
+				AccessMode write_access_mode = AccessMode::Public;
 			};
 
 			enum PrimitiveAnalogs //with priority 0 - 2
@@ -51,23 +51,20 @@ namespace MSLC
 				Real,
 			};
 
-			struct TypeDescription 
+			class TypeDescription : public SymbolDescription
 			{
+			public:
 				std::unordered_map<std::string, TypeField> fields;
 				std::unordered_map<std::string, Functions::FunctionID> methods;
 				std::unordered_map<std::string, Functions::FunctionID> connected_functions;
-				std::string name;
 				size_t size;
-				TypeID id;		//Sets from outside (CompilationState?)
 				TypeID inheriting_id = INVALID_ID;
 				TypeFlags flags;
 				TypeCategory category;
 				PrimitiveAnalogs primitive_analog;
 				size_t alignment = STANDART_ALIGNMENT;
-				//Meta
-				size_t definition_line = 0;
-				moduleid module_id = INVALID_ID;
 
+				//Meta
 				size_t GetAlignedSize() 
 				{
 					return ((size + alignment - 1) / alignment) * alignment;

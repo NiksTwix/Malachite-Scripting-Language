@@ -29,7 +29,7 @@ namespace MSLC
                 double realVal;    //Real in Malachite is double 
                 bool boolVal;
                 int64_t intVal;
-                uint64_t uintVal;
+                uint64_t uintVal = 0;
                 char charVal;
             };
             std::string strVal;   // Для строк 

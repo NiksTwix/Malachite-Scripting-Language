@@ -123,6 +123,7 @@ namespace MSLVM
 		heap_size = MinHeapSize;
 
 		end = heap_sa + heap_size;
+
 	}
 
 	void DynamicMemory::Free()

@@ -18,6 +18,16 @@ namespace MSLC
 					{Pseudo::LowLevelOpCode::DIVI,ByteOpCode::DIVI},
 					{Pseudo::LowLevelOpCode::MODI,ByteOpCode::MODI},
 					{Pseudo::LowLevelOpCode::NEGI,ByteOpCode::NEGI},
+
+					{Pseudo::LowLevelOpCode::MOV,ByteOpCode::MOVRR},
+					{Pseudo::LowLevelOpCode::MOVRI,ByteOpCode::MOVRI},
+					{Pseudo::LowLevelOpCode::ALLOC,ByteOpCode::ALLOC},
+					{Pseudo::LowLevelOpCode::FREE,ByteOpCode::FREE},
+					{Pseudo::LowLevelOpCode::SPEC_CALL,ByteOpCode::SPEC_CALL},
+					{Pseudo::LowLevelOpCode::LABEL,ByteOpCode::JMP_LABEL},
+					{Pseudo::LowLevelOpCode::JMP_NIF,ByteOpCode::JMPCNV},
+					{Pseudo::LowLevelOpCode::JMP,ByteOpCode::JMP},
+					{Pseudo::LowLevelOpCode::JMP_IF,ByteOpCode::JMPCV},
 				};
 
 				uint8_t GetAllocatedRegister(std::shared_ptr<ByteTranslationState>  state, Pseudo::LowLevelRegisters id);

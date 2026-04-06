@@ -72,7 +72,7 @@ namespace MSLC
 
 					if (frame.source != ValueSource::Pointer && frame.source != ValueSource::Register)
 					{
-						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Dereference can complited only with pointer.", Diagnostics::LogicError, Diagnostics::SourceCode, operation.debug_line));
+						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Dereference can be complited only with pointer.", Diagnostics::LogicError, Diagnostics::SourceCode, operation.debug_line));
 						return;
 					}
 
@@ -119,10 +119,19 @@ namespace MSLC
 						}
 					}
 
-					auto conv_cmd = GetConversionCommand(right.dynamic_primitive_type, left.dynamic_primitive_type, right.data);
-					if (conv_cmd.code != ByteOpCode::NOP) {
-						PushCommand(b_state, ByteCommand(conv_cmd), operation.debug_line);
+					if (!(left.contains_pointer && right.dynamic_primitive_type == PrimitiveAnalogs::UInt) || (left.contains_pointer && right.dynamic_primitive_type == PrimitiveAnalogs::Int))
+					{
+						auto conv_cmd = GetConversionCommand(right.dynamic_primitive_type, left.dynamic_primitive_type, right.data);
+						if (conv_cmd.code != ByteOpCode::NOP) {
+							PushCommand(b_state, ByteCommand(conv_cmd), operation.debug_line);
+						}
 					}
+					else if (left.contains_pointer && (right.dynamic_primitive_type != PrimitiveAnalogs::UInt && right.dynamic_primitive_type != PrimitiveAnalogs::Int))
+					{
+						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Saving not uint (or negative int) value as pointer is forbidden.", Diagnostics::TypeError, Diagnostics::SourceCode, operation.debug_line));
+						return;
+					}
+					
 
 					if (left.source == ValueSource::StaticAddress || left.source == ValueSource::Symbol)
 					{
@@ -165,15 +174,17 @@ namespace MSLC
 						if (b_state->dvicm[operation.arg_0]) 
 						{
 							b_state->value_stack.push(ValueFrame(ValueSource::StaticAddress, vdesc->global_stack_offset,
-								vdesc->vinfo.isPointer() ? PrimitiveAnalogs::UInt : tdesc->primitive_analog,
+								tdesc->primitive_analog,
 								vdesc->vinfo.isPointer() ? POINTER_SIZE : tdesc->size));
+							b_state->value_stack.top().contains_pointer = vdesc->vinfo.isPointer();
 							b_state->value_stack.top().static_primitive_type = tdesc->primitive_analog;
 						}
 						else 
 						{
 							b_state->value_stack.push(ValueFrame(ValueSource::Symbol, b_state->cs_observer->AddUnhandledSymbol(CompilationInfo::SymbolType::Variable, operation.arg_0),
-								vdesc->vinfo.isPointer() ? PrimitiveAnalogs::UInt : tdesc->primitive_analog,
+								tdesc->primitive_analog,
 								vdesc->vinfo.isPointer() ? POINTER_SIZE : tdesc->size));
+							b_state->value_stack.top().contains_pointer = vdesc->vinfo.isPointer();
 							b_state->value_stack.top().static_primitive_type = tdesc->primitive_analog;
 						}
 						
@@ -212,6 +223,15 @@ namespace MSLC
 			void CommandsHandler::HandleAL(Pseudo::POperationArray& p_array, std::shared_ptr<ByteTranslationState> b_state)
 			{
 				auto operation = p_array[b_state->pseudo_ip];
+				
+				auto add_converted_frame = [](std::shared_ptr<ByteTranslationState> b_state, ValueFrame& left, ValueFrame& right, size_t converted_reg, PrimitiveAnalogs common_type) -> void
+					{
+						ValueFrame new_frame = ValueFrame(left.source, left.data, common_type, converted_reg == left.data ? left.dynamic_data_size : right.dynamic_data_size);
+						new_frame.static_primitive_type = converted_reg == left.data ? left.static_primitive_type : right.static_primitive_type;
+						new_frame.static_data_size = converted_reg == left.data ? left.static_data_size : right.static_data_size;
+						b_state->value_stack.push(new_frame);
+					};
+					
 
 				auto main_ari_handler = [&]() -> void
 					{
@@ -224,9 +244,10 @@ namespace MSLC
 						ValueFrame right = GenerateLoadCommand(p_array,b_state);
 
 
-						bool left_is_pointer = b_state->value_stack.top().source == ValueSource::Pointer;
+						
 
 						ValueFrame left = GenerateLoadCommand(p_array, b_state);
+						bool left_is_pointer = left.source == ValueSource::Pointer;
 
 						size_t converted_reg = left.data;
 						PrimitiveAnalogs common_type = left.dynamic_primitive_type;
@@ -243,10 +264,10 @@ namespace MSLC
 						{
 							auto free_register = b_state->registers_table.FindFreeGeneral();
 							PushCommand(b_state, ByteCommand(			//Move data size in register
-								ByteOpCode::MOVRI,
+								ByteOpCode::LOAD_CONST_STATIC,
+								CommandArgument(b_state->cs_observer->GetICT().GetOrAdd(left.static_data_size), CommandSource::Constant),
 								CommandArgument(free_register, CommandSource::Register),
-								CommandArgument(left.static_data_size, CommandSource::Immediate),
-								CommandArgument(0, CommandSource::Immediate)
+								CommandArgument(sizeof(left.static_data_size), CommandSource::Immediate)
 							), operation.debug_line);
 
 
@@ -270,7 +291,7 @@ namespace MSLC
 						), operation.debug_line);
 						b_state->registers_table.SetFree(right.data);
 
-						b_state->value_stack.push(ValueFrame(left.source,left.data,common_type, converted_reg == left.data ? left.dynamic_data_size : right.dynamic_data_size));
+						add_converted_frame(b_state, left, right, converted_reg, common_type);
 					};
 				auto main_logic_handler = [&]() -> void
 					{
@@ -395,7 +416,7 @@ namespace MSLC
 					b_state->registers_table.SetFree(right.data);
 					//ValueFrame(left.source_arg, common_type, converted_reg.reg_index == left.source_arg.reg_index ? left.data_size : right.data_size)
 
-					b_state->value_stack.push(ValueFrame(left.source, left.data, common_type, converted_reg == left.data ? left.dynamic_data_size : right.dynamic_data_size));
+					add_converted_frame(b_state, left, right, converted_reg, common_type);
 					break;
 				}
 				case Pseudo::PseudoOpCode::Negative:
@@ -476,25 +497,22 @@ namespace MSLC
 				if (frame.source == ValueSource::Register || frame.source == ValueSource::Pointer) return frame;
 
 				if (frame.source == ValueSource::DynamicAddress) {
-					// Address is already in register  (reg_index)
-					if (frame.dynamic_data_size > POINTER_SIZE) {
-						// Big data — leave a pointer (address in the register)
-						frame.source = ValueSource::Pointer;
-						frame.dynamic_data_size = POINTER_SIZE;
-						return frame;
-					}
-					else {
-						// Small data — load values by address 
-						// LOAD_DYNAMIC [reg_addr] → reg_value
-						PushCommand(b_state,
-							ByteCommand(ByteOpCode::LOAD_DYNAMIC, CommandArgument(frame.data, CommandSource::Register),                    // register with address
-								CommandArgument(frame.data, CommandSource::Register), // destination / Register reusing
-								CommandArgument(frame.dynamic_data_size, Immediate)),
-							current_line);
 
-						frame.source = ValueSource::Register;
-						return frame;
+					if (frame.dynamic_data_size > POINTER_SIZE)
+					{
+						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Attempt of loading big data(>8 bytes) to register", Diagnostics::DeveloperError, Diagnostics::IRCode, b_state->pseudo_ip));
 					}
+
+					// LOAD_DYNAMIC [reg_addr] → reg_value
+					PushCommand(b_state,
+						ByteCommand(ByteOpCode::LOAD_DYNAMIC, CommandArgument(frame.data, CommandSource::Register),                    // register with address
+							CommandArgument(frame.data, CommandSource::Register), // destination / Register reusing
+							CommandArgument(frame.dynamic_data_size, Immediate)),
+						current_line);
+
+					frame.source = ValueSource::Register;
+					return frame;
+					
 				}
 				else if (frame.source == ValueSource::StaticAddress || frame.source == ValueSource::Symbol) {
 					// Static address (offset)
@@ -502,33 +520,25 @@ namespace MSLC
 
 					if (!CheckRegister(b_state, free_reg))return ValueFrame::Invalid();
 
-					if (frame.dynamic_data_size > POINTER_SIZE) {
-						// Big data — load address
-						PushCommand(b_state,
-							ByteCommand(ByteOpCode::LEA_STATIC,
-								CommandArgument(frame.data, CommandSource::MemoryAddress),                    // static_offset
-								CommandArgument(free_reg, Register)),
-							current_line);
-						TryMarkAsUnhandledSymbol(frame, b_state,0b1);
-						frame.data = free_reg;
-						frame.source = ValueSource::Pointer;
-						frame.dynamic_data_size = POINTER_SIZE;
-						
+					if (frame.dynamic_data_size > POINTER_SIZE) 
+					{
+						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Attempt of loading big data(>8 bytes) to register", Diagnostics::DeveloperError, Diagnostics::IRCode, b_state->pseudo_ip));
 					}
-					else {
-						// Small data — load value
-						PushCommand(b_state,
-							ByteCommand(ByteOpCode::LOAD_STATIC,
-								CommandArgument(frame.data, CommandSource::MemoryAddress),                  // static_offset
-								CommandArgument(free_reg, Register),
-								CommandArgument(frame.dynamic_data_size, Immediate)),
-							current_line);
-						TryMarkAsUnhandledSymbol(frame, b_state, 0b1);
-						frame.data = free_reg;
-						frame.source = ValueSource::Register;
-					}
+
+					PushCommand(b_state,
+						ByteCommand(ByteOpCode::LOAD_STATIC,
+							CommandArgument(frame.data, CommandSource::MemoryAddress),                  // static_offset
+							CommandArgument(free_reg, Register),
+							CommandArgument(frame.dynamic_data_size, Immediate)),
+						current_line);
+					TryMarkAsUnhandledSymbol(frame, b_state, 0b1);
+					frame.data = free_reg;
+					frame.source = frame.contains_pointer ? ValueSource::Pointer: ValueSource::Register;
+					frame.dynamic_primitive_type = frame.source == ValueSource::Pointer ? PrimitiveAnalogs::UInt : frame.static_primitive_type;	//WARN
+					frame.contains_pointer = false;
 					return frame;
 				}
+
 				else if (frame.source == ValueSource::Constant)
 				{
 					size_t free_reg = b_state->registers_table.AllocateFreeGeneral();

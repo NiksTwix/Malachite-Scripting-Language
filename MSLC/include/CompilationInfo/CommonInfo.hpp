@@ -14,7 +14,31 @@ namespace MSLC
 
 		constexpr DescriptionID START_COUNTER_ID = 0;
 
-		using moduleid = uint16_t;
+
+		using NamespaceID = DescriptionID;
+		using LabelID = DescriptionID;
+
+
+
+		enum class AccessMode
+		{
+			Public,
+			Protected,
+			Private
+		};
+
+
+
+		class SymbolDescription 
+		{
+		public:
+			std::string name;
+			size_t definition_line;
+			DescriptionID id = INVALID_ID;
+			NamespaceID namespace_id = INVALID_ID;
+			Definitions::ModuleId module_id = UINT16_MAX;
+			AccessMode access_mode = AccessMode::Public;
+		};
 
 		namespace Functions
 		{

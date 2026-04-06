@@ -16,6 +16,8 @@ namespace MSLVM
 		{
 			state.memory.ClearDynamicPart();
 		}
+
+		state.HFI.Set(state.memory.GetHeapStart(), state.memory.GetHeapEnd(), DEFAULT_ALIGNMENT);
 	}
 	void execute_code_switch(VMState& state)	//Plan: load script, clear vm state, execute
 	{
@@ -39,6 +41,13 @@ namespace MSLVM
 				break;
 			}
 			VMOperation& operation = state.memory.GetOperation(state.registers[SpecialRegister::IP].u);
+
+
+			//std::cout << "\n---" << state.registers[SpecialRegister::IP].u << "\nRegisters:\n";
+			//for (int i = 0; i < 10; i++)
+			//{
+			//	std::cout << state.registers[i].u << " ";
+			//}
 
 			switch (operation.code)
 			{
@@ -426,7 +435,7 @@ namespace MSLVM
 				uint64_t address = state.registers[REG_U(operation.arg0)].u;
 				uint64_t size = state.registers[REG_U(operation.arg1)].u;
 				if (address < state.memory.GetHeapStart() || address + size > state.memory.GetEnd()) {
-					state.Raise(ErrorCode::FailedMemoryAllocation);
+					state.Raise(ErrorCode::FailedMemoryFreeing);
 					break;
 				}
 				if (auto t = state.HFI.Free(address, size); t != ErrorCode::NoError)

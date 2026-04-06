@@ -9,36 +9,27 @@ namespace MSLC
 			//Creates first global frame;
 			frames_stack.push_back(std::make_shared<VisibleFrame>());
 
-			//basic types
-			Symbol symbol;
-			symbol.type = SymbolType::Type;
 			//real
 			Types::TypeDescription real_desc;
 			real_desc.category = Types::TypeCategory::Primitive;
 			real_desc.name = std::string(TypeMarkers::w_real);
 			real_desc.primitive_analog = Types::PrimitiveAnalogs::Real;
 			real_desc.size = 8;		
-
-			symbol.description_id = gst.AddType(real_desc);
-			frames_stack.back()->lsl.Add(real_desc.name, symbol);
+			RegisterType(real_desc);
 			//int
 			Types::TypeDescription int_desc;
 			int_desc.category = Types::TypeCategory::Primitive;
 			int_desc.name = std::string(TypeMarkers::w_integer);
 			int_desc.primitive_analog = Types::PrimitiveAnalogs::Int;
 			int_desc.size = 8;
-			symbol.description_id = gst.AddType(int_desc);
-			frames_stack.back()->lsl.Add(int_desc.name, symbol);
-
+			RegisterType(int_desc);
 			//uint
 			Types::TypeDescription uint_desc;
 			uint_desc.category = Types::TypeCategory::Primitive;
 			uint_desc.name = std::string(TypeMarkers::w_unsigned);
 			uint_desc.primitive_analog = Types::PrimitiveAnalogs::UInt;
 			uint_desc.size = 8;
-			symbol.description_id = gst.AddType(uint_desc);
-			frames_stack.back()->lsl.Add(uint_desc.name, symbol);
-
+			RegisterType(uint_desc);
 			//void type is forbidden. For pointers allowed "ptr char"
 		}
 		CompilationState::CompilationState()
@@ -119,6 +110,23 @@ namespace MSLC
 			symbol.description_id = GetGST().AddVariable(description);
 			if (!frames_stack.empty())
 			{
+				description.namespace_id = frames_stack.back()->namespace_id;
+				frames_stack.back()->lsl.Add(description.name, symbol);
+				return frames_stack.back()->lsl.GetSafe(description.name);
+			}
+			else return nullptr;
+		}
+
+		Symbol* CompilationState::RegisterType(Types::TypeDescription description)
+		{
+			Symbol symbol;
+			symbol.type = SymbolType::Type;
+			description.module_id = current_module_id;
+			symbol.description_id = GetGST().AddType(description);
+			GetICT().GetOrAdd(description.size);	//Adds size of type's object to constants
+			if (!frames_stack.empty())
+			{
+				description.namespace_id = frames_stack.back()->namespace_id;
 				frames_stack.back()->lsl.Add(description.name, symbol);
 				return frames_stack.back()->lsl.GetSafe(description.name);
 			}
@@ -143,7 +151,7 @@ namespace MSLC
 
 		//GST
 
-		size_t GlobalSymbolTable::AddUnhandledSymbol(SymbolType type, size_t desc_id, moduleid current_module)
+		size_t GlobalSymbolTable::AddUnhandledSymbol(SymbolType type, DescriptionID desc_id, Definitions::ModuleId current_module)
 		{
 			auto it = local_desc_to_global_id.find({ type,desc_id });
 			if (it != local_desc_to_global_id.end()) return it->second;
@@ -188,6 +196,7 @@ namespace MSLC
 			if (frame == nullptr) return INVALID_ID;
 			size_t namespace_id = global_namespace_id++;
 			namespaces[namespace_id] = frame;
+			frame->namespace_id = namespace_id;
 			return namespace_id;
 		}
 		std::shared_ptr<VisibleFrame> GlobalSymbolTable::GetNamespace(NamespaceID id)

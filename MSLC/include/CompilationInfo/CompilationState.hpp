@@ -8,8 +8,7 @@ namespace MSLC
 {
 	namespace CompilationInfo
 	{
-		using NamespaceID = DescriptionID;
-		using LabelID = DescriptionID;
+		
 		enum class SymbolType : uint8_t
 		{
 			Undefined,
@@ -121,7 +120,7 @@ namespace MSLC
 			NamespaceID GetLastNamespaceID() { return global_namespace_id - 1; }
 
 
-			size_t AddUnhandledSymbol(SymbolType type, size_t desc_id, moduleid current_module);
+			size_t AddUnhandledSymbol(SymbolType type, DescriptionID desc_id, Definitions::ModuleId current_module);
 			UnhandledSymbol* GetUnhandledSymbol(size_t global_id);
 
 			size_t GetUnhandledSymbolsCount() const;
@@ -139,6 +138,7 @@ namespace MSLC
 		{
 			LocalSymbolTable lsl;
 			VisibleFrameType type;	//If namespace - after handling lsl will be copied in global table
+			NamespaceID namespace_id = INVALID_ID;
 		};
 
 		
