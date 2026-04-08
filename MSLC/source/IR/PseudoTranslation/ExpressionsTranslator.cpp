@@ -49,13 +49,25 @@ namespace MSLC
 				case GroupType::FunctionCall:
 					break; 
 				case GroupType::DataAccess:
+				{
+					for (auto& child : node.complex)
+					{
+						AnalyzeAPST(child, pts);
+					}
+					pts.pseudo_code.Pushback(PseudoOperation(PseudoOpCode::GetByArgument, 0, 0, 0, PseudoOperationFlags::None));
+				}
 					break;
 				case GroupType::DataAccessChain:
+				case GroupType::Argument:
+					for (auto& child : node.complex)
+					{
+						AnalyzeAPST(child, pts);
+					}
 					break;
+
 				case GroupType::AttributeUsing:
 					break;
-				case GroupType::Argument:
-					break;
+				
 				case GroupType::Operation:
 				{
 					auto operator_info = OperatorsTable::Get().GetInfo(node.simple.value.strVal);

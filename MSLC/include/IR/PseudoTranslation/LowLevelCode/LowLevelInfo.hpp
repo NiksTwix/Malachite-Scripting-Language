@@ -16,7 +16,7 @@ namespace MSLC {
 				LEA,	//Register-dest, identificator Load address of variable to register
 				DLEA,	//Register-dest, identificator Load straightaway in register pointer which contains in variable
 				STORE,	//Register-dest,Register-src, size
-				LOAD,	//Register-dest,Register-src,size
+				LOAD,	//Register-dest,Register-src[reg with address],size
 				ADDI,	//Register-dest,register-src0,register-src1
 				SUBI,	//Register-dest,register-src0,register-src1
 				MULI,	//Register-dest,register-src0,register-src1

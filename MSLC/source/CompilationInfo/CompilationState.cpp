@@ -30,6 +30,14 @@ namespace MSLC
 			uint_desc.primitive_analog = Types::PrimitiveAnalogs::UInt;
 			uint_desc.size = 8;
 			RegisterType(uint_desc);
+			//char
+			Types::TypeDescription char_desc;
+			char_desc.category = Types::TypeCategory::Primitive;
+			char_desc.name = std::string(TypeMarkers::w_character);
+			char_desc.primitive_analog = Types::PrimitiveAnalogs::Int;
+			char_desc.alignment = 1;
+			char_desc.size = 1;
+			RegisterType(char_desc);
 			//void type is forbidden. For pointers allowed "ptr char"
 		}
 		CompilationState::CompilationState()

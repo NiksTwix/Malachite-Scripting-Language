@@ -142,6 +142,7 @@ namespace MSLL
 
 			SYMBOL_LABEL,	//Symbol declaring (function), arg0 - symbol_id -> inserting GRAB_FRAME with positive in MSLVM_1
 
+			MOV_FROM_SR,	//Move from special register. REG-DEST, SPECIAL_REG_ID-SRC
 			SPEC_CALL,	//VM_CALL/SYSTEM_CALL
 
 			SECTION_SPECIAL_ED,

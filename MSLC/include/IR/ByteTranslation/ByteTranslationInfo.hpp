@@ -201,6 +201,7 @@ namespace MSLC
 
 				SYMBOL_LABEL,	//Symbol declaring (function), arg0 - symbol_id -> inserting GRAB_FRAME with positive in MSLVM_1
 
+				MOV_FROM_SR,	//Move from special register. REG-DEST, SPECIAL_REG_ID-SRC
 				SPEC_CALL,	//VM_CALL/SYSTEM_CALL CALL_TYPE, arg1, arg2
 
 				SECTION_SPECIAL_ED,
@@ -334,12 +335,12 @@ namespace MSLC
 					return InvalidRegister;
 				}
 
-				size_t FindFreeAccumulator() const {
-					for (size_t i = general_count; i < general_count + accum_count; ++i) {
-						if (!IsUsed(i)) return i;
-					}
-					return InvalidRegister;
-				}
+				//size_t FindFreeAccumulator() const {
+				//	for (size_t i = general_count; i < general_count + accum_count; ++i) {
+				//		if (!IsUsed(i)) return i;
+				//	}
+				//	return InvalidRegister;
+				//}
 
 				//CommandSource GetRegType(size_t index) const {
 				//	if (index < general_count) return RGeneral;
@@ -377,6 +378,9 @@ namespace MSLC
 				PrimitiveAnalogs static_primitive_type = PrimitiveAnalogs::UInt;
 				size_t static_data_size = 0;		// Size of typed value
 
+				CompilationInfo::Types::TypeID type_id = CompilationInfo::INVALID_ID;
+
+
 
 				ValueFrame(ValueSource source,size_t data, PrimitiveAnalogs type, size_t size) : source(source), data(data), dynamic_primitive_type(type), dynamic_data_size(size), static_primitive_type(type), static_data_size(size) {}
 
@@ -387,6 +391,12 @@ namespace MSLC
 				{
 					return ValueFrame(ValueSource::Immediate,0, PrimitiveAnalogs::UInt, 0);
 				}
+
+				static CompilationInfo::Types::TypeDescription* GetTypeDesc(CompilationInfo::Types::TypeID id, CompilationInfo::CompilationState* state) 
+				{
+					return state->GetGST().GetType(id);
+				}
+
 			};
 
 			using BCommandsArray = Definitions::ChunkArray<ByteCommand>;
@@ -413,6 +423,7 @@ namespace MSLC
 				std::stack<ValueFrame> value_stack{};         //Stack for operations
 				std::stack<StackFrame> frame_stack{};    //When we create variable add it size to frame_size stack;
 
+				uint32_t current_line = 0;
 				BCommandsArray result;
 
 				ByteTranslationConfig config;

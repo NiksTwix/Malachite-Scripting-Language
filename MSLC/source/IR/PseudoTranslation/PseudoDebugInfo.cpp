@@ -95,7 +95,7 @@ namespace MSLC
 
 					{PseudoOpCode::GetFieldByValue, "GetFieldByValue"},
 					{PseudoOpCode::GetFieldByPointer, "GetFieldByPointer"},
-
+					{PseudoOpCode::GetByArgument, "GetByArgument"},
 					// Logic
 					{PseudoOpCode::Greater, "Greater"},
 					{PseudoOpCode::Less, "Less"},

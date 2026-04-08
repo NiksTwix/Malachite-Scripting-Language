@@ -62,6 +62,9 @@ namespace MSLC
 				GetPointer,
 				Dereference,
 
+				GetByArgument,	//[argument] / get by offset. In the pseudo post processor for operator[] this command will be replace on function call
+				//^^^ in the future type_id retranslation must occure
+
 				GetFieldByValue,
 				GetFieldByPointer,
 
@@ -93,7 +96,7 @@ namespace MSLC
 				ET_CONTROL_FLOW,
 
 
-				CreateArray,	//count of previous elements in stack
+				CreateArray,	//count of previous elements in stack, type_id (by first element)
 				PushFrame,
 				PopFrame,
 				PushLLOpers,		//argument - id (index in array) of low level pseudo code block

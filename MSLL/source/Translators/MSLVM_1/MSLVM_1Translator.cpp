@@ -404,8 +404,8 @@ namespace MSLL
 			}
 			case LinkDefinitions::ByteOpCode::LEA_CONST:
 			{
-				std::cerr << "Unsupported operation. Byte operation code:" << (int)command.code << "\n";
-				return false;
+				PushVMCommand(VMOperationCode::MOV_RI, command.arg1, command.arg0,LinkDefinitions::CommandArgument(0,LinkDefinitions::CommandSource::Immediate), result);
+				break;
 			}
 			case LinkDefinitions::ByteOpCode::LOAD_STATIC:
 			{

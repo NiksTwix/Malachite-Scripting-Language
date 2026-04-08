@@ -78,7 +78,7 @@ namespace MSLC {
 
     
                     {ByteOpCode::LOAD_CONST_STATIC, "LOAD_CONST_STATIC"},
-                    {ByteOpCode::LEA_CONST, "LOAD_CONST_DYNAMIC"},
+                    {ByteOpCode::LEA_CONST, "LEA_CONST"},
 
                     {ByteOpCode::LOAD_STATIC, "LOAD_STATIC"},
                     {ByteOpCode::STORE_STATIC, "STORE_STATIC"},

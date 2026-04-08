@@ -34,6 +34,9 @@ namespace MSLC
 
 				LLTranslator ll_translator;
 
+				void PushPointerArithmetic(ValueFrame& left, ValueFrame& right, std::shared_ptr<ByteTranslationState> b_state, PrimitiveAnalogs type);
+
+
 			public:
 				void HandleCommand(std::shared_ptr<ByteTranslationState>  b_state);
 

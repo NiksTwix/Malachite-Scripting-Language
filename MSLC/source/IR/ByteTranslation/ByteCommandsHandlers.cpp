@@ -31,7 +31,7 @@ namespace MSLC
 								ByteCommand(ByteOpCode::LEA_STATIC,
 									CommandArgument(frame.data, CommandSource::MemoryAddress),
 									CommandArgument(reg, CommandSource::Register)),
-								operation.debug_line);
+								b_state->current_line);
 							TryMarkAsUnhandledSymbol(frame, b_state, 0b001);
 							frame.data = reg;
 							frame.source = ValueSource::Pointer;  // pointer in register
@@ -48,7 +48,7 @@ namespace MSLC
 							break;
 
 						default:
-							Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Getting pointer of non-memory data is invalid.", Diagnostics::LogicError, Diagnostics::SourceCode, operation.debug_line));
+							Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Getting pointer of non-memory data is invalid.", Diagnostics::LogicError, Diagnostics::SourceCode, b_state->current_line));
 							return;
 					}
 					b_state->value_stack.push(frame);
@@ -72,7 +72,7 @@ namespace MSLC
 
 					if (frame.source != ValueSource::Pointer && frame.source != ValueSource::Register)
 					{
-						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Dereference can be complited only with pointer.", Diagnostics::LogicError, Diagnostics::SourceCode, operation.debug_line));
+						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Dereference can be complited only with pointer.", Diagnostics::LogicError, Diagnostics::SourceCode, b_state->current_line));
 						return;
 					}
 
@@ -102,7 +102,7 @@ namespace MSLC
 						b_state->value_stack.push(right);	//left wasnt removed
 
 						Pseudo::POperationArray temp_array;
-						temp_array.Pushback(Pseudo::PseudoOperation((Pseudo::PseudoOpCode)operation.arg_0,(uint32_t)operation.debug_line));	//AL command
+						temp_array.Pushback(Pseudo::PseudoOperation((Pseudo::PseudoOpCode)operation.arg_0,(uint32_t)b_state->current_line));	//AL command
 						size_t temp_pseudo_ip = b_state->pseudo_ip;
 						b_state->pseudo_ip = 0;
 						HandleAL(temp_array, b_state);
@@ -123,36 +123,79 @@ namespace MSLC
 					{
 						auto conv_cmd = GetConversionCommand(right.dynamic_primitive_type, left.dynamic_primitive_type, right.data);
 						if (conv_cmd.code != ByteOpCode::NOP) {
-							PushCommand(b_state, ByteCommand(conv_cmd), operation.debug_line);
+							PushCommand(b_state, ByteCommand(conv_cmd), b_state->current_line);
 						}
 					}
 					else if (left.contains_pointer && (right.dynamic_primitive_type != PrimitiveAnalogs::UInt && right.dynamic_primitive_type != PrimitiveAnalogs::Int))
 					{
-						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Saving not uint (or negative int) value as pointer is forbidden.", Diagnostics::TypeError, Diagnostics::SourceCode, operation.debug_line));
+						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Saving not uint (or negative int) value as pointer is forbidden.", Diagnostics::TypeError, Diagnostics::SourceCode, b_state->current_line));
 						return;
 					}
 					
 
 					if (left.source == ValueSource::StaticAddress || left.source == ValueSource::Symbol)
 					{
-						PushCommand(b_state, ByteCommand(ByteOpCode::STORE_STATIC,CommandArgument(left.data,CommandSource::MemoryAddress), CommandArgument(right.data, CommandSource::Register), CommandArgument(left.static_data_size, CommandSource::Immediate)), operation.debug_line);
+						PushCommand(b_state, ByteCommand(ByteOpCode::STORE_STATIC,CommandArgument(left.data,CommandSource::MemoryAddress), CommandArgument(right.data, CommandSource::Register), CommandArgument(left.static_data_size, CommandSource::Immediate)), b_state->current_line);
 						TryMarkAsUnhandledSymbol(left, b_state, 0b001);
 					}
 					else if (left.source == ValueSource::DynamicAddress) 
 					{
-						PushCommand(b_state, ByteCommand(ByteOpCode::STORE_DYNAMIC, CommandArgument(left.data, CommandSource::Register), CommandArgument(right.data, CommandSource::Register), CommandArgument(left.static_data_size, CommandSource::Immediate)), operation.debug_line);
+						PushCommand(b_state, ByteCommand(ByteOpCode::STORE_DYNAMIC, CommandArgument(left.data, CommandSource::Register), CommandArgument(right.data, CommandSource::Register), CommandArgument(left.static_data_size, CommandSource::Immediate)), b_state->current_line);
 					}
 					else
 					{
-						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Assign works only with either static or dynamic addresses as left operand.", Diagnostics::DeveloperError, Diagnostics::SourceCode, operation.debug_line));
+						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Assign works only with either static or dynamic addresses as left operand.", Diagnostics::DeveloperError, Diagnostics::SourceCode, b_state->current_line));
 						return;
 					}
 
 					if (operation.op_code != Pseudo::PseudoOpCode::AssignR)
 					{
-						b_state->value_stack.pop();
+						if (operation.arg_0 == 0)b_state->value_stack.pop();	//WARN
+						//If was complex assign -> left and right was deleted and arguments for this command have out
 						b_state->registers_table.SetFree(right.data);
 					}
+					break;
+
+				}
+				case Pseudo::PseudoOpCode::GetByArgument:	//Offset mode
+				{
+
+					if (b_state->value_stack.size() < 2)
+					{
+						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("GetByArgument demands two operands.", Diagnostics::DeveloperError, Diagnostics::IRCode, b_state->pseudo_ip));
+						return;
+					}
+					ValueFrame right = GenerateLoadCommand(p_array, b_state);	//index
+					ValueFrame left = GenerateLoadCommand(p_array, b_state);		//identifier (data in the memory cell)
+
+				
+
+					if (left.source != ValueSource::Pointer && left.source != ValueSource::Register)
+					{
+						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("GetByArgument works only with either pointer or register as left operand.", Diagnostics::DeveloperError, Diagnostics::SourceCode, b_state->current_line));
+						return;
+					}
+					if (left.type_id != CompilationInfo::INVALID_ID) 
+					{
+						PushPointerArithmetic(left, right, b_state, right.dynamic_primitive_type);
+					}
+					
+
+					PushCommand(b_state, ByteCommand(
+						GetTypedArithmeticCommandCode(Pseudo::PseudoOpCode::Add, right.dynamic_primitive_type),
+						CommandArgument(left.data, CommandSource::Register),
+						CommandArgument(left.data, CommandSource::Register),
+						CommandArgument(right.data, CommandSource::Register)
+					), b_state->current_line);
+					b_state->registers_table.SetFree(right.data);
+
+					//Dereference
+
+					left.dynamic_data_size = left.static_data_size;
+					left.source = ValueSource::DynamicAddress;
+					left.dynamic_primitive_type = left.static_primitive_type;
+					b_state->value_stack.push(left);
+
 					break;
 				}
 				default:
@@ -178,6 +221,7 @@ namespace MSLC
 								vdesc->vinfo.isPointer() ? POINTER_SIZE : tdesc->size));
 							b_state->value_stack.top().contains_pointer = vdesc->vinfo.isPointer();
 							b_state->value_stack.top().static_primitive_type = tdesc->primitive_analog;
+							b_state->value_stack.top().type_id = tdesc->id;
 						}
 						else 
 						{
@@ -186,6 +230,7 @@ namespace MSLC
 								vdesc->vinfo.isPointer() ? POINTER_SIZE : tdesc->size));
 							b_state->value_stack.top().contains_pointer = vdesc->vinfo.isPointer();
 							b_state->value_stack.top().static_primitive_type = tdesc->primitive_analog;
+							b_state->value_stack.top().type_id = tdesc->id;
 						}
 						
 						break;
@@ -212,8 +257,11 @@ namespace MSLC
 					CompilationInfo::Types::TypeDescription* tdesc = b_state->cs_observer->GetGST().GetType(vdesc->vinfo.type_id);
 
 					vdesc->global_stack_offset = b_state->frame_stack.top().NextFreeAddress();
-					b_state->frame_stack.top().size += tdesc->GetAlignedSize();
-					PushCommand(b_state, ByteCommand(ByteOpCode::STACK_UP, CommandArgument(tdesc->GetAlignedSize(), CommandSource::Immediate)), operation.debug_line);
+
+					size_t size = vdesc->vinfo.isPointer() ? 8 : tdesc->GetAlignedSize();
+
+					b_state->frame_stack.top().size += size;
+					PushCommand(b_state, ByteCommand(ByteOpCode::STACK_UP, CommandArgument(size, CommandSource::Immediate)), b_state->current_line);
 					break;
 				}
 				}
@@ -229,6 +277,7 @@ namespace MSLC
 						ValueFrame new_frame = ValueFrame(left.source, left.data, common_type, converted_reg == left.data ? left.dynamic_data_size : right.dynamic_data_size);
 						new_frame.static_primitive_type = converted_reg == left.data ? left.static_primitive_type : right.static_primitive_type;
 						new_frame.static_data_size = converted_reg == left.data ? left.static_data_size : right.static_data_size;
+						new_frame.type_id = converted_reg == left.data ? left.type_id : right.type_id;
 						b_state->value_stack.push(new_frame);
 					};
 					
@@ -257,30 +306,12 @@ namespace MSLC
 							converted_reg, common_type
 						);
 						if (conv_cmd.code != ByteOpCode::NOP) {
-							PushCommand(b_state, ByteCommand(conv_cmd), operation.debug_line);
+							PushCommand(b_state, ByteCommand(conv_cmd), b_state->current_line);
 						}
 
-						if (left_is_pointer) 
+						if (left_is_pointer && left.type_id != CompilationInfo::INVALID_ID) 
 						{
-							auto free_register = b_state->registers_table.FindFreeGeneral();
-							PushCommand(b_state, ByteCommand(			//Move data size in register
-								ByteOpCode::LOAD_CONST_STATIC,
-								CommandArgument(b_state->cs_observer->GetICT().GetOrAdd(left.static_data_size), CommandSource::Constant),
-								CommandArgument(free_register, CommandSource::Register),
-								CommandArgument(sizeof(left.static_data_size), CommandSource::Immediate)
-							), operation.debug_line);
-
-
-
-							PushCommand(b_state, ByteCommand(
-								GetTypedArithmeticCommandCode(Pseudo::PseudoOpCode::Multiply, common_type),
-								CommandArgument(right.data, CommandSource::Register),
-								CommandArgument(right.data, CommandSource::Register),
-								CommandArgument(free_register, CommandSource::Register)
-							), operation.debug_line);
-							b_state->registers_table.SetFree(free_register);
-
-							
+							PushPointerArithmetic(left, right, b_state, common_type);
 						}
 
 						PushCommand(b_state, ByteCommand(
@@ -288,7 +319,7 @@ namespace MSLC
 							CommandArgument(left.data, CommandSource::Register),
 							CommandArgument(left.data, CommandSource::Register),
 							CommandArgument(right.data, CommandSource::Register)
-						), operation.debug_line);
+						), b_state->current_line);
 						b_state->registers_table.SetFree(right.data);
 
 						add_converted_frame(b_state, left, right, converted_reg, common_type);
@@ -305,7 +336,7 @@ namespace MSLC
 
 						PushCommand(b_state, 
 							ByteCommand(GetLogicCommand(operation.op_code, PrimitiveAnalogs::UInt), CommandArgument(left.data, CommandSource::Register), 
-								CommandArgument(left.data, CommandSource::Register), CommandArgument(right.data, CommandSource::Register)), operation.debug_line);
+								CommandArgument(left.data, CommandSource::Register), CommandArgument(right.data, CommandSource::Register)), b_state->current_line);
 
 						b_state->registers_table.SetFree(right.data);
 						b_state->value_stack.push(ValueFrame(ValueSource::Register, left.data, PrimitiveAnalogs::UInt, LOGIC_RESULT_SIZE));	//1 BYTE
@@ -321,7 +352,7 @@ namespace MSLC
 						ValueFrame left = GenerateLoadCommand(p_array, b_state);
 	
 						if (left.dynamic_primitive_type == PrimitiveAnalogs::Real || right.dynamic_primitive_type == PrimitiveAnalogs::Real) {
-							Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Bit operation requires integer types.", Diagnostics::MessageType::LogicError, Diagnostics::SourceType::SourceCode, operation.debug_line));
+							Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Bit operation requires integer types.", Diagnostics::MessageType::LogicError, Diagnostics::SourceType::SourceCode, b_state->current_line));
 							return;
 						}
 
@@ -330,7 +361,7 @@ namespace MSLC
 							CommandArgument(left.data, CommandSource::Register),
 							CommandArgument(left.data, CommandSource::Register),
 							CommandArgument(right.data, CommandSource::Register)
-						), operation.debug_line);
+						), b_state->current_line);
 
 						b_state->registers_table.SetFree(right.data);
 						b_state->value_stack.push(ValueFrame(ValueSource::Register, left.data, PrimitiveAnalogs::UInt, left.dynamic_data_size));
@@ -353,12 +384,12 @@ namespace MSLC
 							converted_reg, common_type
 						);
 						if (conv_cmd.code != ByteOpCode::NOP) {
-							PushCommand(b_state, ByteCommand(conv_cmd), operation.debug_line);	
+							PushCommand(b_state, ByteCommand(conv_cmd), b_state->current_line);	
 						}
 
 						PushCommand(b_state,
 							ByteCommand(GetLogicCommand(operation.op_code, common_type), CommandArgument(left.data, CommandSource::Register),
-								CommandArgument(left.data, CommandSource::Register), CommandArgument(right.data, CommandSource::Register)), operation.debug_line);
+								CommandArgument(left.data, CommandSource::Register), CommandArgument(right.data, CommandSource::Register)), b_state->current_line);
 
 						b_state->registers_table.SetFree(right.data);
 						b_state->value_stack.push(ValueFrame(ValueSource::Register, left.data, PrimitiveAnalogs::UInt, LOGIC_RESULT_SIZE));	// 1 BYTE
@@ -393,7 +424,7 @@ namespace MSLC
 
 					// Mod is only for integer types
 					if (left.dynamic_primitive_type == PrimitiveAnalogs::Real || right.dynamic_primitive_type == PrimitiveAnalogs::Real) {
-						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Mod operation requires integer types.", Diagnostics::MessageType::LogicError, Diagnostics::SourceType::SourceCode, operation.debug_line));
+						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Mod operation requires integer types.", Diagnostics::MessageType::LogicError, Diagnostics::SourceType::SourceCode, b_state->current_line));
 						return;
 					}
 					size_t converted_reg;
@@ -404,7 +435,7 @@ namespace MSLC
 						converted_reg, common_type
 					);
 					if (conv_cmd.code != ByteOpCode::NOP) {
-						PushCommand(b_state, ByteCommand(conv_cmd), operation.debug_line);
+						PushCommand(b_state, ByteCommand(conv_cmd), b_state->current_line);
 					}
 
 					PushCommand(b_state, ByteCommand(
@@ -412,7 +443,7 @@ namespace MSLC
 						CommandArgument(left.data, CommandSource::Register),
 						CommandArgument(left.data, CommandSource::Register),
 						CommandArgument(right.data, CommandSource::Register)
-					), operation.debug_line);
+					), b_state->current_line);
 					b_state->registers_table.SetFree(right.data);
 					//ValueFrame(left.source_arg, common_type, converted_reg.reg_index == left.source_arg.reg_index ? left.data_size : right.data_size)
 
@@ -423,21 +454,21 @@ namespace MSLC
 				{
 					if (b_state->value_stack.size() < 1)
 					{
-						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Negative is unary operation, but gets zero arguments.", Diagnostics::MessageType::LogicError, Diagnostics::SourceType::SourceCode, operation.debug_line));
+						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Negative is unary operation, but gets zero arguments.", Diagnostics::MessageType::LogicError, Diagnostics::SourceType::SourceCode, b_state->current_line));
 						break;
 					}
 					ValueFrame vf_left = GenerateLoadCommand(p_array,b_state);
 
 					// Negative only for int or double/real (INT, DOUBLE)
 					if (vf_left.dynamic_primitive_type == PrimitiveAnalogs::UInt) {
-						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Negative operation requires signed types (int, real).", Diagnostics::MessageType::TypeError, Diagnostics::SourceType::SourceCode, operation.debug_line));
+						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Negative operation requires signed types (int, real).", Diagnostics::MessageType::TypeError, Diagnostics::SourceType::SourceCode, b_state->current_line));
 						break;
 					}
 
 					PushCommand(b_state, ByteCommand(
 						GetTypedArithmeticCommandCode(operation.op_code, vf_left.dynamic_primitive_type),
 						CommandArgument( vf_left.data, CommandSource::Register),
-						CommandArgument( vf_left.data, CommandSource::Register)), operation.debug_line);
+						CommandArgument( vf_left.data, CommandSource::Register)), b_state->current_line);
 					b_state->value_stack.push(vf_left);
 					break;
 				}
@@ -457,7 +488,7 @@ namespace MSLC
 					PushCommand(b_state, ByteCommand(
 						GetLogicCommand(operation.op_code, vf_left.dynamic_primitive_type),
 						CommandArgument(vf_left.data, CommandSource::Register),
-						CommandArgument(vf_left.data, CommandSource::Register)), operation.debug_line);
+						CommandArgument(vf_left.data, CommandSource::Register)), b_state->current_line);
 					b_state->value_stack.push(vf_left);
 					break;
 				}
@@ -543,7 +574,7 @@ namespace MSLC
 				{
 					size_t free_reg = b_state->registers_table.AllocateFreeGeneral();
 					if (!CheckRegister(b_state, free_reg))return ValueFrame::Invalid();
-					if (frame.dynamic_data_size > POINTER_SIZE) {
+					if (frame.dynamic_data_size > POINTER_SIZE || b_state->cs_observer->GetICT().GetByID(frame.data).type == Definitions::ValueType::STRING) {
 						// Big data — load address of constant
 						PushCommand(b_state,
 							ByteCommand(ByteOpCode::LEA_CONST,
@@ -768,10 +799,40 @@ namespace MSLC
 				}
 			}
 
+			void CommandsHandler::PushPointerArithmetic(ValueFrame& left, ValueFrame& right, std::shared_ptr<ByteTranslationState> b_state,PrimitiveAnalogs type)
+			{
+				if (left.dynamic_primitive_type == PrimitiveAnalogs::Real || right.dynamic_primitive_type == PrimitiveAnalogs::Real) 
+				{
+					Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Pointer arithmetic with real numbers is forbidden.", Diagnostics::TypeError, Diagnostics::SourceCode, b_state->current_line));
+				}
+
+				auto aligned_size = b_state->cs_observer->GetICT().GetOrAdd(left.GetTypeDesc(left.type_id, b_state->cs_observer)->GetAlignedSize());
+
+				auto free_register = b_state->registers_table.FindFreeGeneral();
+				PushCommand(b_state, ByteCommand(			//Move data size in register
+					ByteOpCode::LOAD_CONST_STATIC,
+					CommandArgument(aligned_size, CommandSource::Constant),
+					CommandArgument(free_register, CommandSource::Register),
+					CommandArgument(sizeof(left.static_data_size), CommandSource::Immediate)
+				), b_state->current_line);
+
+
+
+				PushCommand(b_state, ByteCommand(
+					GetTypedArithmeticCommandCode(Pseudo::PseudoOpCode::Multiply, type),
+					CommandArgument(right.data, CommandSource::Register),
+					CommandArgument(right.data, CommandSource::Register),
+					CommandArgument(free_register, CommandSource::Register)
+				), b_state->current_line);
+				b_state->registers_table.SetFree(free_register);
+
+
+			}
+
 			void CommandsHandler::HandleCommand(std::shared_ptr<ByteTranslationState> b_state)
 			{
 				Pseudo::PseudoOperation& operation = b_state->pseudo_state_observer->pseudo_code.Get(b_state->pseudo_ip);
-
+				b_state->current_line = b_state->current_line;
 				if (operation.op_code == Pseudo::PseudoOpCode::PushFrame)
 				{
 					b_state->PushFrame(); 
@@ -781,7 +842,7 @@ namespace MSLC
 				{
 					if (!b_state->PopFrame())
 					{
-						Diagnostics::Logger::Get().PrintWithFormat(Diagnostics::InformationMessage("Extra visible's scope deleting. Operation line: %s.", Diagnostics::DeveloperError, Diagnostics::IRCode, b_state->pseudo_ip), operation.debug_line);
+						Diagnostics::Logger::Get().PrintWithFormat(Diagnostics::InformationMessage("Extra visible's scope deleting. Operation line: %s.", Diagnostics::DeveloperError, Diagnostics::IRCode, b_state->pseudo_ip), b_state->current_line);
 					}
 					return;
 				}
