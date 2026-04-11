@@ -266,17 +266,32 @@ namespace MSLC
                         else if ((t.simple.type == TokenType::OPERATOR || t.simple.type == TokenType::KEYWORD) && OperatorsTable::Get().Has(t.simple.value.strVal)) {
                             try 
                             {
-                                while (!operations.empty() &&
-                                    operations.back().simple.value.strVal != "(" &&
-                                    (OperatorsTable::Get().GetInfo(operations.back().simple.value.strVal).priority >
-                                        OperatorsTable::Get().GetInfo(t.simple.value.strVal).priority ||
-                                        (OperatorsTable::Get().GetInfo(operations.back().simple.value.strVal).priority ==
-                                            OperatorsTable::Get().GetInfo(t.simple.value.strVal).priority &&
-                                            OperatorsTable::Get().GetInfo(t.simple.value.strVal).associativity == OperatorInfo::Associativity::LeftRight))) {
-                                    // Only if priority is greater OR pririties are equal and associativity is LeftRight
-                                    result.push_back(operations.back());
-                                    operations.pop_back();
+                                
+                                auto current_operator = t.simple.value.strVal;
+
+                                auto get_op_info = [](const std::string& operator_) -> OperatorInfo
+                                    {
+                                        return  OperatorsTable::Get().GetInfo(operator_);
+                                    };
+
+                                while (!operations.empty() && operations.back().simple.value.strVal != "(") {
+                                    auto back_op = operations.back().simple.value.strVal;
+                                    auto back_info = get_op_info(back_op);
+                                    auto current_info = get_op_info(current_operator);
+
+                                    if (back_info.priority > current_info.priority ||
+                                        (back_info.priority == current_info.priority &&
+                                            current_info.associativity == OperatorInfo::Associativity::LeftRight &&
+                                            !(back_info.type == OperatorInfo::Type::Unary && current_info.type == OperatorInfo::Type::Unary))) {
+                                        result.push_back(operations.back());
+                                        operations.pop_back();
+                                    }
+                                    else {
+                                        break;
+                                    }
                                 }
+                                
+                                
                                 operations.push_back(TokensGroup(t));
                             }
                             catch (...) 
@@ -285,7 +300,6 @@ namespace MSLC
                                 {
                                     std::cout << tg.IsSimple() << " " << tg.simple.value.ToString() << "\n";
                                 }
-                                int i = 0;
                             }
                         }
                         else if (t.simple.value.strVal == "(") {  // ← Simple delimiter handling
@@ -317,6 +331,19 @@ namespace MSLC
                     result.push_back(operations.back());
                     operations.pop_back();
                 }
+
+                //for (auto t : result) 
+                //{
+                //    if (t.type == GroupType::QualifiedName) 
+                //    {
+                //        for (auto t2 : t.complex) 
+                //        {
+                //            std::cout << t2.simple.value.ToString() << " ";
+                //        }
+                //    }
+                //
+                //    else std::cout << t.simple.value.ToString() << " ";
+                //}
 
                 return TokensGroup(result);
 			}

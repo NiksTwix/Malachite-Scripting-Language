@@ -258,6 +258,10 @@ namespace MSLC
 								// Continue building
 								continue;
 							}
+							else //operators line: ***c
+							{
+								
+							}
 						}
 					}
 					lex_state.current_index++;

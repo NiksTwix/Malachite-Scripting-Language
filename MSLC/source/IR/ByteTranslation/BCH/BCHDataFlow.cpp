@@ -76,7 +76,8 @@ namespace MSLC
 
 						frame.Dereference();
 
-						if (frame.value_info.isPointer()) 
+						if (frame.value_info.isPointer())	//If dereferenced value is pointer we need to load it because in another case it just will be switching POINTER/DYNAMIC_ADDRESS. 
+							//If we remove this check pointer with depth 1 will be loaded two times (here and by another operation) pointer->value->??? 
 						{
 							PushCommand(b_state,
 								ByteCommand(ByteOpCode::LOAD_DYNAMIC, CommandArgument(frame.data, CommandSource::Register),                    // register with address
@@ -201,7 +202,8 @@ namespace MSLC
 						//Generate load command
 						left.Dereference();
 						
-						if (left.value_info.isPointer())
+						if (left.value_info.isPointer())	//If dereferenced value is pointer we need to load it because in another case it just will be switching POINTER/DYNAMIC_ADDRESS. 
+							//If we remove this check pointers with depth 1 will be loaded two times (here and by another operation) pointer->value->??? (dont ask the questions. Just forget. It works- and its proper)
 						{
 							PushCommand(b_state,
 								ByteCommand(ByteOpCode::LOAD_DYNAMIC, CommandArgument(left.data, CommandSource::Register),                    // register with address
