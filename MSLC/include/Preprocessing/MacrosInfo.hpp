@@ -38,6 +38,7 @@ namespace MSLC
 
             // Минимальная отладочная информация
             size_t line_defined = 0;
+            Definitions::ModuleId module_defined = 0;
         };
 
         class MacrosTable
@@ -54,12 +55,12 @@ namespace MSLC
 
             MacrosID DefineConstant(const std::string& name,
                 Definitions::ValueContainer value,
-                size_t line = 0);
+                Diagnostics::DebugInfo di);
 
             MacrosID DefineFunction(const std::string& name,
                 std::vector<Token> body_tokens,
                 std::vector<ParameterLabel> parameters,
-                size_t line = 0);
+                Diagnostics::DebugInfo di);
 
             // Main methods of fast access
             bool HasMacro(const std::string& name) const;

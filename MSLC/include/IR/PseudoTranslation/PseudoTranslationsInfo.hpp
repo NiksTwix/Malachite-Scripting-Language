@@ -116,23 +116,23 @@ namespace MSLC
 				size_t arg_0;
 				size_t arg_1;
 				size_t arg_2;
-				uint32_t debug_line;
+				Diagnostics::DebugInfo debug_info;
 				PseudoOpCode op_code;
 				uint8_t flags;
 
-				PseudoOperation(PseudoOpCode code, size_t arg0, size_t arg1, size_t arg2, uint32_t line, uint8_t flags) : arg_0(arg0), arg_1(arg1), arg_2(arg2), debug_line(line), op_code(code), flags(flags)
+				PseudoOperation(PseudoOpCode code, size_t arg0, size_t arg1, size_t arg2, Diagnostics::DebugInfo debug_info, uint8_t flags) : arg_0(arg0), arg_1(arg1), arg_2(arg2), debug_info(debug_info), op_code(code), flags(flags)
 				{
 				}
-				PseudoOperation(PseudoOpCode code, size_t arg0, size_t arg1, size_t arg2, uint32_t line) : arg_0(arg0), arg_1(arg1), arg_2(arg2), debug_line(line), op_code(code), flags(PseudoOperationFlags::None)
+				PseudoOperation(PseudoOpCode code, size_t arg0, size_t arg1, size_t arg2, Diagnostics::DebugInfo debug_info) : arg_0(arg0), arg_1(arg1), arg_2(arg2), debug_info(debug_info), op_code(code), flags(PseudoOperationFlags::None)
 				{
 				}
-				PseudoOperation(PseudoOpCode code, size_t arg0, size_t arg1,  uint32_t line) : arg_0(arg0), arg_1(arg1), arg_2(0), debug_line(line), op_code(code), flags(PseudoOperationFlags::None)
+				PseudoOperation(PseudoOpCode code, size_t arg0, size_t arg1, Diagnostics::DebugInfo debug_info) : arg_0(arg0), arg_1(arg1), arg_2(0), debug_info(debug_info), op_code(code), flags(PseudoOperationFlags::None)
 				{
 				}
-				PseudoOperation(PseudoOpCode code, size_t arg0, uint32_t line) : arg_0(arg0), arg_1(0), arg_2(0), debug_line(line), op_code(code), flags(PseudoOperationFlags::None)
+				PseudoOperation(PseudoOpCode code, size_t arg0, Diagnostics::DebugInfo debug_info) : arg_0(arg0), arg_1(0), arg_2(0), debug_info(debug_info), op_code(code), flags(PseudoOperationFlags::None)
 				{
 				}
-				PseudoOperation(PseudoOpCode code, uint32_t line) : arg_0(0), arg_1(0), arg_2(0), debug_line(line), op_code(code), flags(PseudoOperationFlags::None)
+				PseudoOperation(PseudoOpCode code, Diagnostics::DebugInfo debug_info) : arg_0(0), arg_1(0), arg_2(0), debug_info(debug_info), op_code(code), flags(PseudoOperationFlags::None)
 				{
 				}
 				PseudoOperation() = default;

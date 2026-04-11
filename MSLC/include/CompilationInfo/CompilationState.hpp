@@ -167,7 +167,7 @@ namespace MSLC
 
 			std::unordered_map<Values::ConstantID, ConstantInfo> constants_info;
 
-			uint32_t current_module_id = 0;
+			Definitions::ModuleId current_module_id = 0;
 
 			uint16_t compilation_flags = 0;
 
@@ -188,7 +188,7 @@ namespace MSLC
 			void SetModule(uint32_t module_) { current_module_id = module_; }
 
 			//Registration
-
+			Definitions::ModuleId CompilationState::GetCurrentModuleID();
 			Symbol* RegisterVariable(Variables::VariableDescription description);
 			Symbol* RegisterFunction(Functions::FunctionDescription description);
 			Symbol* RegisterType(Types::TypeDescription description);

@@ -67,9 +67,10 @@ namespace MSLC {
 
                     {ByteOpCode::MOVRR, "MOVRR"},
                     {ByteOpCode::MOVRI, "MOVRI"},
-                    {ByteOpCode::STACK_UP, "PUSH"},
-                    {ByteOpCode::STACK_DOWN, "POP"},
-
+                    {ByteOpCode::STACK_UP, "STACK_UP"},
+                    {ByteOpCode::STACK_DOWN, "STACK_DOWN"},
+                    {ByteOpCode::PUSH, "PUSH"},
+                    {ByteOpCode::POP, "POP"},
                     {ByteOpCode::LEA_STATIC, "LEA_STATIC"},
                     {ByteOpCode::LEA_DYNAMIC, "LEA_DYNAMIC"},
 
@@ -85,7 +86,8 @@ namespace MSLC {
 
                     {ByteOpCode::ALLOC, "ALLOC"},
                     {ByteOpCode::FREE, "FREE"},
-
+                    {ByteOpCode::COPY_DYNAMIC, "COPY_DYNAMIC"},
+                    {ByteOpCode::COPY_STATIC, "COPY_STATIC"},
                     {ByteOpCode::JMP, "JMP"},
                     {ByteOpCode::JMP_LABEL, "JMP_LABEL" },
                     {ByteOpCode::JMPCV, "JMPCV"},

@@ -42,7 +42,7 @@ namespace MSLC
 
 				GroupType type = GroupType::Simple;
 
-				size_t line = 0;
+				Diagnostics::DebugInfo debug_info;
 
 				bool IsSimple() const { return type == GroupType::Simple; }
 				bool IsSimpleOrQN() const { return type == GroupType::QualifiedName || simple.type == Tokenization::TokenType::IDENTIFIER || simple.type == Tokenization::TokenType::LITERAL || type == GroupType::ArrayLiteral;}
@@ -54,18 +54,18 @@ namespace MSLC
 				{
 					type = GroupType::Root;
 					complex = tokens;
-					if (!tokens.empty()) line = tokens.front().line;
+					if (!tokens.empty()) debug_info = tokens.front().debug_info;
 				}
 				TokensGroup(std::vector<TokensGroup>& tokens, GroupType group_type)
 				{
 					type = group_type;
 					complex = tokens;
-					if (!tokens.empty()) line = tokens.front().line;
+					if (!tokens.empty()) debug_info = tokens.front().debug_info;
 				}
 				TokensGroup(TokensGroup simple_group, std::vector<TokensGroup> tokens, GroupType group_type)
 				{
 					type = group_type;
-					line = simple_group.line;
+					debug_info = simple_group.debug_info;
 					complex = tokens;
 					simple = simple_group.simple;
 				}
@@ -73,13 +73,13 @@ namespace MSLC
 				{
 					type = group_type;
 					complex = tokens;
-					line = simple.debug_info;
+					debug_info = simple.debug_info;
 					this->simple = simple;
 				}
 				TokensGroup(Tokenization::Token token)
 				{
 					type = GroupType::Simple;
-					line = token.debug_info;
+					debug_info = token.debug_info;
 					simple = token;
 				}
 				TokensGroup(GroupType type) : type(type)

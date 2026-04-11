@@ -53,7 +53,7 @@ namespace MSLC
                 // Found func call - create complex group
                 TokensGroup t = tokens[current_index];
                 TokensGroup func_call(GroupType::FunctionCall);
-                func_call.line = t.line;	//for debugging
+                func_call.debug_info = t.debug_info;	//for debugging
                 func_call.complex.push_back(t); // function identifier
 
                 current_index += 2; // skip name and (
@@ -88,7 +88,7 @@ namespace MSLC
                         }
                         else
                         {
-                            Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Invalid argument.", Diagnostics::SyntaxError, Diagnostics::SourceCode, t.line));
+                            Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Invalid argument.", Diagnostics::SyntaxError, Diagnostics::SourceCode, t.debug_info));
                             current_index++;
                             break;
                         }
@@ -128,7 +128,7 @@ namespace MSLC
                 // Found func call - create complex group
                 TokensGroup t = tokens[current_index];
                 TokensGroup data_access(gtype);
-                data_access.line = t.line;
+                data_access.debug_info = t.debug_info;
                 if (t.simple.type == TokenType::DELIMITER)
                 {
                     current_index += 1; // skip [
@@ -252,7 +252,7 @@ namespace MSLC
                                 }
                                 else 
                                 {
-                                    Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Invalid type identifier.", Diagnostics::SyntaxError, Diagnostics::SourceCode, t.line));
+                                    Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Invalid type identifier.", Diagnostics::SyntaxError, Diagnostics::SourceCode, t.debug_info));
                                     break;
                                 }
                             }

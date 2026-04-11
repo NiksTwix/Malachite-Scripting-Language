@@ -9,12 +9,13 @@ namespace MSLC
 		struct LexingState 
 		{
 			std::string undefined_token = std::string();
-			int current_line = 0;
 			int current_depth = 0;
 			bool was_comment = false;
 			bool was_neg_value = false;
 			size_t current_index = 0;
 			size_t module_id = 0;
+
+			Diagnostics::DebugInfo debug_info;
 
 			bool in_string = false;
 			bool in_symbol_literal = false;
@@ -66,7 +67,7 @@ namespace MSLC
 				return TokensInfoTable::Get().GetTokenType(op + "u") == TokenType::OPERATOR;
 			}
 		public:
-			std::vector<Token> ToTokens(std::string text, size_t module_id = 0);
+			std::vector<Token> ToTokens(std::string text, Definitions::ModuleId module_id = 0);
 		};
 	}
 

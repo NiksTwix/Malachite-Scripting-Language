@@ -6,28 +6,28 @@ namespace MSLC
 	{
 		namespace Byte
 		{
-			uint8_t LLTranslator::GetAllocatedRegister(std::shared_ptr<ByteTranslationState> state, Pseudo::LowLevelRegisters id)
+			uint8_t LLTranslator::GetAllocatedRegister(std::shared_ptr<ByteTranslationState> b_state, Pseudo::LowLevelRegisters id)
 			{
 				auto it = allocated_registers.find(id);
 				if (it != allocated_registers.end()) return it->second;
 				
-				size_t free_register = state->registers_table.AllocateFreeGeneral();
+				size_t free_register = b_state->registers_table.AllocateFreeGeneral();
 				if (free_register == InvalidRegister) 
 				{
-					Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("The low level " + std::string(Keywords::w_op_code) + " section free registers has ran out.", Diagnostics::DeveloperError, Diagnostics::SourceCode, 0));
+					Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("The low level " + std::string(Keywords::w_op_code) + " section free registers has ran out.", Diagnostics::DeveloperError, Diagnostics::SourceCode, b_state->GetDebugInfo()));
 					return 0;
 				
 				}
 				allocated_registers[id] = free_register;
 				return free_register;
 			}
-			void LLTranslator::HandleLowLevel(std::shared_ptr<ByteTranslationState> state, const Pseudo::LLOperation& operation)
+			void LLTranslator::HandleLowLevel(std::shared_ptr<ByteTranslationState> b_state, const Pseudo::LLOperation& operation)
 			{
 				//operations handling
 
-				auto push_command = [](std::shared_ptr<ByteTranslationState> state, uint32_t line, ByteCommand cmd)
+				auto push_command = [](std::shared_ptr<ByteTranslationState> state, Diagnostics::DebugInfo  di, ByteCommand cmd)
 					{
-						cmd.source_line = line;
+						cmd.source_line = di.place;
 						cmd.pseudo_op_index = state->result.Size();
 						state->result.Pushback(cmd);
 					};
@@ -38,58 +38,58 @@ namespace MSLC
 				{
 				case Pseudo::LowLevelOpCode::NOP:
 				{
-					Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("The " + std::string(Keywords::w_op_code) + " section's traslator has generated NOP operation. Is it well?", Diagnostics::DeveloperError, Diagnostics::SourceCode, operation.source_line));
+					Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("The " + std::string(Keywords::w_op_code) + " section's traslator has generated NOP operation. Is it well?", Diagnostics::DeveloperError, Diagnostics::SourceCode, b_state->GetDebugInfo()));
 					return;
 				}
 				case Pseudo::LowLevelOpCode::LEA:
 				{
-					uint8_t reg = GetAllocatedRegister(state,(Pseudo::LowLevelRegisters)operation.arg0.data);
+					uint8_t reg = GetAllocatedRegister(b_state,(Pseudo::LowLevelRegisters)operation.arg0.data);
 					
 					size_t variable_id = operation.arg1.data;
 
-					if (state->dvicm[variable_id]) 
+					if (b_state->dvicm[variable_id]) 
 					{
-						push_command(state, operation.source_line, ByteCommand(ByteOpCode::MOVRI, CommandArgument(reg, CommandSource::Register), CommandArgument(state->cs_observer->GetGST().GetVariable(variable_id)->global_stack_offset, CommandSource::MemoryAddress)));
+						push_command(b_state, operation.debug_info, ByteCommand(ByteOpCode::MOVRI, CommandArgument(reg, CommandSource::Register), CommandArgument(b_state->cs_observer->GetGST().GetVariable(variable_id)->global_stack_offset, CommandSource::MemoryAddress)));
 					}
 					else 
 					{
-						push_command(state, operation.source_line, ByteCommand(ByteOpCode::MOVRI, CommandArgument(reg, CommandSource::Register), CommandArgument(state->cs_observer->AddUnhandledSymbol(CompilationInfo::SymbolType::Variable, variable_id), CommandSource::Symbol)));
+						push_command(b_state, operation.debug_info, ByteCommand(ByteOpCode::MOVRI, CommandArgument(reg, CommandSource::Register), CommandArgument(b_state->cs_observer->AddUnhandledSymbol(CompilationInfo::SymbolType::Variable, variable_id), CommandSource::Symbol)));
 					}
 				}
 					break;
 				case Pseudo::LowLevelOpCode::DLEA:
 				{
-					uint8_t reg = GetAllocatedRegister(state, (Pseudo::LowLevelRegisters)operation.arg0.data);
+					uint8_t reg = GetAllocatedRegister(b_state, (Pseudo::LowLevelRegisters)operation.arg0.data);
 
 					size_t variable_id = operation.arg1.data;
-					if (state->dvicm[variable_id])
+					if (b_state->dvicm[variable_id])
 					{
-						push_command(state, operation.source_line, 
-							ByteCommand(ByteOpCode::LOAD_STATIC, CommandArgument(state->cs_observer->GetGST().GetVariable(variable_id)->global_stack_offset, CommandSource::MemoryAddress), CommandArgument(reg, CommandSource::Register), CommandArgument(POINTER_SIZE, CommandSource::Immediate)));
+						push_command(b_state, operation.debug_info, 
+							ByteCommand(ByteOpCode::LOAD_STATIC, CommandArgument(b_state->cs_observer->GetGST().GetVariable(variable_id)->global_stack_offset, CommandSource::MemoryAddress), CommandArgument(reg, CommandSource::Register), CommandArgument(POINTER_SIZE, CommandSource::Immediate)));
 					}
 					else
 					{
-						push_command(state, operation.source_line, 
-							ByteCommand(ByteOpCode::LOAD_STATIC, CommandArgument(state->cs_observer->AddUnhandledSymbol(CompilationInfo::SymbolType::Variable, variable_id), CommandSource::Symbol), CommandArgument(reg, CommandSource::Register), CommandArgument(POINTER_SIZE, CommandSource::Immediate)));
+						push_command(b_state, operation.debug_info, 
+							ByteCommand(ByteOpCode::LOAD_STATIC, CommandArgument(b_state->cs_observer->AddUnhandledSymbol(CompilationInfo::SymbolType::Variable, variable_id), CommandSource::Symbol), CommandArgument(reg, CommandSource::Register), CommandArgument(POINTER_SIZE, CommandSource::Immediate)));
 					}
 				}
 					break;
 				case Pseudo::LowLevelOpCode::STORE:
 				{
-					uint8_t reg0 = GetAllocatedRegister(state, (Pseudo::LowLevelRegisters)operation.arg0.data);
-					uint8_t reg1 = GetAllocatedRegister(state, (Pseudo::LowLevelRegisters)operation.arg1.data);
+					uint8_t reg0 = GetAllocatedRegister(b_state, (Pseudo::LowLevelRegisters)operation.arg0.data);
+					uint8_t reg1 = GetAllocatedRegister(b_state, (Pseudo::LowLevelRegisters)operation.arg1.data);
 					size_t size = operation.arg2.data;
 					
-					push_command(state, operation.source_line, ByteCommand(ByteOpCode::STORE_DYNAMIC, CommandArgument(reg0, CommandSource::Register), CommandArgument(reg1, CommandSource::Register), CommandArgument(size, CommandSource::Immediate)));
+					push_command(b_state, operation.debug_info, ByteCommand(ByteOpCode::STORE_DYNAMIC, CommandArgument(reg0, CommandSource::Register), CommandArgument(reg1, CommandSource::Register), CommandArgument(size, CommandSource::Immediate)));
 				}
 					break;
 				case Pseudo::LowLevelOpCode::LOAD:
 				{
-					uint8_t reg0 = GetAllocatedRegister(state, (Pseudo::LowLevelRegisters)operation.arg0.data);
-					uint8_t reg1 = GetAllocatedRegister(state, (Pseudo::LowLevelRegisters)operation.arg1.data);
+					uint8_t reg0 = GetAllocatedRegister(b_state, (Pseudo::LowLevelRegisters)operation.arg0.data);
+					uint8_t reg1 = GetAllocatedRegister(b_state, (Pseudo::LowLevelRegisters)operation.arg1.data);
 					size_t size = operation.arg2.data;
 
-					push_command(state, operation.source_line, ByteCommand(ByteOpCode::LOAD_DYNAMIC, CommandArgument(reg1, CommandSource::Register), CommandArgument(reg0, CommandSource::Register), CommandArgument(size, CommandSource::Immediate)));
+					push_command(b_state, operation.debug_info, ByteCommand(ByteOpCode::LOAD_DYNAMIC, CommandArgument(reg1, CommandSource::Register), CommandArgument(reg0, CommandSource::Register), CommandArgument(size, CommandSource::Immediate)));
 				}
 				break;
 				case Pseudo::LowLevelOpCode::ADDI:
@@ -98,10 +98,10 @@ namespace MSLC
 				case Pseudo::LowLevelOpCode::DIVI:
 				case Pseudo::LowLevelOpCode::MODI:
 				{
-					uint8_t reg0 = GetAllocatedRegister(state, (Pseudo::LowLevelRegisters)operation.arg0.data);
-					uint8_t reg1 = GetAllocatedRegister(state, (Pseudo::LowLevelRegisters)operation.arg1.data);
-					uint8_t reg2 = GetAllocatedRegister(state, (Pseudo::LowLevelRegisters)operation.arg2.data);
-					push_command(state, operation.source_line, ByteCommand(op_code_conversions[operation.code], CommandArgument(reg0, CommandSource::Register), CommandArgument(reg1, CommandSource::Register), CommandArgument(reg2, CommandSource::Register)));
+					uint8_t reg0 = GetAllocatedRegister(b_state, (Pseudo::LowLevelRegisters)operation.arg0.data);
+					uint8_t reg1 = GetAllocatedRegister(b_state, (Pseudo::LowLevelRegisters)operation.arg1.data);
+					uint8_t reg2 = GetAllocatedRegister(b_state, (Pseudo::LowLevelRegisters)operation.arg2.data);
+					push_command(b_state, operation.debug_info, ByteCommand(op_code_conversions[operation.code], CommandArgument(reg0, CommandSource::Register), CommandArgument(reg1, CommandSource::Register), CommandArgument(reg2, CommandSource::Register)));
 				}
 					break;
 
@@ -109,17 +109,17 @@ namespace MSLC
 
 				case Pseudo::LowLevelOpCode::MOV:
 				{
-					uint8_t reg0 = GetAllocatedRegister(state, (Pseudo::LowLevelRegisters)operation.arg0.data);
-					uint8_t reg1 = GetAllocatedRegister(state, (Pseudo::LowLevelRegisters)operation.arg1.data);
-					push_command(state, operation.source_line, ByteCommand(op_code_conversions[operation.code], CommandArgument(reg0, CommandSource::Register), CommandArgument(reg1, CommandSource::Register)));
+					uint8_t reg0 = GetAllocatedRegister(b_state, (Pseudo::LowLevelRegisters)operation.arg0.data);
+					uint8_t reg1 = GetAllocatedRegister(b_state, (Pseudo::LowLevelRegisters)operation.arg1.data);
+					push_command(b_state, operation.debug_info, ByteCommand(op_code_conversions[operation.code], CommandArgument(reg0, CommandSource::Register), CommandArgument(reg1, CommandSource::Register)));
 				}
 					break;
 
 				case Pseudo::LowLevelOpCode::MOVRI:
 				{
-					uint8_t reg0 = GetAllocatedRegister(state, (Pseudo::LowLevelRegisters)operation.arg0.data);
+					uint8_t reg0 = GetAllocatedRegister(b_state, (Pseudo::LowLevelRegisters)operation.arg0.data);
 
-					push_command(state, operation.source_line, ByteCommand(op_code_conversions[operation.code], CommandArgument(reg0, CommandSource::Register), CommandArgument(operation.arg1.data, CommandSource::Immediate)));
+					push_command(b_state, operation.debug_info, ByteCommand(op_code_conversions[operation.code], CommandArgument(reg0, CommandSource::Register), CommandArgument(operation.arg1.data, CommandSource::Immediate)));
 				}
 					break;
 
@@ -146,10 +146,10 @@ namespace MSLC
 							}
 						};
 
-					args_check(command.arg1, operation.arg1, state, this);
-					args_check(command.arg2, operation.arg2, state, this);
+					args_check(command.arg1, operation.arg1, b_state, this);
+					args_check(command.arg2, operation.arg2, b_state, this);
 
-					push_command(state, operation.source_line, command);
+					push_command(b_state, operation.debug_info, command);
 				}
 					
 					break;
@@ -159,7 +159,7 @@ namespace MSLC
 					command.code = op_code_conversions[operation.code];
 					command.arg0 = CommandArgument(operation.arg0.data, CommandSource::Immediate); //Label id
 
-					push_command(state, operation.source_line, command);
+					push_command(b_state, operation.debug_info, command);
 				
 				}
 					break;
@@ -170,8 +170,8 @@ namespace MSLC
 					ByteCommand command;
 					command.code = op_code_conversions[operation.code];
 					command.arg0 = CommandArgument(operation.arg0.data, CommandSource::Immediate); //Label id
-					command.arg1 = CommandArgument(GetAllocatedRegister(state, (Pseudo::LowLevelRegisters)operation.arg1.data), CommandSource::Register); //Register id
-					push_command(state, operation.source_line, command);
+					command.arg1 = CommandArgument(GetAllocatedRegister(b_state, (Pseudo::LowLevelRegisters)operation.arg1.data), CommandSource::Register); //Register id
+					push_command(b_state, operation.debug_info, command);
 
 				}
 					break;
@@ -182,7 +182,7 @@ namespace MSLC
 					command.code = op_code_conversions[operation.code];
 					command.arg0 = CommandArgument(operation.arg0.data, CommandSource::Immediate); //Label id
 
-					push_command(state, operation.source_line, command);
+					push_command(b_state, operation.debug_info, command);
 				}
 				break;
 
@@ -190,10 +190,10 @@ namespace MSLC
 				{
 					ByteCommand command;
 					command.code = op_code_conversions[operation.code];
-					command.arg0 = CommandArgument(GetAllocatedRegister(state, (Pseudo::LowLevelRegisters)operation.arg0.data), CommandSource::Register);
-					command.arg1 =  CommandArgument(GetAllocatedRegister(state, (Pseudo::LowLevelRegisters)operation.arg1.data), CommandSource::Register);
+					command.arg0 = CommandArgument(GetAllocatedRegister(b_state, (Pseudo::LowLevelRegisters)operation.arg0.data), CommandSource::Register);
+					command.arg1 =  CommandArgument(GetAllocatedRegister(b_state, (Pseudo::LowLevelRegisters)operation.arg1.data), CommandSource::Register);
 					command.arg2 = CommandArgument(operation.arg2.data, CommandSource::Immediate);
-					push_command(state, operation.source_line, command);
+					push_command(b_state, operation.debug_info, command);
 				}
 				break;
 
@@ -201,19 +201,19 @@ namespace MSLC
 				{
 					ByteCommand command;
 					command.code = op_code_conversions[operation.code];
-					command.arg0 = CommandArgument(GetAllocatedRegister(state, (Pseudo::LowLevelRegisters)operation.arg0.data), CommandSource::Register);
-					command.arg1 = CommandArgument(GetAllocatedRegister(state, (Pseudo::LowLevelRegisters)operation.arg1.data), CommandSource::Register);
-					push_command(state, operation.source_line, command);
+					command.arg0 = CommandArgument(GetAllocatedRegister(b_state, (Pseudo::LowLevelRegisters)operation.arg0.data), CommandSource::Register);
+					command.arg1 = CommandArgument(GetAllocatedRegister(b_state, (Pseudo::LowLevelRegisters)operation.arg1.data), CommandSource::Register);
+					push_command(b_state, operation.debug_info, command);
 				}
 				break;
 				case Pseudo::LowLevelOpCode::COPY:
 				{
 					ByteCommand command;
 					command.code = op_code_conversions[operation.code];
-					command.arg0 = CommandArgument(GetAllocatedRegister(state, (Pseudo::LowLevelRegisters)operation.arg0.data), CommandSource::Register);
-					command.arg1 = CommandArgument(GetAllocatedRegister(state, (Pseudo::LowLevelRegisters)operation.arg1.data), CommandSource::Register);
-					command.arg2 = CommandArgument(GetAllocatedRegister(state, (Pseudo::LowLevelRegisters)operation.arg2.data), CommandSource::Register);
-					push_command(state, operation.source_line, command);
+					command.arg0 = CommandArgument(GetAllocatedRegister(b_state, (Pseudo::LowLevelRegisters)operation.arg0.data), CommandSource::Register);
+					command.arg1 = CommandArgument(GetAllocatedRegister(b_state, (Pseudo::LowLevelRegisters)operation.arg1.data), CommandSource::Register);
+					command.arg2 = CommandArgument(GetAllocatedRegister(b_state, (Pseudo::LowLevelRegisters)operation.arg2.data), CommandSource::Register);
+					push_command(b_state, operation.debug_info, command);
 				}
 				break;
 

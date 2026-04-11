@@ -38,7 +38,7 @@ namespace MSLC
 		{
 			std::vector<Tokenization::Token> tokens;
 			std::vector<ASTNode> children;
-			int line;
+			Diagnostics::DebugInfo debug_info;
 			ASTNodeType type  = ASTNodeType::None;
 			ASTGroupType group_type = ASTGroupType::None;
 		};
@@ -54,7 +54,7 @@ namespace MSLC
 			struct ASTState
 			{
 				int current_depth = 0;
-				int last_line = 0;
+				Diagnostics::DebugInfo last_debug_info;
 				std::stack<SkipScope> skip_scopes;
 			};
 

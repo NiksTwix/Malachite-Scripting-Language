@@ -7,7 +7,7 @@ namespace MSLC
 
 	namespace Preprocessing
 	{
-		MacrosID MacrosTable::DefineConstant(const std::string& name, Definitions::ValueContainer value, size_t line)
+		MacrosID MacrosTable::DefineConstant(const std::string& name, Definitions::ValueContainer value, Diagnostics::DebugInfo di)
         {
             MacrosID id = m_next_id++;
 
@@ -16,14 +16,14 @@ namespace MSLC
             md.type = MacroType::Constant;
             md.name = name;
             md.constant_value = value;
-            md.line_defined = line;
-
+            md.line_defined = di.place;
+            md.module_defined = di.module_id;
             m_macros[id] = md;
             m_name_to_id[name] = id;
 
             return id;
         }
-        MacrosID MacrosTable::DefineFunction(const std::string& name, std::vector<Token> body_tokens, std::vector<ParameterLabel> parameters, size_t line)
+        MacrosID MacrosTable::DefineFunction(const std::string& name, std::vector<Token> body_tokens, std::vector<ParameterLabel> parameters, Diagnostics::DebugInfo di)
         {
             MacrosID id = m_next_id++;
 
@@ -33,8 +33,8 @@ namespace MSLC
             md.name = name;
             md.body_tokens = std::move(body_tokens);
             md.parameters = std::move(parameters);
-            md.line_defined = line;
-
+            md.line_defined = di.place;
+            md.module_defined = di.module_id;
             m_macros[id] = md;
             m_name_to_id[name] = id;
 

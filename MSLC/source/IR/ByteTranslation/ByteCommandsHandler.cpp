@@ -11,7 +11,7 @@ namespace MSLC
 			void CommandsHandler::HandleCommand(std::shared_ptr<ByteTranslationState> b_state)
 			{
 				Pseudo::PseudoOperation& operation = b_state->pseudo_state_observer->pseudo_code.Get(b_state->pseudo_ip);
-				b_state->current_line = b_state->current_line;
+				b_state->debug_info = operation.debug_info;
 				if (operation.op_code == Pseudo::PseudoOpCode::PushFrame)
 				{
 					b_state->PushFrame(); 
@@ -21,7 +21,7 @@ namespace MSLC
 				{
 					if (!b_state->PopFrame())
 					{
-						Diagnostics::Logger::Get().PrintWithFormat(Diagnostics::InformationMessage("Extra visible's scope deleting. Operation line: %s.", Diagnostics::DeveloperError, Diagnostics::IRCode, b_state->pseudo_ip), b_state->current_line);
+						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Extra visible's scope deleting. Operation line: %s.", Diagnostics::DeveloperError, Diagnostics::SourceCode, b_state->GetDebugInfo()));
 					}
 					return;
 				}

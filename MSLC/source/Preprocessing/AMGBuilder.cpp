@@ -85,7 +85,7 @@ namespace MSLC
                                 Diagnostics::ErrorTexts::import_directive_argument.data(),
                                 Diagnostics::MessageType::FileError,
                                 Diagnostics::SourceType::SourceCode,
-                                0
+                                {0,0}
                             ),
                             import_path,
                             file_path
@@ -203,7 +203,7 @@ namespace MSLC
                         Diagnostics::ErrorTexts::file_loading_bad_path.data(),
                         Diagnostics::MessageType::FileError,
                         Diagnostics::SourceType::SourceCode,
-                        0
+                        { 0,0 }
                     ),
                     path
                 );

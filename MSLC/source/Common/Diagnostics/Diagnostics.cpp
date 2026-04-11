@@ -81,10 +81,10 @@ namespace MSLC
         switch (message.s_type)
         {
         case SourceCode:
-            place = "Line:" + std::to_string(message.place);
+            place = "Line:" + std::to_string(message.di.place) + ".ModuleID:" + std::to_string(message.di.module_id);
             break;
         case IRCode:
-            place = "Instruction pointer:" + std::to_string(message.place);
+            place = "Instruction pointer:" + std::to_string(message.di.module_id) + ".ModuleID:" + std::to_string(message.di.module_id);
             break;
         default:
             break;

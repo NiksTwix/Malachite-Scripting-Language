@@ -53,13 +53,12 @@ namespace MSLC
 			//std::string source_value;
 			Definitions::ValueContainer value;
 			TokenType type;
-			size_t debug_info;
-			size_t module_id;
+			Diagnostics::DebugInfo debug_info;
 
-			Token(Definitions::ValueContainer val_con, TokenType type, size_t line = 0, size_t module_id = 0) : value(val_con), type(type), debug_info(line), module_id(module_id) {}
-			Token(TokenType type) : value((uint64_t)0), type(type), debug_info(0), module_id(0) {}
-			Token() : value((uint64_t)0), type(TokenType::UNDEFINED), debug_info(0), module_id(0) {}
-			Token(TokenType type, size_t line = 0, size_t module_id = 0) : value((uint64_t)0), type(type), debug_info(line), module_id(module_id) {}
+			Token(Definitions::ValueContainer val_con, TokenType type, Diagnostics::DebugInfo debug_info) : value(val_con), type(type), debug_info(debug_info) {}
+			Token(TokenType type, Diagnostics::DebugInfo debug_info) : value((int64_t)0), type(type), debug_info(debug_info) {}
+			Token(TokenType type) : value((uint64_t)0), type(type), debug_info(0, 0) {}
+			Token() : value((uint64_t)0), type(TokenType::UNDEFINED), debug_info(0, 0) {}
 		};
 
 

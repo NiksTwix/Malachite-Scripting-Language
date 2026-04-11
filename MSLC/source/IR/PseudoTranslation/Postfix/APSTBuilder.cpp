@@ -12,7 +12,7 @@ namespace MSLC
 			{
 				if (!OperatorsTable::Get().Has(_operator.simple.value.strVal))
 				{
-					Dia::Logger::Get().Print(Dia::InformationMessage("APSTBuilder: Undefined operator.", Dia::MessageType::DeveloperError, Dia::SourceCode, _operator.line));
+					Dia::Logger::Get().Print(Dia::InformationMessage("APSTBuilder: Undefined operator.", Dia::MessageType::DeveloperError, Dia::SourceCode, _operator.debug_info));
 					return {};
 				}
 				OperatorInfo info = OperatorsTable::Get().GetInfo(_operator.simple.value.strVal);
@@ -21,7 +21,7 @@ namespace MSLC
 				{
 					if (stack.empty())
 					{
-						Dia::Logger::Get().Print(Dia::InformationMessage("Unary operator expects operand.", Dia::MessageType::SyntaxError, Dia::SourceCode, _operator.line));
+						Dia::Logger::Get().Print(Dia::InformationMessage("Unary operator expects operand.", Dia::MessageType::SyntaxError, Dia::SourceCode, _operator.debug_info));
 						return{};
 					}
 					auto left = stack.back(); stack.pop_back();
@@ -35,7 +35,7 @@ namespace MSLC
 					if (stack.size() < 2)
 					{
 						//InsertError
-						Dia::Logger::Get().Print(Dia::InformationMessage("Binary operator expects two operands.", Dia::MessageType::SyntaxError, Dia::SourceCode, _operator.line));
+						Dia::Logger::Get().Print(Dia::InformationMessage("Binary operator expects two operands.", Dia::MessageType::SyntaxError, Dia::SourceCode, _operator.debug_info));
 						return{};
 					}
 					auto right = stack.back(); stack.pop_back();
@@ -49,14 +49,14 @@ namespace MSLC
 					if (stack.size() < 2)
 					{
 						//InsertError
-						Dia::Logger::Get().Print(Dia::InformationMessage("Declaration's operator expects left and right values.", Dia::MessageType::SyntaxError, Dia::SourceCode, _operator.line));
+						Dia::Logger::Get().Print(Dia::InformationMessage("Declaration's operator expects left and right values.", Dia::MessageType::SyntaxError, Dia::SourceCode, _operator.debug_info));
 						return {};
 					}
 					auto right = stack.back(); stack.pop_back();	//type value
 					auto left = stack.back(); stack.pop_back();		//identifier value
 					if (left.simple.type != TokenType::IDENTIFIER) 
 					{
-						Dia::Logger::Get().Print(Dia::InformationMessage("Declaration of variable is impossible because identifier is invalid.", Dia::MessageType::SyntaxError, Dia::SourceCode, _operator.line));
+						Dia::Logger::Get().Print(Dia::InformationMessage("Declaration of variable is impossible because identifier is invalid.", Dia::MessageType::SyntaxError, Dia::SourceCode, _operator.debug_info));
 						return {};
 					}
 					std::vector<TokensGroup> declaration_args = { left,right };
@@ -68,7 +68,7 @@ namespace MSLC
 					if (stack.size() < 2)
 					{
 						//InsertError
-						Dia::Logger::Get().Print(Dia::InformationMessage("Assignment's operator expects left and right values.", Dia::MessageType::SyntaxError, Dia::SourceCode, _operator.line));
+						Dia::Logger::Get().Print(Dia::InformationMessage("Assignment's operator expects left and right values.", Dia::MessageType::SyntaxError, Dia::SourceCode, _operator.debug_info));
 						return {};
 					}
 					auto right = stack.back(); stack.pop_back();
@@ -79,7 +79,7 @@ namespace MSLC
 					return assignment;
 
 				}
-				Dia::Logger::Get().Print(Dia::InformationMessage("APSTBuilder: Operator hasnt be handled.", Dia::MessageType::DeveloperError, Dia::SourceCode, _operator.line));
+				Dia::Logger::Get().Print(Dia::InformationMessage("APSTBuilder: Operator hasnt be handled.", Dia::MessageType::DeveloperError, Dia::SourceCode, _operator.debug_info));
 				return {};
 			}
 			TokensGroup APSTBuilder::HandleToOperator(std::vector<TokensGroup>& stack, TokensGroup& to_op)
@@ -87,7 +87,7 @@ namespace MSLC
 				// Needed: [expression] to [type]
 				if (stack.size() < 2)
 				{
-					Dia::Logger::Get().Print(Dia::InformationMessage("Type casting operator expects two operands.", Dia::MessageType::SyntaxError, Dia::SourceCode, to_op.line));
+					Dia::Logger::Get().Print(Dia::InformationMessage("Type casting operator expects two operands.", Dia::MessageType::SyntaxError, Dia::SourceCode, to_op.debug_info));
 					return TokensGroup();
 				}
 				TokensGroup target_type = stack.back(); stack.pop_back();
@@ -101,7 +101,7 @@ namespace MSLC
 			{
 				// Нужно: new тип [аргументы/размер]
 				if (stack.empty()) {
-					Dia::Logger::Get().Print(Dia::InformationMessage("Object's creation operator expects one operand.", Dia::MessageType::SyntaxError, Dia::SourceCode, new_op.line));
+					Dia::Logger::Get().Print(Dia::InformationMessage("Object's creation operator expects one operand.", Dia::MessageType::SyntaxError, Dia::SourceCode, new_op.debug_info));
 					return TokensGroup();
 				}
 
@@ -178,7 +178,7 @@ namespace MSLC
 						{
 							if (group.complex.size() == 0)
 							{
-								Dia::Logger::Get().Print(Dia::InformationMessage("Operator [] expects one argument.", Dia::MessageType::SyntaxError, Dia::SourceCode, group.line));
+								Dia::Logger::Get().Print(Dia::InformationMessage("Operator [] expects one argument.", Dia::MessageType::SyntaxError, Dia::SourceCode, group.debug_info));
 								continue;
 							}
 

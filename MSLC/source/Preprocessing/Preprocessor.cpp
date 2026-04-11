@@ -25,7 +25,7 @@ namespace MSLC
             }
             if (args.size() < 3)
             {
-                Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Invalid arguments count of directive \"" + std::string(Directives::w_define_const) + "\".Expected NAME = VALUE/EXPRESSION.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceCode, state.current_line));
+                Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Invalid arguments count of directive \"" + std::string(Directives::w_define_const) + "\".Expected NAME = VALUE/EXPRESSION.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceCode, { (uint32_t)state.current_line,state.c_state->GetCurrentModuleID() }));
                 return;
             }
             else if (args.size() == 3)   //Simple expression
@@ -38,31 +38,31 @@ namespace MSLC
 
                 if (name_token.type != TokenType::IDENTIFIER ||equals_token.value.strVal != "=")
                 {
-                    Diagnostics::Logger::Get().Print({ "Invalid \"" + std::string(Directives::w_define_const) + "\" directive's identifier.",  Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, state.current_line });
+                    Diagnostics::Logger::Get().Print({ "Invalid \"" + std::string(Directives::w_define_const) + "\" directive's identifier.",  Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, {(uint32_t)state.current_line,state.c_state->GetCurrentModuleID() } });
                     return;
                 }
                 if (equals_token.value.strVal != "=")
                 {
-                    Diagnostics::Logger::Get().Print({ "Directive \"" + std::string(Directives::w_define_const) + "\" excepts = after identifier, but gets \""+ equals_token.value.strVal +"\".",  Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, state.current_line });
+                    Diagnostics::Logger::Get().Print({ "Directive \"" + std::string(Directives::w_define_const) + "\" excepts = after identifier, but gets \""+ equals_token.value.strVal +"\".",  Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, {(uint32_t)state.current_line,state.c_state->GetCurrentModuleID() } });
                     return;
                 }
                 // Macro's registration
                 std::string name = name_token.value.strVal;
-                if (value_token.type == TokenType::LITERAL)state.c_state->GetMacrosTable().DefineConstant(name, value_token.value, state.current_line);
+                if (value_token.type == TokenType::LITERAL)state.c_state->GetMacrosTable().DefineConstant(name, value_token.value, { (uint32_t)state.current_line,state.c_state->GetCurrentModuleID() });
                 else if (value_token.type == TokenType::IDENTIFIER && state.c_state->GetMacrosTable().HasMacro(value_token.value.strVal))
                 {
                     auto macro = state.c_state->GetMacrosTable().GetMacro(value_token.value.strVal);
 
                     if (macro.type != MacroType::Constant) 
                     {
-                        Diagnostics::Logger::Get().Print({ "Directive \"" + std::string(Directives::w_define_const) + "\" supports only constant macros in its arguments.",  Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, state.current_line });
+                        Diagnostics::Logger::Get().Print({ "Directive \"" + std::string(Directives::w_define_const) + "\" supports only constant macros in its arguments.",  Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode,  {(uint32_t)state.current_line,state.c_state->GetCurrentModuleID() } });
                         return;
                     }
-                    state.c_state->GetMacrosTable().DefineConstant(name, macro.constant_value, state.current_line);
+                    state.c_state->GetMacrosTable().DefineConstant(name, macro.constant_value, { (uint32_t)state.current_line,state.c_state->GetCurrentModuleID() });
                 }
                 else 
                 {
-                    Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Invalid arguments of directive \"" + std::string(Directives::w_define_const) + "\".", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceCode, state.current_line));
+                    Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Invalid arguments of directive \"" + std::string(Directives::w_define_const) + "\".", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceCode, { (uint32_t)state.current_line,state.c_state->GetCurrentModuleID() }));
                     return;
                 }
             }
@@ -281,7 +281,7 @@ namespace MSLC
             // Один проход, всё на месте
             for (state.current_index = 0; state.current_index < tokens.size(); state.current_index++) {
                 Token& t = tokens[state.current_index];
-                state.current_line = t.debug_info;  // Для сообщений об ошибках
+                state.current_line = t.debug_info.place;  // Для сообщений об ошибках
 
                 if (t.type == TokenType::PREPROCESSOR_DIRECTIVE) {
                     if (t.value.strVal == Directives::w_define_const) {
@@ -298,7 +298,7 @@ namespace MSLC
                         }
                         else 
                         {
-                            Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Invalid arguments count of directive \"" + std::string(Directives::w_import) + "\". Expected #import \"path to file\"", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceCode, state.current_line));
+                            Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Invalid arguments count of directive \"" + std::string(Directives::w_import) + "\". Expected #import \"path to file\"", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceCode, { (uint32_t)state.current_line,state.c_state->GetCurrentModuleID() }));
                         }
 
                         state.current_index++;

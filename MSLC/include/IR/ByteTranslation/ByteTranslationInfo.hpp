@@ -466,7 +466,7 @@ namespace MSLC
 				std::stack<ValueFrame> value_stack{};         //Stack for operations
 				std::stack<StackFrame> frame_stack{};    //When we create variable add it size to frame_size stack;
 
-				uint32_t current_line = 0;
+				Diagnostics::DebugInfo debug_info;
 				BCommandsArray result;
 
 				ByteTranslationConfig config;
@@ -505,6 +505,12 @@ namespace MSLC
 					else frame_stack.pop();
 					return true;
 				}
+
+				Diagnostics::DebugInfo GetDebugInfo() 
+				{
+					return debug_info;
+				}
+
 			};
 		}
 	}

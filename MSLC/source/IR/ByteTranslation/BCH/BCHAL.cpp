@@ -28,7 +28,7 @@ namespace MSLC
 							//Use secondly register of the one operand
 							if (b_state->value_stack.size() < 2)
 							{
-								Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Binary operation gets less than two operands.", Diagnostics::MessageType::DeveloperError, Diagnostics::SourceType::IRCode, b_state->pseudo_ip));
+								Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Binary operation gets less than two operands.", Diagnostics::MessageType::DeveloperError, Diagnostics::SourceType::SourceCode, b_state->GetDebugInfo()));
 								return;
 							}
 							ValueFrame right = GenerateLoadCommand(p_array, b_state);
@@ -44,7 +44,7 @@ namespace MSLC
 								converted_reg, common_type
 							);
 							if (conv_cmd.code != ByteOpCode::NOP) {
-								PushCommand(b_state, ByteCommand(conv_cmd), b_state->current_line);
+								PushCommand(b_state, ByteCommand(conv_cmd), b_state->GetDebugInfo().place);
 							}
 
 							if (left_is_pointer && left.value_info.type_id != CompilationInfo::INVALID_ID)
@@ -57,7 +57,7 @@ namespace MSLC
 								CommandArgument(left.data, CommandSource::Register),
 								CommandArgument(left.data, CommandSource::Register),
 								CommandArgument(right.data, CommandSource::Register)
-							), b_state->current_line);
+							), b_state->GetDebugInfo().place);
 							b_state->registers_table.SetFree(right.data);
 
 							add_converted_frame(b_state, left, right, converted_reg, common_type);
@@ -66,7 +66,7 @@ namespace MSLC
 						{
 							if (b_state->value_stack.size() < 2)
 							{
-								Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Binary operation gets less than two operands.", Diagnostics::MessageType::DeveloperError, Diagnostics::SourceType::IRCode, b_state->pseudo_ip));
+								Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Binary operation gets less than two operands.", Diagnostics::MessageType::DeveloperError, Diagnostics::SourceType::SourceCode, b_state->GetDebugInfo()));
 								return;
 							}
 							ValueFrame right = GenerateLoadCommand(p_array, b_state);
@@ -74,7 +74,7 @@ namespace MSLC
 
 							PushCommand(b_state,
 								ByteCommand(GetLogicCommand(operation.op_code, PrimitiveAnalogs::UInt), CommandArgument(left.data, CommandSource::Register),
-									CommandArgument(left.data, CommandSource::Register), CommandArgument(right.data, CommandSource::Register)), b_state->current_line);
+									CommandArgument(left.data, CommandSource::Register), CommandArgument(right.data, CommandSource::Register)), b_state->GetDebugInfo().place);
 
 							b_state->registers_table.SetFree(right.data);
 							b_state->value_stack.push(ValueFrame(ValueSource::Register, left.data, PrimitiveAnalogs::UInt, LOGIC_RESULT_SIZE, b_state->cs_observer));	//1 BYTE
@@ -83,14 +83,14 @@ namespace MSLC
 						{
 							if (b_state->value_stack.size() < 2)
 							{
-								Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Binary operation gets less than two operands.", Diagnostics::MessageType::DeveloperError, Diagnostics::SourceType::IRCode, b_state->pseudo_ip));
+								Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Binary operation gets less than two operands.", Diagnostics::MessageType::DeveloperError, Diagnostics::SourceType::SourceCode, b_state->GetDebugInfo()));
 								return;
 							}
 							ValueFrame right = GenerateLoadCommand(p_array, b_state);
 							ValueFrame left = GenerateLoadCommand(p_array, b_state);
 
 							if (left.dynamic_primitive_type == PrimitiveAnalogs::Real || right.dynamic_primitive_type == PrimitiveAnalogs::Real) {
-								Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Bit operation requires integer types.", Diagnostics::MessageType::LogicError, Diagnostics::SourceType::SourceCode, b_state->current_line));
+								Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Bit operation requires integer types.", Diagnostics::MessageType::LogicError, Diagnostics::SourceType::SourceCode, b_state->GetDebugInfo()));
 								return;
 							}
 
@@ -99,7 +99,7 @@ namespace MSLC
 								CommandArgument(left.data, CommandSource::Register),
 								CommandArgument(left.data, CommandSource::Register),
 								CommandArgument(right.data, CommandSource::Register)
-							), b_state->current_line);
+							), b_state->GetDebugInfo().place);
 
 							b_state->registers_table.SetFree(right.data);
 							b_state->value_stack.push(ValueFrame(ValueSource::Register, left.data, PrimitiveAnalogs::UInt, left.dynamic_data_size, b_state->cs_observer));
@@ -108,7 +108,7 @@ namespace MSLC
 						{
 							if (b_state->value_stack.size() < 2)
 							{
-								Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Binary operation gets less than two operands.", Diagnostics::MessageType::DeveloperError, Diagnostics::SourceType::IRCode, b_state->pseudo_ip));
+								Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Binary operation gets less than two operands.", Diagnostics::MessageType::DeveloperError, Diagnostics::SourceType::SourceCode, b_state->GetDebugInfo()));
 								return;
 							}
 							ValueFrame right = GenerateLoadCommand(p_array, b_state);
@@ -122,12 +122,12 @@ namespace MSLC
 								converted_reg, common_type
 							);
 							if (conv_cmd.code != ByteOpCode::NOP) {
-								PushCommand(b_state, ByteCommand(conv_cmd), b_state->current_line);
+								PushCommand(b_state, ByteCommand(conv_cmd), b_state->GetDebugInfo().place);
 							}
 
 							PushCommand(b_state,
 								ByteCommand(GetLogicCommand(operation.op_code, common_type), CommandArgument(left.data, CommandSource::Register),
-									CommandArgument(left.data, CommandSource::Register), CommandArgument(right.data, CommandSource::Register)), b_state->current_line);
+									CommandArgument(left.data, CommandSource::Register), CommandArgument(right.data, CommandSource::Register)), b_state->GetDebugInfo().place);
 
 							b_state->registers_table.SetFree(right.data);
 							b_state->value_stack.push(ValueFrame(ValueSource::Register, left.data, PrimitiveAnalogs::UInt, LOGIC_RESULT_SIZE, b_state->cs_observer));	// 1 BYTE
@@ -154,7 +154,7 @@ namespace MSLC
 					{
 						if (b_state->value_stack.size() < 2)
 						{
-							Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Binary operation gets less than two operands.", Diagnostics::MessageType::DeveloperError, Diagnostics::SourceType::IRCode, b_state->pseudo_ip));
+							Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Binary operation gets less than two operands.", Diagnostics::MessageType::DeveloperError, Diagnostics::SourceType::SourceCode, b_state->GetDebugInfo()));
 							return;
 						}
 						ValueFrame right = GenerateLoadCommand(p_array, b_state);
@@ -162,7 +162,7 @@ namespace MSLC
 
 						// Mod is only for integer types
 						if (left.dynamic_primitive_type == PrimitiveAnalogs::Real || right.dynamic_primitive_type == PrimitiveAnalogs::Real) {
-							Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Mod operation requires integer types.", Diagnostics::MessageType::LogicError, Diagnostics::SourceType::SourceCode, b_state->current_line));
+							Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Mod operation requires integer types.", Diagnostics::MessageType::LogicError, Diagnostics::SourceType::SourceCode, b_state->GetDebugInfo()));
 							return;
 						}
 						size_t converted_reg;
@@ -173,7 +173,7 @@ namespace MSLC
 							converted_reg, common_type
 						);
 						if (conv_cmd.code != ByteOpCode::NOP) {
-							PushCommand(b_state, ByteCommand(conv_cmd), b_state->current_line);
+							PushCommand(b_state, ByteCommand(conv_cmd), b_state->GetDebugInfo().place);
 						}
 
 						PushCommand(b_state, ByteCommand(
@@ -181,7 +181,7 @@ namespace MSLC
 							CommandArgument(left.data, CommandSource::Register),
 							CommandArgument(left.data, CommandSource::Register),
 							CommandArgument(right.data, CommandSource::Register)
-						), b_state->current_line);
+						), b_state->GetDebugInfo().place);
 						b_state->registers_table.SetFree(right.data);
 						//ValueFrame(left.source_arg, common_type, converted_reg.reg_index == left.source_arg.reg_index ? left.data_size : right.data_size)
 
@@ -192,21 +192,21 @@ namespace MSLC
 					{
 						if (b_state->value_stack.size() < 1)
 						{
-							Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Negative is unary operation, but gets zero arguments.", Diagnostics::MessageType::LogicError, Diagnostics::SourceType::SourceCode, b_state->current_line));
+							Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Negative is unary operation, but gets zero arguments.", Diagnostics::MessageType::LogicError, Diagnostics::SourceType::SourceCode, b_state->GetDebugInfo()));
 							break;
 						}
 						ValueFrame vf_left = GenerateLoadCommand(p_array, b_state);
 
 						// Negative only for int or double/real (INT, DOUBLE)
 						if (vf_left.dynamic_primitive_type == PrimitiveAnalogs::UInt) {
-							Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Negative operation requires signed types (int, real).", Diagnostics::MessageType::TypeError, Diagnostics::SourceType::SourceCode, b_state->current_line));
+							Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Negative operation requires signed types (int, real).", Diagnostics::MessageType::TypeError, Diagnostics::SourceType::SourceCode, b_state->GetDebugInfo()));
 							break;
 						}
 
 						PushCommand(b_state, ByteCommand(
 							GetTypedArithmeticCommandCode(operation.op_code, vf_left.dynamic_primitive_type),
 							CommandArgument(vf_left.data, CommandSource::Register),
-							CommandArgument(vf_left.data, CommandSource::Register)), b_state->current_line);
+							CommandArgument(vf_left.data, CommandSource::Register)), b_state->GetDebugInfo().place);
 						b_state->value_stack.push(vf_left);
 						break;
 					}
@@ -226,7 +226,7 @@ namespace MSLC
 						PushCommand(b_state, ByteCommand(
 							GetLogicCommand(operation.op_code, vf_left.dynamic_primitive_type),
 							CommandArgument(vf_left.data, CommandSource::Register),
-							CommandArgument(vf_left.data, CommandSource::Register)), b_state->current_line);
+							CommandArgument(vf_left.data, CommandSource::Register)), b_state->GetDebugInfo().place);
 						b_state->value_stack.push(vf_left);
 						break;
 					}

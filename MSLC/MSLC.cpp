@@ -10,7 +10,7 @@ using namespace MSLC;
 
 int main()
 {
-    Diagnostics::Logger::Get().PrintWithFormat(Diagnostics::InformationMessage("Hello world, %s!", Diagnostics::MessageType::TypeError, 0 == -1 ? Diagnostics::None : Diagnostics::SourceCode, 0), "Nirinis");
+    Diagnostics::Logger::Get().PrintWithFormat(Diagnostics::InformationMessage("Hello world, %s!", Diagnostics::MessageType::TypeError, 0 == -1 ? Diagnostics::None : Diagnostics::SourceCode, {0,0}), "Nirinis");
 
     Diagnostics::Logger::Get().SetOutputMode(Diagnostics::OutputType::CMD);
 

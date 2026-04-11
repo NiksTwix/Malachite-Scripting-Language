@@ -6,10 +6,10 @@ namespace MSLC
 	{
 		namespace Pseudo
 		{
-			void LLTranslator::Handle(PseudoTranslationState& state, std::vector<Argument>& arguments, std::vector<Token>& op_code, size_t line)
+			void LLTranslator::Handle(PseudoTranslationState& state, std::vector<Argument>& arguments, std::vector<Token>& op_code, Diagnostics::DebugInfo  di)
 			{
 				LLOperation operation;
-				operation.source_line = line;
+				operation.debug_info = di;
 				if (op_code.size() == 1)
 				{
 					LowLevelOpCode code = LLTranslationMap::Get().GetCode(op_code[0].value.strVal);
@@ -19,7 +19,7 @@ namespace MSLC
 				else 
 				{
 					error:
-						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("In " + std::string(Keywords::w_op_code) + " section is invalid operation code.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, line));
+						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("In " + std::string(Keywords::w_op_code) + " section is invalid operation code.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, di));
 						return;
 				}
 
@@ -34,7 +34,7 @@ namespace MSLC
 
 					if (arguments[1].tokens.size() > 1)
 					{
-						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("In " + std::string(Keywords::w_op_code) + " section complex identificator's using is forbidden.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, line));
+						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("In " + std::string(Keywords::w_op_code) + " section complex identificator's using is forbidden.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, di));
 						return;
 
 					}
@@ -45,7 +45,7 @@ namespace MSLC
 
 					if (operation.code == LowLevelOpCode::DLEA && !state.cs_observer->GetGST().GetVariable(symbol->description_id)->vinfo.isPointer())
 					{
-						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("In " + std::string(Keywords::w_op_code) + " section DLEA requires pointer variable. DLEA loads pointer which containes in variable straightaway to register. DLEA = LEA + LOAD.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, line));
+						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("In " + std::string(Keywords::w_op_code) + " section DLEA requires pointer variable. DLEA loads pointer which containes in variable straightaway to register. DLEA = LEA + LOAD.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, di));
 						return;
 					}
 
@@ -217,10 +217,10 @@ namespace MSLC
 				default:
 				{
 				error1:
-					Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Invalid \"" + op_code[0].value.strVal + "\" operation.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, line));
+					Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Invalid \"" + op_code[0].value.strVal + "\" operation.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, di));
 					return;
 				error2:
-					Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Invalid arguments of \"" + op_code[0].value.strVal + "\" operation.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, line));
+					Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Invalid arguments of \"" + op_code[0].value.strVal + "\" operation.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, di));
 					return;
 				}
 				}
@@ -233,7 +233,7 @@ namespace MSLC
 				size_t chunks_id = state.ll_operations_chunks.size();
 				state.ll_operations_chunks.emplace_back();
 
-				state.pseudo_code.Pushback(PseudoOperation(PseudoOpCode::PushLLOpers, chunks_id,(uint32_t)node.line));
+				state.pseudo_code.Pushback(PseudoOperation(PseudoOpCode::PushLLOpers, chunks_id,node.debug_info));
 
 				for (const AST::ASTNode& cnode : node.children)
 				{
@@ -243,7 +243,7 @@ namespace MSLC
 					}
 					if (cnode.type != AST::ASTNodeType::Expression)
 					{
-						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("In " + std::string(Keywords::w_op_code) + " section are allowed only simple instructions.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, cnode.line));
+						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("In " + std::string(Keywords::w_op_code) + " section are allowed only simple instructions.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, cnode.debug_info));
 						continue;
 					}
 					std::vector<Argument> arguments;
@@ -261,7 +261,7 @@ namespace MSLC
 						{
 							if (arguments_) 
 							{
-								Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("In " + std::string(Keywords::w_op_code) + " section repeated using ':' for arguments separating is forbidden.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, cnode.line));
+								Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("In " + std::string(Keywords::w_op_code) + " section repeated using ':' for arguments separating is forbidden.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, cnode.debug_info));
 								checking = false;
 							}
 							arguments_ = true;
@@ -271,7 +271,7 @@ namespace MSLC
 						{
 							if (!current.valid) 
 							{
-								Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("In " + std::string(Keywords::w_op_code) + " section operation contains invalid argument.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, cnode.line));
+								Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("In " + std::string(Keywords::w_op_code) + " section operation contains invalid argument.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, cnode.debug_info));
 								checking = false;
 								continue;
 							}
@@ -289,12 +289,12 @@ namespace MSLC
 					if (!checking) continue;
 					if (!current.valid)
 					{
-						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("In " + std::string(Keywords::w_op_code) + " section operation contains invalid argument.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, cnode.line));
+						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("In " + std::string(Keywords::w_op_code) + " section operation contains invalid argument.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, cnode.debug_info));
 						continue;
 					}
 					arguments.push_back(current);
 					
-					Handle(state, arguments, op_code, cnode.line);
+					Handle(state, arguments, op_code, cnode.debug_info);
 				}
 			}
 		}

@@ -52,6 +52,12 @@ namespace MSLC
 		{
 			return gst;
 		}
+
+		Definitions::ModuleId CompilationState::GetCurrentModuleID()
+		{
+			return current_module_id;
+		}
+
 		Values::ImmediateConstantsTable& CompilationState::GetICT()
 		{
 			return ict;
@@ -104,7 +110,7 @@ namespace MSLC
 		{
 			if (frames_stack.empty()) 
 			{
-				Diagnostics::Logger::Get().Print({ "PopFrame cannot be applied for empty frames stack.", Diagnostics::MessageType::DeveloperError, Diagnostics::SourceType::None });
+				Diagnostics::Logger::Get().Print({ "PopFrame cannot be applied for empty frames stack.", Diagnostics::MessageType::DeveloperError, Diagnostics::SourceType::None,{0,current_module_id} });
 				return;
 			}
 			frames_stack.pop_back();

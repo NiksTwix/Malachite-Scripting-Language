@@ -7,7 +7,7 @@ namespace MSLC
 {
 	namespace Definitions 
 	{
-		ValueContainer CastTo(ValueContainer value, ValueType type, int line)
+		ValueContainer CastTo(ValueContainer value, ValueType type, Diagnostics::DebugInfo di)
         {
             switch (type)
             {
@@ -18,7 +18,7 @@ namespace MSLC
                 {
                     if (!Strings::StringOperations::IsNumber(value.strVal))
                     {
-                        Diagnostics::Logger::Get().PrintWithFormat(Diagnostics::InformationMessage(Diagnostics::ErrorTexts::value_container_invalid_casting.data(), Diagnostics::MessageType::TypeError, line == -1 ? Diagnostics::None : Diagnostics::SourceCode, line), "string", "integer");
+                        Diagnostics::Logger::Get().PrintWithFormat(Diagnostics::InformationMessage(Diagnostics::ErrorTexts::value_container_invalid_casting.data(), Diagnostics::MessageType::TypeError,  Diagnostics::SourceCode, di), "string", "integer");
                         return ValueContainer();
                     }
                     return std::stoll(value.strVal);
@@ -30,7 +30,7 @@ namespace MSLC
                 {
                     if (!Strings::StringOperations::IsNumber(value.strVal))
                     {
-                        Diagnostics::Logger::Get().PrintWithFormat(Diagnostics::InformationMessage(Diagnostics::ErrorTexts::value_container_invalid_casting.data(), Diagnostics::MessageType::TypeError, line == -1 ? Diagnostics::None : Diagnostics::SourceCode, line), "string", "unsigned integer");
+                        Diagnostics::Logger::Get().PrintWithFormat(Diagnostics::InformationMessage(Diagnostics::ErrorTexts::value_container_invalid_casting.data(), Diagnostics::MessageType::TypeError,Diagnostics::SourceCode, di), "string", "unsigned integer");
                         return ValueContainer();
                     }
                     return std::stoull(value.strVal);
@@ -42,7 +42,7 @@ namespace MSLC
                 {
                     if (value.strVal != "true" && value.strVal != "false")
                     {
-                        Diagnostics::Logger::Get().PrintWithFormat(Diagnostics::InformationMessage(Diagnostics::ErrorTexts::value_container_invalid_casting.data(), Diagnostics::MessageType::TypeError, line == -1 ? Diagnostics::None : Diagnostics::SourceCode, line), "string", "bool");
+                        Diagnostics::Logger::Get().PrintWithFormat(Diagnostics::InformationMessage(Diagnostics::ErrorTexts::value_container_invalid_casting.data(), Diagnostics::MessageType::TypeError, Diagnostics::SourceCode, di), "string", "bool");
                         return ValueContainer();
                         return ValueContainer();
                     }
@@ -58,7 +58,7 @@ namespace MSLC
                 {
                     if (!Strings::StringOperations::IsNumber(value.strVal))
                     {
-                        Diagnostics::Logger::Get().PrintWithFormat(Diagnostics::InformationMessage(Diagnostics::ErrorTexts::value_container_invalid_casting.data(), Diagnostics::MessageType::TypeError, line == -1 ? Diagnostics::None : Diagnostics::SourceCode, line), "string", "real");
+                        Diagnostics::Logger::Get().PrintWithFormat(Diagnostics::InformationMessage(Diagnostics::ErrorTexts::value_container_invalid_casting.data(), Diagnostics::MessageType::TypeError, Diagnostics::SourceCode, di), "string", "real");
                         return ValueContainer();
                     }
                     return std::stod(value.strVal);
@@ -84,7 +84,7 @@ namespace MSLC
                 {
                     if (value.strVal.size() != 1)
                     {
-                        Diagnostics::Logger::Get().PrintWithFormat(Diagnostics::InformationMessage(Diagnostics::ErrorTexts::value_container_invalid_casting.data(), Diagnostics::MessageType::TypeError, line == -1 ? Diagnostics::None : Diagnostics::SourceCode, line), "string", "char");
+                        Diagnostics::Logger::Get().PrintWithFormat(Diagnostics::InformationMessage(Diagnostics::ErrorTexts::value_container_invalid_casting.data(), Diagnostics::MessageType::TypeError, Diagnostics::SourceCode, di), "string", "char");
                         return ValueContainer();
                     }
                     return value.strVal[0];
@@ -92,7 +92,7 @@ namespace MSLC
                 if (value.type == ValueType::REAL) return (char)value.realVal;
                 break;
             default:
-                Diagnostics::Logger::Get().PrintWithFormat(Diagnostics::InformationMessage(Diagnostics::ErrorTexts::value_container_invalid_casting.data(), Diagnostics::MessageType::TypeError, line == -1 ? Diagnostics::None : Diagnostics::SourceCode, line), "", "undefined type");
+                Diagnostics::Logger::Get().PrintWithFormat(Diagnostics::InformationMessage(Diagnostics::ErrorTexts::value_container_invalid_casting.data(), Diagnostics::MessageType::TypeError, Diagnostics::SourceCode, di), "", "undefined type");
                 return ValueContainer();
                 break;
             }

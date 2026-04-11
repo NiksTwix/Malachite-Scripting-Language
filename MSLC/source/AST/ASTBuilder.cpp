@@ -51,7 +51,7 @@ namespace MSLC
 			ASTNode group_header;
 			group_header.group_type = group_type;
 			group_header.type = ASTNodeType::NodeGroup;
-			group_header.line = group.front().first.line;
+			group_header.debug_info = group.front().first.debug_info;
 			for (std::pair<ASTNode, size_t>& p : group) 
 			{
 				group_header.children.push_back(p.first);
@@ -105,19 +105,18 @@ namespace MSLC
 			for (int i = 0; i < tokens.size(); i++)
 			{
 				Tokenization::Token& t = tokens[i];
-				state.last_line = t.debug_info;
-
-
+				state.last_debug_info = t.debug_info;
+	
 				if (t.value.strVal == "{")
 				{
 					if (command_tokens.empty()) 
 					{
 						ASTNode empty_node;
 						empty_node.type = ASTNodeType::CodeBlock;
-						empty_node.line = t.debug_info;
+						empty_node.debug_info = t.debug_info;
 						cn_stack.push(empty_node);
 						ASTNode scope_start;
-						scope_start.tokens.push_back(Tokenization::Token((uint64_t)Tokenization::CompilationLabel::OPEN_VISIBLE_SCOPE, Tokenization::TokenType::COMPILATION_LABEL, t.debug_info, t.module_id));
+						scope_start.tokens.push_back(Tokenization::Token((uint64_t)Tokenization::CompilationLabel::OPEN_VISIBLE_SCOPE, Tokenization::TokenType::COMPILATION_LABEL, t.debug_info));
 						cn_stack.top().children.push_back(scope_start);
 					}
 					else 
@@ -132,19 +131,19 @@ namespace MSLC
 						if (type != ASTNodeType::Expression)	//Multyline block
 						{
 							ASTNode node;
-							node.line = command_tokens.back().debug_info;
+							node.debug_info = command_tokens.back().debug_info;
 							node.tokens = std::move(command_tokens);
 							node.type = type;
 							cn_stack.push(node);
 							ASTNode scope_start;
-							scope_start.tokens.push_back(Tokenization::Token((uint64_t)Tokenization::CompilationLabel::OPEN_VISIBLE_SCOPE, Tokenization::TokenType::COMPILATION_LABEL, t.debug_info, t.module_id));
+							scope_start.tokens.push_back(Tokenization::Token((uint64_t)Tokenization::CompilationLabel::OPEN_VISIBLE_SCOPE, Tokenization::TokenType::COMPILATION_LABEL, t.debug_info));
 							cn_stack.top().children.push_back(scope_start);
 						}
 						else //Expression -> code block
 						{
 							//Expression
 							ASTNode prev_node;
-							prev_node.line = command_tokens.back().debug_info;
+							prev_node.debug_info = command_tokens.back().debug_info;
 							prev_node.type = ASTNodeType::Expression;
 							prev_node.tokens = std::move(command_tokens);
 							cn_stack.top().children.push_back(prev_node);
@@ -152,10 +151,10 @@ namespace MSLC
 							//Code block
 							ASTNode empty_node;
 							empty_node.type = ASTNodeType::CodeBlock;
-							empty_node.line = t.debug_info;
+							empty_node.debug_info = t.debug_info;
 							cn_stack.push(empty_node);
 							ASTNode scope_start;
-							scope_start.tokens.push_back(Tokenization::Token((uint64_t)Tokenization::CompilationLabel::OPEN_VISIBLE_SCOPE, Tokenization::TokenType::COMPILATION_LABEL, t.debug_info, t.module_id));
+							scope_start.tokens.push_back(Tokenization::Token((uint64_t)Tokenization::CompilationLabel::OPEN_VISIBLE_SCOPE, Tokenization::TokenType::COMPILATION_LABEL, t.debug_info));
 							cn_stack.top().children.push_back(scope_start);
 						}
 					}
@@ -172,7 +171,7 @@ namespace MSLC
 					}
 
 					ASTNode scope_end;
-					scope_end.tokens.push_back(Tokenization::Token((uint64_t)Tokenization::CompilationLabel::CLOSE_VISIBLE_SCOPE, Tokenization::TokenType::COMPILATION_LABEL, t.debug_info, t.module_id));	//TODO инрементировать, если надо
+					scope_end.tokens.push_back(Tokenization::Token((uint64_t)Tokenization::CompilationLabel::CLOSE_VISIBLE_SCOPE, Tokenization::TokenType::COMPILATION_LABEL, t.debug_info));	//TODO инрементировать, если надо
 					cn_stack.top().children.push_back(scope_end);
 
 					auto node = cn_stack.top();
@@ -187,7 +186,7 @@ namespace MSLC
 					{
 						ASTNode node;
 						//command_tokens.push_back(t);
-						node.line = command_tokens.back().debug_info;
+						node.debug_info = command_tokens.back().debug_info;
 						node.type = DefineType(command_tokens);
 						node.tokens = std::move(command_tokens);
 						cn_stack.top().children.push_back(node);
@@ -206,7 +205,7 @@ namespace MSLC
 			if (!command_tokens.empty())
 			{
 				ASTNode node;
-				node.line = command_tokens.back().debug_info;
+				node.debug_info = command_tokens.back().debug_info;
 				node.type = DefineType(command_tokens);
 				node.tokens = std::move(command_tokens);
 				cn_stack.top().children.push_back(node);
@@ -214,12 +213,12 @@ namespace MSLC
 
 			if (state.current_depth > 0)
 			{
-				Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Expected '}'.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, state.last_line));
+				Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Expected '}'.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, state.last_debug_info));
 			}
 
 			if (cn_stack.empty()) 
 			{
-				Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Developer Message:AST Stack underflow.", Diagnostics::MessageType::LogicError, Diagnostics::SourceType::SourceCode, state.last_line));
+				Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Developer Message:AST Stack underflow.", Diagnostics::MessageType::LogicError, Diagnostics::SourceType::SourceCode, state.last_debug_info));
 				return root;
 			}
 			root = cn_stack.top();
