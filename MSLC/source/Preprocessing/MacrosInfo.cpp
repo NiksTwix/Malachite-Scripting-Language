@@ -7,7 +7,7 @@ namespace MSLC
 
 	namespace Preprocessing
 	{
-		MacrosID MacrosTable::DefineConstant(const std::string& name, Definitions::ValueContainer value, Diagnostics::DebugInfo di)
+		MacrosID MacrosTable::DefineConstant(const std::string& name, Definitions::ValueContainer value, Diagnostics::DeclaringPlace di)
         {
             MacrosID id = m_next_id++;
 
@@ -23,7 +23,7 @@ namespace MSLC
 
             return id;
         }
-        MacrosID MacrosTable::DefineFunction(const std::string& name, std::vector<Token> body_tokens, std::vector<ParameterLabel> parameters, Diagnostics::DebugInfo di)
+        MacrosID MacrosTable::DefineFunction(const std::string& name, std::vector<Token> body_tokens, std::vector<ParameterLabel> parameters, Diagnostics::DeclaringPlace di)
         {
             MacrosID id = m_next_id++;
 

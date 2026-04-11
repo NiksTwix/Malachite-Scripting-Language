@@ -116,23 +116,23 @@ namespace MSLC
 				size_t arg_0;
 				size_t arg_1;
 				size_t arg_2;
-				Diagnostics::DebugInfo debug_info;
+				Diagnostics::DeclaringPlace declaring_place;
 				PseudoOpCode op_code;
 				uint8_t flags;
 
-				PseudoOperation(PseudoOpCode code, size_t arg0, size_t arg1, size_t arg2, Diagnostics::DebugInfo debug_info, uint8_t flags) : arg_0(arg0), arg_1(arg1), arg_2(arg2), debug_info(debug_info), op_code(code), flags(flags)
+				PseudoOperation(PseudoOpCode code, size_t arg0, size_t arg1, size_t arg2, Diagnostics::DeclaringPlace declaring_place, uint8_t flags) : arg_0(arg0), arg_1(arg1), arg_2(arg2), declaring_place(declaring_place), op_code(code), flags(flags)
 				{
 				}
-				PseudoOperation(PseudoOpCode code, size_t arg0, size_t arg1, size_t arg2, Diagnostics::DebugInfo debug_info) : arg_0(arg0), arg_1(arg1), arg_2(arg2), debug_info(debug_info), op_code(code), flags(PseudoOperationFlags::None)
+				PseudoOperation(PseudoOpCode code, size_t arg0, size_t arg1, size_t arg2, Diagnostics::DeclaringPlace declaring_place) : arg_0(arg0), arg_1(arg1), arg_2(arg2), declaring_place(declaring_place), op_code(code), flags(PseudoOperationFlags::None)
 				{
 				}
-				PseudoOperation(PseudoOpCode code, size_t arg0, size_t arg1, Diagnostics::DebugInfo debug_info) : arg_0(arg0), arg_1(arg1), arg_2(0), debug_info(debug_info), op_code(code), flags(PseudoOperationFlags::None)
+				PseudoOperation(PseudoOpCode code, size_t arg0, size_t arg1, Diagnostics::DeclaringPlace declaring_place) : arg_0(arg0), arg_1(arg1), arg_2(0), declaring_place(declaring_place), op_code(code), flags(PseudoOperationFlags::None)
 				{
 				}
-				PseudoOperation(PseudoOpCode code, size_t arg0, Diagnostics::DebugInfo debug_info) : arg_0(arg0), arg_1(0), arg_2(0), debug_info(debug_info), op_code(code), flags(PseudoOperationFlags::None)
+				PseudoOperation(PseudoOpCode code, size_t arg0, Diagnostics::DeclaringPlace declaring_place) : arg_0(arg0), arg_1(0), arg_2(0), declaring_place(declaring_place), op_code(code), flags(PseudoOperationFlags::None)
 				{
 				}
-				PseudoOperation(PseudoOpCode code, Diagnostics::DebugInfo debug_info) : arg_0(0), arg_1(0), arg_2(0), debug_info(debug_info), op_code(code), flags(PseudoOperationFlags::None)
+				PseudoOperation(PseudoOpCode code, Diagnostics::DeclaringPlace declaring_place) : arg_0(0), arg_1(0), arg_2(0), declaring_place(declaring_place), op_code(code), flags(PseudoOperationFlags::None)
 				{
 				}
 				PseudoOperation() = default;

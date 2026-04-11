@@ -44,13 +44,13 @@ namespace MSLC
 			IRCode,
 		};
 
-        struct DebugInfo 
+        struct DeclaringPlace 
         {
             uint32_t place = 0; //line or pseudo, byte instruction pointer 
             uint16_t module_id = 0;
 
-            DebugInfo() = default;
-            DebugInfo(uint32_t place, uint16_t module_id) : place(place), module_id(module_id) {}
+            DeclaringPlace() = default;
+            DeclaringPlace(uint32_t place, uint16_t module_id) : place(place), module_id(module_id) {}
         };
 
 
@@ -59,12 +59,12 @@ namespace MSLC
 			std::string text;
 			SourceType	s_type;
 			MessageType m_type;
-			DebugInfo di;
+			DeclaringPlace di;
 			
 
-			InformationMessage(const std::string& text, MessageType m_type, SourceType s_type, DebugInfo di) : text(text), m_type(m_type), s_type(s_type), di(di) {}
-			InformationMessage(const std::string& text, MessageType m_type, DebugInfo di) : text(text), m_type(m_type), s_type(SourceType::SourceCode), di(di) {}
-			InformationMessage(const std::string& text, DebugInfo di) : text(text), m_type(MessageType::Info), s_type(SourceType::SourceCode), di(di) {}
+			InformationMessage(const std::string& text, MessageType m_type, SourceType s_type, DeclaringPlace di) : text(text), m_type(m_type), s_type(s_type), di(di) {}
+			InformationMessage(const std::string& text, MessageType m_type, DeclaringPlace di) : text(text), m_type(m_type), s_type(SourceType::SourceCode), di(di) {}
+			InformationMessage(const std::string& text, DeclaringPlace di) : text(text), m_type(MessageType::Info), s_type(SourceType::SourceCode), di(di) {}
             InformationMessage(const std::string& text, MessageType m_type) : text(text), m_type(m_type), s_type(SourceType::SourceCode) {}
 			InformationMessage(const std::string& text) : text(text), m_type(MessageType::Info), s_type(SourceType::None) {}
 		};

@@ -7,7 +7,7 @@ namespace MSLC
 {
 	namespace Definitions 
 	{
-		ValueContainer CastTo(ValueContainer value, ValueType type, Diagnostics::DebugInfo di)
+		ValueContainer CastTo(ValueContainer value, ValueType type, Diagnostics::DeclaringPlace di)
         {
             switch (type)
             {

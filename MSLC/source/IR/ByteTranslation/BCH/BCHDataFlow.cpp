@@ -19,7 +19,7 @@ namespace MSLC
 					{
 						if (b_state->value_stack.empty())
 						{
-							Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Values stack is empty.", Diagnostics::DeveloperError, Diagnostics::SourceCode, b_state->GetDebugInfo()));
+							Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Values stack is empty.", Diagnostics::DeveloperError, Diagnostics::SourceCode, b_state->GetDeclaringPlace()));
 							return;
 						}
 						ValueFrame frame = b_state->value_stack.top(); b_state->value_stack.pop();
@@ -33,7 +33,7 @@ namespace MSLC
 								ByteCommand(ByteOpCode::LEA_STATIC,
 									CommandArgument(frame.data, CommandSource::MemoryAddress),
 									CommandArgument(reg, CommandSource::Register)),
-								b_state->GetDebugInfo().place);
+								b_state->GetDeclaringPlace().place);
 							TryMarkAsUnhandledSymbol(frame, b_state, 0b001);
 							frame.data = reg;
 							frame.GetPointer();	//value source changed here
@@ -46,7 +46,7 @@ namespace MSLC
 							break;
 
 						default:
-							Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Getting pointer of non-memory data is invalid.", Diagnostics::LogicError, Diagnostics::SourceCode, b_state->GetDebugInfo()));
+							Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Getting pointer of non-memory data is invalid.", Diagnostics::LogicError, Diagnostics::SourceCode, b_state->GetDeclaringPlace()));
 							return;
 						}
 						b_state->value_stack.push(frame);
@@ -57,7 +57,7 @@ namespace MSLC
 					{
 						if (b_state->value_stack.empty())
 						{
-							Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Values stack is empty.", Diagnostics::DeveloperError, Diagnostics::SourceCode, b_state->GetDebugInfo()));
+							Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Values stack is empty.", Diagnostics::DeveloperError, Diagnostics::SourceCode, b_state->GetDeclaringPlace()));
 							return;
 						}
 						ValueFrame frame = b_state->value_stack.top();
@@ -70,7 +70,7 @@ namespace MSLC
 
 						if (frame.source != ValueSource::Pointer && frame.source != ValueSource::Register)
 						{
-							Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Dereference can be complited only with pointer.", Diagnostics::LogicError, Diagnostics::SourceCode, b_state->GetDebugInfo()));
+							Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Dereference can be complited only with pointer.", Diagnostics::LogicError, Diagnostics::SourceCode, b_state->GetDeclaringPlace()));
 							return;
 						}
 
@@ -83,7 +83,7 @@ namespace MSLC
 								ByteCommand(ByteOpCode::LOAD_DYNAMIC, CommandArgument(frame.data, CommandSource::Register),                    // register with address
 									CommandArgument(frame.data, CommandSource::Register), // destination / Register reusing
 									CommandArgument(frame.dynamic_data_size, Immediate)),
-								b_state->GetDebugInfo().place);
+								b_state->GetDeclaringPlace().place);
 						}
 						
 
@@ -96,7 +96,7 @@ namespace MSLC
 					{
 						if (b_state->value_stack.size() < 2)
 						{
-							Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Assign demands two operands.", Diagnostics::DeveloperError, Diagnostics::SourceCode, b_state->GetDebugInfo()));
+							Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Assign demands two operands.", Diagnostics::DeveloperError, Diagnostics::SourceCode, b_state->GetDeclaringPlace()));
 							return;
 						}
 						ValueFrame right = GenerateLoadCommand(p_array, b_state);
@@ -111,7 +111,7 @@ namespace MSLC
 							b_state->value_stack.push(right);	//left wasnt removed
 
 							Pseudo::POperationArray temp_array;
-							temp_array.Pushback(Pseudo::PseudoOperation((Pseudo::PseudoOpCode)operation.arg_0, b_state->GetDebugInfo()));	//AL command
+							temp_array.Pushback(Pseudo::PseudoOperation((Pseudo::PseudoOpCode)operation.arg_0, b_state->GetDeclaringPlace()));	//AL command
 							size_t temp_pseudo_ip = b_state->pseudo_ip;
 							b_state->pseudo_ip = 0;
 							alh.Handle(temp_array, b_state);
@@ -132,28 +132,28 @@ namespace MSLC
 						{
 							auto conv_cmd = GetConversionCommand(right.dynamic_primitive_type, left.dynamic_primitive_type, right.data);
 							if (conv_cmd.code != ByteOpCode::NOP) {
-								PushCommand(b_state, ByteCommand(conv_cmd), b_state->GetDebugInfo().place);
+								PushCommand(b_state, ByteCommand(conv_cmd), b_state->GetDeclaringPlace().place);
 							}
 						}
 						else if (left.value_info.isPointer() && (right.dynamic_primitive_type != PrimitiveAnalogs::UInt && right.dynamic_primitive_type != PrimitiveAnalogs::Int))
 						{
-							Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Saving not uint (or negative int) value as pointer is forbidden.", Diagnostics::TypeError, Diagnostics::SourceCode, b_state->GetDebugInfo()));
+							Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Saving not uint (or negative int) value as pointer is forbidden.", Diagnostics::TypeError, Diagnostics::SourceCode, b_state->GetDeclaringPlace()));
 							return;
 						}
 
 
 						if (left.source == ValueSource::StaticAddress || left.source == ValueSource::Symbol)
 						{
-							PushCommand(b_state, ByteCommand(ByteOpCode::STORE_STATIC, CommandArgument(left.data, CommandSource::MemoryAddress), CommandArgument(right.data, CommandSource::Register), CommandArgument(left.static_data_size, CommandSource::Immediate)), b_state->GetDebugInfo().place);
+							PushCommand(b_state, ByteCommand(ByteOpCode::STORE_STATIC, CommandArgument(left.data, CommandSource::MemoryAddress), CommandArgument(right.data, CommandSource::Register), CommandArgument(left.static_data_size, CommandSource::Immediate)), b_state->GetDeclaringPlace().place);
 							TryMarkAsUnhandledSymbol(left, b_state, 0b001);
 						}
 						else if (left.source == ValueSource::DynamicAddress)
 						{
-							PushCommand(b_state, ByteCommand(ByteOpCode::STORE_DYNAMIC, CommandArgument(left.data, CommandSource::Register), CommandArgument(right.data, CommandSource::Register), CommandArgument(left.static_data_size, CommandSource::Immediate)), b_state->GetDebugInfo().place);
+							PushCommand(b_state, ByteCommand(ByteOpCode::STORE_DYNAMIC, CommandArgument(left.data, CommandSource::Register), CommandArgument(right.data, CommandSource::Register), CommandArgument(left.static_data_size, CommandSource::Immediate)), b_state->GetDeclaringPlace().place);
 						}
 						else
 						{
-							Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Assign works only with either static or dynamic addresses as left operand.", Diagnostics::DeveloperError, Diagnostics::SourceCode, b_state->GetDebugInfo()));
+							Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Assign works only with either static or dynamic addresses as left operand.", Diagnostics::DeveloperError, Diagnostics::SourceCode, b_state->GetDeclaringPlace()));
 							return;
 						}
 
@@ -171,7 +171,7 @@ namespace MSLC
 
 						if (b_state->value_stack.size() < 2)
 						{
-							Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("GetByArgument demands two operands.", Diagnostics::DeveloperError, Diagnostics::SourceCode, b_state->GetDebugInfo()));
+							Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("GetByArgument demands two operands.", Diagnostics::DeveloperError, Diagnostics::SourceCode, b_state->GetDeclaringPlace()));
 							return;
 						}
 						ValueFrame right = GenerateLoadCommand(p_array, b_state);	//index
@@ -181,7 +181,7 @@ namespace MSLC
 
 						if (left.source != ValueSource::Pointer && left.source != ValueSource::Register)
 						{
-							Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("GetByArgument works only with either pointer or register as left operand.", Diagnostics::DeveloperError, Diagnostics::SourceCode, b_state->GetDebugInfo()));
+							Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("GetByArgument works only with either pointer or register as left operand.", Diagnostics::DeveloperError, Diagnostics::SourceCode, b_state->GetDeclaringPlace()));
 							return;
 						}
 						if (left.value_info.type_id != CompilationInfo::INVALID_ID)
@@ -195,7 +195,7 @@ namespace MSLC
 							CommandArgument(left.data, CommandSource::Register),
 							CommandArgument(left.data, CommandSource::Register),
 							CommandArgument(right.data, CommandSource::Register)
-						), b_state->GetDebugInfo().place);
+						), b_state->GetDeclaringPlace().place);
 						b_state->registers_table.SetFree(right.data);
 
 						
@@ -209,7 +209,7 @@ namespace MSLC
 								ByteCommand(ByteOpCode::LOAD_DYNAMIC, CommandArgument(left.data, CommandSource::Register),                    // register with address
 									CommandArgument(left.data, CommandSource::Register), // destination / Register reusing
 									CommandArgument(left.dynamic_data_size, Immediate)),
-								b_state->GetDebugInfo().place);
+								b_state->GetDeclaringPlace().place);
 						}
 						b_state->value_stack.push(left);
 						break;
@@ -275,7 +275,7 @@ namespace MSLC
 						size_t size = vdesc->vinfo.isPointer() ? POINTER_SIZE : tdesc->GetAlignedSize();
 
 						b_state->frame_stack.top().size += size;
-						PushCommand(b_state, ByteCommand(ByteOpCode::STACK_UP, CommandArgument(size, CommandSource::Immediate)), b_state->GetDebugInfo().place);
+						PushCommand(b_state, ByteCommand(ByteOpCode::STACK_UP, CommandArgument(size, CommandSource::Immediate)), b_state->GetDeclaringPlace().place);
 						break;
 					}
 					}

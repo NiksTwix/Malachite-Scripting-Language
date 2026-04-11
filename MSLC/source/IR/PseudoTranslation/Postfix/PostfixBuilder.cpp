@@ -53,7 +53,7 @@ namespace MSLC
                 // Found func call - create complex group
                 TokensGroup t = tokens[current_index];
                 TokensGroup func_call(GroupType::FunctionCall);
-                func_call.debug_info = t.debug_info;	//for debugging
+                func_call.declaring_place = t.declaring_place;	//for debugging
                 func_call.complex.push_back(t); // function identifier
 
                 current_index += 2; // skip name and (
@@ -88,7 +88,7 @@ namespace MSLC
                         }
                         else
                         {
-                            Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Invalid argument.", Diagnostics::SyntaxError, Diagnostics::SourceCode, t.debug_info));
+                            Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Invalid argument.", Diagnostics::SyntaxError, Diagnostics::SourceCode, t.declaring_place));
                             current_index++;
                             break;
                         }
@@ -128,7 +128,7 @@ namespace MSLC
                 // Found func call - create complex group
                 TokensGroup t = tokens[current_index];
                 TokensGroup data_access(gtype);
-                data_access.debug_info = t.debug_info;
+                data_access.declaring_place = t.declaring_place;
                 if (t.simple.type == TokenType::DELIMITER)
                 {
                     current_index += 1; // skip [
@@ -206,7 +206,7 @@ namespace MSLC
                         }
                         else 
                         {
-                            Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Invalid access to field.", Diagnostics::SyntaxError, Diagnostics::SourceCode, token.debug_info));
+                            Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Invalid access to field.", Diagnostics::SyntaxError, Diagnostics::SourceCode, token.declaring_place));
                             continue;
                         }
                     }
@@ -252,7 +252,7 @@ namespace MSLC
                                 }
                                 else 
                                 {
-                                    Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Invalid type identifier.", Diagnostics::SyntaxError, Diagnostics::SourceCode, t.debug_info));
+                                    Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Invalid type identifier.", Diagnostics::SyntaxError, Diagnostics::SourceCode, t.declaring_place));
                                     break;
                                 }
                             }

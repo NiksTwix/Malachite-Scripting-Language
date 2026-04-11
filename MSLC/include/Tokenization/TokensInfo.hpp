@@ -53,12 +53,12 @@ namespace MSLC
 			//std::string source_value;
 			Definitions::ValueContainer value;
 			TokenType type;
-			Diagnostics::DebugInfo debug_info;
+			Diagnostics::DeclaringPlace declaring_place;
 
-			Token(Definitions::ValueContainer val_con, TokenType type, Diagnostics::DebugInfo debug_info) : value(val_con), type(type), debug_info(debug_info) {}
-			Token(TokenType type, Diagnostics::DebugInfo debug_info) : value((int64_t)0), type(type), debug_info(debug_info) {}
-			Token(TokenType type) : value((uint64_t)0), type(type), debug_info(0, 0) {}
-			Token() : value((uint64_t)0), type(TokenType::UNDEFINED), debug_info(0, 0) {}
+			Token(Definitions::ValueContainer val_con, TokenType type, Diagnostics::DeclaringPlace declaring_place) : value(val_con), type(type), declaring_place(declaring_place) {}
+			Token(TokenType type, Diagnostics::DeclaringPlace declaring_place) : value((int64_t)0), type(type), declaring_place(declaring_place) {}
+			Token(TokenType type) : value((uint64_t)0), type(type), declaring_place(0, 0) {}
+			Token() : value((uint64_t)0), type(TokenType::UNDEFINED), declaring_place(0, 0) {}
 		};
 
 

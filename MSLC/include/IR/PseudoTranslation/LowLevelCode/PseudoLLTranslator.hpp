@@ -19,7 +19,7 @@ namespace MSLC
 
 				
 
-				void Handle(PseudoTranslationState& state, std::vector<Argument>& arguments, std::vector<Token>& op_code, Diagnostics::DebugInfo  di);
+				void Handle(PseudoTranslationState& state, std::vector<Argument>& arguments, std::vector<Token>& op_code, Diagnostics::DeclaringPlace  di);
 			public:
 
 				

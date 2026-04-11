@@ -185,7 +185,7 @@ namespace MSLC
 				{
 					if (register_ == InvalidRegister)
 					{
-						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Invalid allocated register.", Diagnostics::DeveloperError, Diagnostics::SourceCode, b_state->GetDebugInfo()));
+						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Invalid allocated register.", Diagnostics::DeveloperError, Diagnostics::SourceCode, b_state->GetDeclaringPlace()));
 						return false;
 					}
 					return true;
@@ -206,7 +206,7 @@ namespace MSLC
 				{
 					if (left.dynamic_primitive_type == PrimitiveAnalogs::Real || right.dynamic_primitive_type == PrimitiveAnalogs::Real)
 					{
-						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Pointer arithmetic with real numbers is forbidden.", Diagnostics::TypeError, Diagnostics::SourceCode, b_state->GetDebugInfo()));
+						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Pointer arithmetic with real numbers is forbidden.", Diagnostics::TypeError, Diagnostics::SourceCode, b_state->GetDeclaringPlace()));
 					}
 
 					auto aligned_size = b_state->cs_observer->GetICT().GetOrAdd(left.GetTypeDesc(left.value_info.type_id, b_state->cs_observer)->GetAlignedSize());
@@ -217,7 +217,7 @@ namespace MSLC
 						CommandArgument(aligned_size, CommandSource::Constant),
 						CommandArgument(free_register, CommandSource::Register),
 						CommandArgument(sizeof(left.static_data_size), CommandSource::Immediate)
-					), b_state->GetDebugInfo().place);
+					), b_state->GetDeclaringPlace().place);
 
 
 
@@ -226,7 +226,7 @@ namespace MSLC
 						CommandArgument(right.data, CommandSource::Register),
 						CommandArgument(right.data, CommandSource::Register),
 						CommandArgument(free_register, CommandSource::Register)
-					), b_state->GetDebugInfo().place);
+					), b_state->GetDeclaringPlace().place);
 					b_state->registers_table.SetFree(free_register);
 
 				}
@@ -234,10 +234,10 @@ namespace MSLC
 				{
 					if (b_state->value_stack.empty())
 					{
-						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Values stack is empty.", Diagnostics::DeveloperError, Diagnostics::SourceCode, b_state->GetDebugInfo()));
+						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Values stack is empty.", Diagnostics::DeveloperError, Diagnostics::SourceCode, b_state->GetDeclaringPlace()));
 						return ValueFrame::Invalid();
 					}
-					size_t current_line = p_array[b_state->pseudo_ip].debug_info.place;
+					size_t current_line = p_array[b_state->pseudo_ip].declaring_place.place;
 					ValueFrame frame = b_state->value_stack.top(); b_state->value_stack.pop();
 
 					if (frame.source == ValueSource::Register || frame.source == ValueSource::Pointer) return frame;
@@ -247,7 +247,7 @@ namespace MSLC
 
 						if (frame.dynamic_data_size > POINTER_SIZE)
 						{
-							Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Attempt of loading big data(>8 bytes) to register", Diagnostics::DeveloperError, Diagnostics::SourceCode, b_state->GetDebugInfo()));
+							Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Attempt of loading big data(>8 bytes) to register", Diagnostics::DeveloperError, Diagnostics::SourceCode, b_state->GetDeclaringPlace()));
 						}
 
 						// LOAD_DYNAMIC [reg_addr] → reg_value
@@ -269,7 +269,7 @@ namespace MSLC
 
 						if (frame.dynamic_data_size > POINTER_SIZE)
 						{
-							Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Attempt of loading big data(>8 bytes) to register", Diagnostics::DeveloperError, Diagnostics::SourceCode, b_state->GetDebugInfo()));
+							Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Attempt of loading big data(>8 bytes) to register", Diagnostics::DeveloperError, Diagnostics::SourceCode, b_state->GetDeclaringPlace()));
 						}
 
 						PushCommand(b_state,

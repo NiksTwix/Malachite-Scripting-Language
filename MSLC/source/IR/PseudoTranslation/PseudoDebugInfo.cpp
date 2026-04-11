@@ -136,7 +136,7 @@ namespace MSLC
 					};
 
 				std::stringstream result;
-				result << "OpCode:" << codes[operation.op_code] << get_tabs(tabs_count) << "Arg0:" << operation.arg_0 << get_tabs(tabs_count) << "Arg1:" << operation.arg_1 << get_tabs(tabs_count) << "Arg2:" << operation.arg_2 << get_tabs(tabs_count) << "Line:" << operation.debug_info.place << "\n";
+				result << "OpCode:" << codes[operation.op_code] << get_tabs(tabs_count) << "Arg0:" << operation.arg_0 << get_tabs(tabs_count) << "Arg1:" << operation.arg_1 << get_tabs(tabs_count) << "Arg2:" << operation.arg_2 << get_tabs(tabs_count) << "Line:" << operation.declaring_place.place << "\n";
 				return result.str();
 			}
 			std::string PseudoOperationsStringSerializator::Serialize(POperationArray& array)

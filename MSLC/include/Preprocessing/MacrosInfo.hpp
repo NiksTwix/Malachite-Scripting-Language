@@ -55,12 +55,12 @@ namespace MSLC
 
             MacrosID DefineConstant(const std::string& name,
                 Definitions::ValueContainer value,
-                Diagnostics::DebugInfo di);
+                Diagnostics::DeclaringPlace di);
 
             MacrosID DefineFunction(const std::string& name,
                 std::vector<Token> body_tokens,
                 std::vector<ParameterLabel> parameters,
-                Diagnostics::DebugInfo di);
+                Diagnostics::DeclaringPlace di);
 
             // Main methods of fast access
             bool HasMacro(const std::string& name) const;

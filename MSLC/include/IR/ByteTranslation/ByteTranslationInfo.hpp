@@ -67,7 +67,7 @@ namespace MSLC
 				// Flags
 				bool isAoT = false;				// AOT compiling in the future
 				bool optimize = false;         // Optimization is enable
-				bool debug_info = true;       // Save debug information
+				bool declaring_place = true;       // Save debug information
 
 				//// Target platform
 				//enum Target {
@@ -466,7 +466,7 @@ namespace MSLC
 				std::stack<ValueFrame> value_stack{};         //Stack for operations
 				std::stack<StackFrame> frame_stack{};    //When we create variable add it size to frame_size stack;
 
-				Diagnostics::DebugInfo debug_info;
+				Diagnostics::DeclaringPlace declaring_place;
 				BCommandsArray result;
 
 				ByteTranslationConfig config;
@@ -506,9 +506,9 @@ namespace MSLC
 					return true;
 				}
 
-				Diagnostics::DebugInfo GetDebugInfo() 
+				Diagnostics::DeclaringPlace GetDeclaringPlace() 
 				{
-					return debug_info;
+					return declaring_place;
 				}
 
 			};

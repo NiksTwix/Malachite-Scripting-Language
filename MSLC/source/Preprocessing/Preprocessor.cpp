@@ -103,7 +103,7 @@ namespace MSLC
                 {
                     if (arg_name_tokens_count > 2)
                     {
-                        Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Invalid argument is in macro's \"" + identifier.value.strVal + "\" header.", Diagnostics::SyntaxError, Diagnostics::SourceCode, identifier.debug_info));
+                        Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Invalid argument is in macro's \"" + identifier.value.strVal + "\" header.", Diagnostics::SyntaxError, Diagnostics::SourceCode, identifier.declaring_place));
                     }
                     header_f = false;
                     continue;
@@ -112,7 +112,7 @@ namespace MSLC
                 {
                     if (arg_name_tokens_count != 1) 
                     {
-                        Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Invalid argument is in macro's \"" + identifier.value.strVal + "\" header.", Diagnostics::SyntaxError, Diagnostics::SourceCode, identifier.debug_info));
+                        Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Invalid argument is in macro's \"" + identifier.value.strVal + "\" header.", Diagnostics::SyntaxError, Diagnostics::SourceCode, identifier.declaring_place));
                     }
                     arg_name_tokens_count = 0;
                     continue;
@@ -159,7 +159,7 @@ namespace MSLC
 
                 
             }
-            state.c_state->GetMacrosTable().DefineFunction(identifier.value.strVal, body, header, identifier.debug_info);
+            state.c_state->GetMacrosTable().DefineFunction(identifier.value.strVal, body, header, identifier.declaring_place);
 
         }
 
@@ -180,7 +180,7 @@ namespace MSLC
 
                     if (macro == nullptr)
                     {
-                        Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Attempt of undefined macro \"" + t.value.strVal + "\" calling exists.", Diagnostics::SyntaxError, Diagnostics::SourceCode, t.debug_info));
+                        Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Attempt of undefined macro \"" + t.value.strVal + "\" calling exists.", Diagnostics::SyntaxError, Diagnostics::SourceCode, t.declaring_place));
                         return;
                     }
 
@@ -220,7 +220,7 @@ namespace MSLC
                     }
                     if (source[i].type == TokenType::DELIMITER && source[i].value.strVal == "," && depth == 0)
                     {
-                        if (current.tokens.empty()) Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Invalid argument is in macros call.", Diagnostics::SyntaxError, Diagnostics::SourceCode, source[i].debug_info));
+                        if (current.tokens.empty()) Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Invalid argument is in macros call.", Diagnostics::SyntaxError, Diagnostics::SourceCode, source[i].declaring_place));
                         args.push_back(current);
                         current = MacroArgument();
                         continue;
@@ -240,7 +240,7 @@ namespace MSLC
                     
                     if (depth < 0) 
                     {
-                        Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Extraneous ) is in macro call.", Diagnostics::SyntaxError, Diagnostics::SourceCode, source[i].debug_info));
+                        Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Extraneous ) is in macro call.", Diagnostics::SyntaxError, Diagnostics::SourceCode, source[i].declaring_place));
                         return;
                     }
 
@@ -251,7 +251,7 @@ namespace MSLC
 
             if (args.size() != macro->parameters.size()) 
             {
-                Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Macro's arguments are invalid.", Diagnostics::LogicError, Diagnostics::SourceCode, source[i].debug_info));
+                Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Macro's arguments are invalid.", Diagnostics::LogicError, Diagnostics::SourceCode, source[i].declaring_place));
                 return;
             }
 
@@ -281,7 +281,7 @@ namespace MSLC
             // Один проход, всё на месте
             for (state.current_index = 0; state.current_index < tokens.size(); state.current_index++) {
                 Token& t = tokens[state.current_index];
-                state.current_line = t.debug_info.place;  // Для сообщений об ошибках
+                state.current_line = t.declaring_place.place;  // Для сообщений об ошибках
 
                 if (t.type == TokenType::PREPROCESSOR_DIRECTIVE) {
                     if (t.value.strVal == Directives::w_define_const) {

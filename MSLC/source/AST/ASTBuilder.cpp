@@ -51,7 +51,7 @@ namespace MSLC
 			ASTNode group_header;
 			group_header.group_type = group_type;
 			group_header.type = ASTNodeType::NodeGroup;
-			group_header.debug_info = group.front().first.debug_info;
+			group_header.declaring_place = group.front().first.declaring_place;
 			for (std::pair<ASTNode, size_t>& p : group) 
 			{
 				group_header.children.push_back(p.first);
@@ -105,7 +105,7 @@ namespace MSLC
 			for (int i = 0; i < tokens.size(); i++)
 			{
 				Tokenization::Token& t = tokens[i];
-				state.last_debug_info = t.debug_info;
+				state.last_declaring_place = t.declaring_place;
 	
 				if (t.value.strVal == "{")
 				{
@@ -113,10 +113,10 @@ namespace MSLC
 					{
 						ASTNode empty_node;
 						empty_node.type = ASTNodeType::CodeBlock;
-						empty_node.debug_info = t.debug_info;
+						empty_node.declaring_place = t.declaring_place;
 						cn_stack.push(empty_node);
 						ASTNode scope_start;
-						scope_start.tokens.push_back(Tokenization::Token((uint64_t)Tokenization::CompilationLabel::OPEN_VISIBLE_SCOPE, Tokenization::TokenType::COMPILATION_LABEL, t.debug_info));
+						scope_start.tokens.push_back(Tokenization::Token((uint64_t)Tokenization::CompilationLabel::OPEN_VISIBLE_SCOPE, Tokenization::TokenType::COMPILATION_LABEL, t.declaring_place));
 						cn_stack.top().children.push_back(scope_start);
 					}
 					else 
@@ -125,25 +125,25 @@ namespace MSLC
 						ASTNodeType type = DefineType(command_tokens);
 						if (type == ASTNodeType::None) 
 						{
-							Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Incorrect code structure: " + line_print(command_tokens) + ".", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, t.debug_info));
+							Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Incorrect code structure: " + line_print(command_tokens) + ".", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, t.declaring_place));
 							continue;
 						}
 						if (type != ASTNodeType::Expression)	//Multyline block
 						{
 							ASTNode node;
-							node.debug_info = command_tokens.back().debug_info;
+							node.declaring_place = command_tokens.back().declaring_place;
 							node.tokens = std::move(command_tokens);
 							node.type = type;
 							cn_stack.push(node);
 							ASTNode scope_start;
-							scope_start.tokens.push_back(Tokenization::Token((uint64_t)Tokenization::CompilationLabel::OPEN_VISIBLE_SCOPE, Tokenization::TokenType::COMPILATION_LABEL, t.debug_info));
+							scope_start.tokens.push_back(Tokenization::Token((uint64_t)Tokenization::CompilationLabel::OPEN_VISIBLE_SCOPE, Tokenization::TokenType::COMPILATION_LABEL, t.declaring_place));
 							cn_stack.top().children.push_back(scope_start);
 						}
 						else //Expression -> code block
 						{
 							//Expression
 							ASTNode prev_node;
-							prev_node.debug_info = command_tokens.back().debug_info;
+							prev_node.declaring_place = command_tokens.back().declaring_place;
 							prev_node.type = ASTNodeType::Expression;
 							prev_node.tokens = std::move(command_tokens);
 							cn_stack.top().children.push_back(prev_node);
@@ -151,10 +151,10 @@ namespace MSLC
 							//Code block
 							ASTNode empty_node;
 							empty_node.type = ASTNodeType::CodeBlock;
-							empty_node.debug_info = t.debug_info;
+							empty_node.declaring_place = t.declaring_place;
 							cn_stack.push(empty_node);
 							ASTNode scope_start;
-							scope_start.tokens.push_back(Tokenization::Token((uint64_t)Tokenization::CompilationLabel::OPEN_VISIBLE_SCOPE, Tokenization::TokenType::COMPILATION_LABEL, t.debug_info));
+							scope_start.tokens.push_back(Tokenization::Token((uint64_t)Tokenization::CompilationLabel::OPEN_VISIBLE_SCOPE, Tokenization::TokenType::COMPILATION_LABEL, t.declaring_place));
 							cn_stack.top().children.push_back(scope_start);
 						}
 					}
@@ -166,12 +166,12 @@ namespace MSLC
 				{
 					if (cn_stack.size() <= 1)
 					{
-						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("There are extra ones '}'.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, t.debug_info));
+						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("There are extra ones '}'.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, t.declaring_place));
 						continue;
 					}
 
 					ASTNode scope_end;
-					scope_end.tokens.push_back(Tokenization::Token((uint64_t)Tokenization::CompilationLabel::CLOSE_VISIBLE_SCOPE, Tokenization::TokenType::COMPILATION_LABEL, t.debug_info));	//TODO инрементировать, если надо
+					scope_end.tokens.push_back(Tokenization::Token((uint64_t)Tokenization::CompilationLabel::CLOSE_VISIBLE_SCOPE, Tokenization::TokenType::COMPILATION_LABEL, t.declaring_place));	//TODO инрементировать, если надо
 					cn_stack.top().children.push_back(scope_end);
 
 					auto node = cn_stack.top();
@@ -186,7 +186,7 @@ namespace MSLC
 					{
 						ASTNode node;
 						//command_tokens.push_back(t);
-						node.debug_info = command_tokens.back().debug_info;
+						node.declaring_place = command_tokens.back().declaring_place;
 						node.type = DefineType(command_tokens);
 						node.tokens = std::move(command_tokens);
 						cn_stack.top().children.push_back(node);
@@ -196,7 +196,7 @@ namespace MSLC
 
 				if (state.current_depth < 0)
 				{
-					Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("There are extra ones '}'.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, t.debug_info));
+					Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("There are extra ones '}'.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, t.declaring_place));
 					continue;
 				}
 				command_tokens.push_back(t);
@@ -205,7 +205,7 @@ namespace MSLC
 			if (!command_tokens.empty())
 			{
 				ASTNode node;
-				node.debug_info = command_tokens.back().debug_info;
+				node.declaring_place = command_tokens.back().declaring_place;
 				node.type = DefineType(command_tokens);
 				node.tokens = std::move(command_tokens);
 				cn_stack.top().children.push_back(node);
@@ -213,12 +213,12 @@ namespace MSLC
 
 			if (state.current_depth > 0)
 			{
-				Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Expected '}'.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, state.last_debug_info));
+				Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Expected '}'.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, state.last_declaring_place));
 			}
 
 			if (cn_stack.empty()) 
 			{
-				Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Developer Message:AST Stack underflow.", Diagnostics::MessageType::LogicError, Diagnostics::SourceType::SourceCode, state.last_debug_info));
+				Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Developer Message:AST Stack underflow.", Diagnostics::MessageType::LogicError, Diagnostics::SourceType::SourceCode, state.last_declaring_place));
 				return root;
 			}
 			root = cn_stack.top();

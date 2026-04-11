@@ -15,7 +15,7 @@ namespace MSLC
 			size_t current_index = 0;
 			size_t module_id = 0;
 
-			Diagnostics::DebugInfo debug_info;
+			Diagnostics::DeclaringPlace declaring_place;
 
 			bool in_string = false;
 			bool in_symbol_literal = false;

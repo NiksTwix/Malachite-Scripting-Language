@@ -33,7 +33,7 @@ namespace MSLC
 			}
 			catch (const std::out_of_range&) {
 				// If number is bigger than uint64_t's max value
-				Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Number value is greater(less) than max(min) permitted.", Diagnostics::MessageType::TypeError, Diagnostics::SourceCode, lex_state.debug_info));
+				Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Number value is greater(less) than max(min) permitted.", Diagnostics::MessageType::TypeError, Diagnostics::SourceCode, lex_state.declaring_place));
 				return Definitions::ValueType::VOID;
 			}
 			return Definitions::ValueType::UINT;
@@ -97,7 +97,7 @@ namespace MSLC
 				case  Definitions::ValueType::UINT:
 					if (inv_copy) {
 						// Negative UINT? Its a error
-						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Unsigned integer cannot be negative.", Diagnostics::MessageType::TypeError, Diagnostics::SourceCode, lex_state.debug_info));
+						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Unsigned integer cannot be negative.", Diagnostics::MessageType::TypeError, Diagnostics::SourceCode, lex_state.declaring_place));
 						return 1.0;
 					}
 					return std::stoull(token);
@@ -124,7 +124,7 @@ namespace MSLC
 		Token Lexer::CreateToken(LexingState& lex_state, std::string operand)
 		{
 			Token t;
-			t.debug_info = lex_state.debug_info;
+			t.declaring_place = lex_state.declaring_place;
 			t.type = GetTokenType(lex_state,operand);
 			t.value = GetTokenValue(lex_state,operand,t.type);
 			
@@ -135,7 +135,7 @@ namespace MSLC
 			int size = str.size();
 			if (size > 4 || size == 0)//Not escape and not char		//TODO Create Compiler Errors
 			{
-				Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Invalid char.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceCode, lex_state.debug_info));
+				Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Invalid char.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceCode, lex_state.declaring_place));
 				return '\0';
 			}
 			if (size == 1) return str[0];
@@ -149,7 +149,7 @@ namespace MSLC
 				case '\\': return'\\';
 				}
 			}
-			Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Invalid char.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceCode, lex_state.debug_info));
+			Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Invalid char.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceCode, lex_state.declaring_place));
 			return '\0';
 		}
 
@@ -273,7 +273,7 @@ namespace MSLC
 
 			if (operator_.empty()) {
 				// Its not operator
-				return Token(TokenType::UNDEFINED, lex_state.debug_info);
+				return Token(TokenType::UNDEFINED, lex_state.declaring_place);
 			}
 
 			// Define type of unarity when handing over already built operator
@@ -313,41 +313,41 @@ namespace MSLC
 				}
 				else {
 					// Unknown operator
-					Diagnostics::InformationMessage message("Unknown operator: '" + operator_ + "'.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, lex_state.debug_info);
+					Diagnostics::InformationMessage message("Unknown operator: '" + operator_ + "'.", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceType::SourceCode, lex_state.declaring_place);
 
 					Diagnostics::Logger::Get().Print(message);
-					return Token(TokenType::UNDEFINED, lex_state.debug_info);
+					return Token(TokenType::UNDEFINED, lex_state.declaring_place);
 				}
 			}
 
-			return Token(final_op, token_type, lex_state.debug_info);
+			return Token(final_op, token_type, lex_state.declaring_place);
 		}
 
 		Token Lexer::InsertOpEnd(LexingState& lex_state, std::vector<Token>& tokens, const std::string& text)
 		{
-			if (tokens.size() == 0)return Token(TokenType::UNDEFINED, lex_state.debug_info);
-			if (text[lex_state.current_index] == ';') return Token((uint64_t)CompilationLabel::OPERATION_END, TokenType::COMPILATION_LABEL, lex_state.debug_info);
+			if (tokens.size() == 0)return Token(TokenType::UNDEFINED, lex_state.declaring_place);
+			if (text[lex_state.current_index] == ';') return Token((uint64_t)CompilationLabel::OPERATION_END, TokenType::COMPILATION_LABEL, lex_state.declaring_place);
 
-			if (tokens.back().type == TokenType::COMPILATION_LABEL || tokens.back().value.strVal == "{" && lex_state.undefined_token.empty()) return Token(TokenType::UNDEFINED,lex_state.debug_info);
+			if (tokens.back().type == TokenType::COMPILATION_LABEL || tokens.back().value.strVal == "{" && lex_state.undefined_token.empty()) return Token(TokenType::UNDEFINED,lex_state.declaring_place);
 
 			if (tokens.back().type != TokenType::COMPILATION_LABEL && tokens.back().value.strVal != "}" && text[lex_state.current_index] == '}')
 			{
-				return Token((uint64_t)CompilationLabel::OPERATION_END, TokenType::COMPILATION_LABEL, lex_state.debug_info);
+				return Token((uint64_t)CompilationLabel::OPERATION_END, TokenType::COMPILATION_LABEL, lex_state.declaring_place);
 			}
 
 			if (text[lex_state.current_index] == '\n' && !(GetNearCharWithoutSpaces(text, lex_state.current_index, 1) == '{' || GetNearCharWithoutSpaces(text, lex_state.current_index, -1) == '}'))
 			{
-				return Token((uint64_t)CompilationLabel::OPERATION_END, TokenType::COMPILATION_LABEL, lex_state.debug_info);
+				return Token((uint64_t)CompilationLabel::OPERATION_END, TokenType::COMPILATION_LABEL, lex_state.declaring_place);
 			}
 
-			return Token(TokenType::UNDEFINED, lex_state.debug_info);
+			return Token(TokenType::UNDEFINED, lex_state.declaring_place);
 		}
 		
 		std::vector<Token> Lexer::ToTokens(std::string text, Definitions::ModuleId module_id)
 		{
 	
 			LexingState state;
-			state.debug_info.module_id = module_id;
+			state.declaring_place.module_id = module_id;
 			bool in_string = false;
 			state.tokens.reserve(text.size() / 4);
 			bool in_symbol_literal = false;
@@ -358,7 +358,7 @@ namespace MSLC
 				if (c == '\r') continue;
 				if (c == '\n')
 				{
-					state.debug_info.place++;
+					state.declaring_place.place++;
 				}
 				// Simple line comments
 				if (!in_string && !in_symbol_literal)
@@ -386,7 +386,7 @@ namespace MSLC
 							prev = text[state.current_index];
 							state.current_index++;
 						}
-						if (!state.was_comment) Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Excepts \"*/\".", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceCode, state.debug_info));
+						if (!state.was_comment) Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Excepts \"*/\".", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceCode, state.declaring_place));
 						continue;
 					}
 
@@ -437,7 +437,7 @@ namespace MSLC
 						state.current_index--;
 						if (t.type == TokenType::UNDEFINED)
 						{
-							Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Invalid operator \"" + t.value.strVal + "\".", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceCode, state.debug_info));
+							Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Invalid operator \"" + t.value.strVal + "\".", Diagnostics::MessageType::SyntaxError, Diagnostics::SourceCode, state.declaring_place));
 							continue;
 						}
 						state.tokens.push_back(t);
@@ -461,7 +461,7 @@ namespace MSLC
 						Token t;
 						t.type = TokenType::DELIMITER;
 						t.value = delimiter;
-						t.debug_info = state.debug_info;
+						t.declaring_place = state.declaring_place;
 						if (c == '{') state.current_depth++;
 						if (c == '}')
 						{
@@ -508,11 +508,11 @@ namespace MSLC
 			if (!state.undefined_token.empty())
 			{
 				Token t;
-				t.debug_info = state.debug_info;
+				t.declaring_place = state.declaring_place;
 				t.type = GetTokenType(state,state.undefined_token);
 				t.value = GetTokenValue(state,state.undefined_token,t.type);
 				state.tokens.push_back(t);
-				state.tokens.push_back(Token((uint64_t)CompilationLabel::OPERATION_END, TokenType::COMPILATION_LABEL, state.debug_info));
+				state.tokens.push_back(Token((uint64_t)CompilationLabel::OPERATION_END, TokenType::COMPILATION_LABEL, state.declaring_place));
 			}
 
 			return state.tokens;
