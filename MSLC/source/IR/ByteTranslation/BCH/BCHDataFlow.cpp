@@ -234,8 +234,7 @@ namespace MSLC
 						{
 							b_state->value_stack.push(ValueFrame(ValueSource::StaticAddress, vdesc->global_stack_offset,
 								tdesc->primitive_analog,
-								vdesc->vinfo.isPointer() ? POINTER_SIZE : tdesc->size));
-							b_state->value_stack.top().state = b_state->cs_observer;
+								vdesc->vinfo.isPointer() ? POINTER_SIZE : tdesc->size, b_state->cs_observer));
 							b_state->value_stack.top().SetValueInfo(vdesc->vinfo);
 							
 						}
@@ -243,8 +242,7 @@ namespace MSLC
 						{
 							b_state->value_stack.push(ValueFrame(ValueSource::Symbol, b_state->cs_observer->AddUnhandledSymbol(CompilationInfo::SymbolType::Variable, operation.arg_0),
 								tdesc->primitive_analog,
-								vdesc->vinfo.isPointer() ? POINTER_SIZE : tdesc->size));
-							b_state->value_stack.top().state = b_state->cs_observer;
+								vdesc->vinfo.isPointer() ? POINTER_SIZE : tdesc->size, b_state->cs_observer));
 							b_state->value_stack.top().SetValueInfo(vdesc->vinfo);
 						
 						}
@@ -254,7 +252,7 @@ namespace MSLC
 					case Pseudo::PseudoOpCode::UseConstant:
 					{
 						const Definitions::ValueContainer& constant = b_state->cs_observer->GetICT().GetByID(operation.arg_0);
-						b_state->value_stack.push(ValueFrame(ValueSource::Constant, operation.arg_0, ValueContainerTypeToPrimitive(constant.type), constant.GetDataSize()));
+						b_state->value_stack.push(ValueFrame(ValueSource::Constant, operation.arg_0, ValueContainerTypeToPrimitive(constant.type), constant.GetDataSize(), b_state->cs_observer));
 						break;
 					}
 					}

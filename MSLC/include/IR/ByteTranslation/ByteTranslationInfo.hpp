@@ -383,13 +383,13 @@ namespace MSLC
 
 				CompilationInfo::Values::ValueInfo value_info;	//dynamic
 
-				CompilationInfo::CompilationState* state;
+				CompilationInfo::CompilationState* cs_observer;
 
-				ValueFrame(ValueSource source,size_t data, PrimitiveAnalogs type, size_t size) : source(source), data(data), dynamic_primitive_type(type), dynamic_data_size(size), static_primitive_type(type), static_data_size(size) {}
+				ValueFrame(ValueSource source,size_t data, PrimitiveAnalogs type, size_t size, CompilationInfo::CompilationState* state) : source(source), data(data), dynamic_primitive_type(type), dynamic_data_size(size), static_primitive_type(type), static_data_size(size), cs_observer(state) {}
 
 				static ValueFrame Invalid()
 				{
-					return ValueFrame(ValueSource::Immediate,0, PrimitiveAnalogs::UInt, 0);
+					return ValueFrame(ValueSource::Immediate,0, PrimitiveAnalogs::UInt, 0, nullptr);
 				}
 				void SetValueInfo(CompilationInfo::Values::ValueInfo vinfo)
 				{
@@ -403,7 +403,7 @@ namespace MSLC
 					}
 					else 
 					{
-						auto desc = GetTypeDesc(vinfo.type_id, state);
+						auto desc = GetTypeDesc(vinfo.type_id, cs_observer);
 						dynamic_primitive_type = desc->primitive_analog;
 						static_primitive_type = desc->primitive_analog;
 						static_data_size = desc->GetAlignedSize();
@@ -419,8 +419,8 @@ namespace MSLC
 						value_info.flags &= ~CompilationInfo::Values::ValueFlags::Pointer;
 						value_info.flags &= ~CompilationInfo::Values::ValueFlags::ConstPointer;
 						source = ValueSource::DynamicAddress;
-						dynamic_primitive_type = GetTypeDesc(value_info.type_id, state)->primitive_analog;
-						dynamic_data_size = GetTypeDesc(value_info.type_id, state)->GetAlignedSize();
+						dynamic_primitive_type = GetTypeDesc(value_info.type_id, cs_observer)->primitive_analog;
+						dynamic_data_size = GetTypeDesc(value_info.type_id, cs_observer)->GetAlignedSize();
 					}
 
 				}

@@ -14,10 +14,11 @@ namespace MSLC
 
 					auto add_converted_frame = [](std::shared_ptr<ByteTranslationState> b_state, ValueFrame& left, ValueFrame& right, size_t converted_reg, PrimitiveAnalogs common_type) -> void
 						{
-							ValueFrame new_frame = ValueFrame(left.source, left.data, common_type, converted_reg == left.data ? left.dynamic_data_size : right.dynamic_data_size);
-							new_frame.static_primitive_type = converted_reg == left.data ? left.static_primitive_type : right.static_primitive_type;
-							new_frame.static_data_size = converted_reg == left.data ? left.static_data_size : right.static_data_size;
-							new_frame.value_info = converted_reg == left.data ? left.value_info : right.value_info;
+							ValueFrame new_frame = ValueFrame(left.source, left.data, common_type, converted_reg == left.data ? left.dynamic_data_size : right.dynamic_data_size, b_state->cs_observer);
+							new_frame.static_primitive_type = converted_reg == left.data ? right.static_primitive_type : left.static_primitive_type;
+							new_frame.static_data_size = converted_reg == left.data ? right.static_data_size :  left.static_data_size;
+							new_frame.value_info = converted_reg == left.data ? right.value_info : left.value_info;
+							//We must take value_info and another from source register (to which we convert data) if converted right - we take left, otherwise right
 							b_state->value_stack.push(new_frame);
 						};
 
@@ -76,7 +77,7 @@ namespace MSLC
 									CommandArgument(left.data, CommandSource::Register), CommandArgument(right.data, CommandSource::Register)), b_state->current_line);
 
 							b_state->registers_table.SetFree(right.data);
-							b_state->value_stack.push(ValueFrame(ValueSource::Register, left.data, PrimitiveAnalogs::UInt, LOGIC_RESULT_SIZE));	//1 BYTE
+							b_state->value_stack.push(ValueFrame(ValueSource::Register, left.data, PrimitiveAnalogs::UInt, LOGIC_RESULT_SIZE, b_state->cs_observer));	//1 BYTE
 						};
 					auto main_bit_logic_handler = [&]() -> void
 						{
@@ -101,7 +102,7 @@ namespace MSLC
 							), b_state->current_line);
 
 							b_state->registers_table.SetFree(right.data);
-							b_state->value_stack.push(ValueFrame(ValueSource::Register, left.data, PrimitiveAnalogs::UInt, left.dynamic_data_size));
+							b_state->value_stack.push(ValueFrame(ValueSource::Register, left.data, PrimitiveAnalogs::UInt, left.dynamic_data_size, b_state->cs_observer));
 						};
 					auto main_cmp_handler = [&]() -> void
 						{
@@ -129,7 +130,7 @@ namespace MSLC
 									CommandArgument(left.data, CommandSource::Register), CommandArgument(right.data, CommandSource::Register)), b_state->current_line);
 
 							b_state->registers_table.SetFree(right.data);
-							b_state->value_stack.push(ValueFrame(ValueSource::Register, left.data, PrimitiveAnalogs::UInt, LOGIC_RESULT_SIZE));	// 1 BYTE
+							b_state->value_stack.push(ValueFrame(ValueSource::Register, left.data, PrimitiveAnalogs::UInt, LOGIC_RESULT_SIZE, b_state->cs_observer));	// 1 BYTE
 						};
 					switch (operation.op_code)
 					{
