@@ -59,8 +59,15 @@ namespace MSLC
 				return type;
 			}
 
-			if (token[0] == '@' || token[0] == '#') return TokensInfoTable::Get().GetTokenType(token.substr(1,token.size()-1));	// Attribute or directive
-
+			if (token[0] == '#')
+			{
+				type = TokensInfoTable::Get().GetTokenType(token.substr(1, token.size() - 1));	//If exists - its directive, else - directive's call
+				return type == TokenType::UNDEFINED ? TokenType::PREPROCESSOR_DIRECTIVE_CALL: type;
+			}
+			if (token[0] == '@') 
+			{
+				return TokensInfoTable::Get().GetTokenType(token.substr(1, token.size() - 1));	// Attribute 
+			}
 			if (Strings::StringOperations::IsNumber(token)) return TokenType::LITERAL;
 
 			if (token.size() >= 2 && token[0] == '"' && token[token.size() - 1] == '"') return TokenType::LITERAL;
@@ -117,7 +124,7 @@ namespace MSLC
 		Token Lexer::CreateToken(LexingState& lex_state, std::string operand)
 		{
 			Token t;
-			t.line = lex_state.current_line;
+			t.debug_info = lex_state.current_line;
 			t.module_id = lex_state.module_id;
 			t.type = GetTokenType(lex_state,operand);
 			t.value = GetTokenValue(lex_state,operand,t.type);
@@ -449,7 +456,7 @@ namespace MSLC
 							state.undefined_token.clear();
 						}
 						Token t;
-						t.line = state.current_line;
+						t.debug_info = state.current_line;
 						t.type = TokenType::DELIMITER;
 						t.value = delimiter;
 						t.module_id = state.module_id;
@@ -499,7 +506,7 @@ namespace MSLC
 			if (!state.undefined_token.empty())
 			{
 				Token t;
-				t.line = state.current_line;
+				t.debug_info = state.current_line;
 				t.type = GetTokenType(state,state.undefined_token);
 				t.value = GetTokenValue(state,state.undefined_token,t.type);
 				t.module_id = state.module_id;

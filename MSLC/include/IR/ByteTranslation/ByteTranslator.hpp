@@ -1,5 +1,5 @@
 #pragma once
-#include "ByteCommandsHandlers.hpp"
+#include "ByteCommandsHandler.hpp"
 
 namespace MSLC
 {
@@ -7,7 +7,6 @@ namespace MSLC
 	{
 		namespace Byte
 		{
-			
 			class ByteTranslator 
 			{
 				CommandsHandler commands_handler;

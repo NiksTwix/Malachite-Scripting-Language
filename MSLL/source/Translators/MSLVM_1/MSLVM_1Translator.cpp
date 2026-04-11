@@ -427,6 +427,16 @@ namespace MSLL
 				PushVMCommand(VMOperationCode::FREE_MEMORY, command.arg0, command.arg1, command.arg2, result);
 				break;
 			}
+			case LinkDefinitions::ByteOpCode::COPY_STATIC:
+			{
+				PushVMCommand(VMOperationCode::STATIC_COPY, command.arg0, command.arg1, command.arg2, result);
+				break;
+			}
+			case LinkDefinitions::ByteOpCode::COPY_DYNAMIC:
+			{
+				PushVMCommand(VMOperationCode::DYNAMIC_COPY, command.arg0, command.arg1, command.arg2, result);
+				break;
+			}
 			default:
 				std::cerr << "Unsupported operation. Byte operation code:" << (int)command.code << "\n";
 				break;

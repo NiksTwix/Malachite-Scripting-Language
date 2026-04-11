@@ -355,15 +355,11 @@ namespace MSLVM
 				if (size == 0) {
 					break;
 				}
-				if (!state.memory.CheckIntervals(state.memory.GetStackStart(), state.memory.GetEnd(), address, size)) {
-					state.Raise(ErrorCode::InvalidMemoryAccess);
-					break;
-				}
-
 				// Write little-endian
 				state.memory.Write(address, value, size);
 				break;
 			}
+
 			//case LOAD_CONST_BY_ADDRESS:
 			//{
 			//	uint64_t address = state.registers[REG_U(operation.arg1)].u;
@@ -445,7 +441,36 @@ namespace MSLVM
 				}
 				break;
 			}
+			case STATIC_COPY:
+			{
+				uint64_t dest = operation.arg0.u;
+				uint64_t src = operation.arg1.u;
+				uint64_t size = operation.arg2.u;
+				if (dest + size > state.memory.GetEnd()) {
+					state.Raise(ErrorCode::InvalidMemoryAccess);
+					break;
+				}
 
+				state.memory.Copy(dest, src, size);
+
+				break;
+			}
+				
+			case DYNAMIC_COPY:
+			{
+				uint64_t dest = state.registers[REG_U(operation.arg0)].u;
+				uint64_t src = state.registers[REG_U(operation.arg1)].u;
+				uint64_t size = state.registers[REG_U(operation.arg2)].u;
+				if (dest + size > state.memory.GetEnd()) {
+					state.Raise(ErrorCode::InvalidMemoryAccess);
+					break;
+				}
+
+				state.memory.Copy(dest, src, size);
+
+				break;
+
+			}
 			case GRAB_FRAME:
 			{
 				uint64_t expanded_bytes = REG_I(operation.arg0);

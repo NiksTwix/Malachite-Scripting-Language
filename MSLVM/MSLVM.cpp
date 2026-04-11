@@ -21,14 +21,14 @@ int main()
     while (!machine.GetState().error_stack.empty()) 
     {
         auto error = machine.GetState().error_stack.pop();
-        std::cout <<  error.code << ";";
+        std::cout <<  error.code << "|" << error.instruction_counter << ";";
     }
 
 
     std::cout << "\nRegisters:\n";
     for (int i = 0; i < 8; i++)
     {
-        std::cout << std::to_string(machine.GetState().registers[i].u) << " ";
+        std::cout << std::to_string(machine.GetState().registers[i].i) << " ";
     }
 
     //std::cout << "\n";

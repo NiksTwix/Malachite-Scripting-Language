@@ -104,23 +104,26 @@ namespace MSLL
 			LEA_STATIC,		// Static address calculating: MemoryAddress (static) -> reg 
 			LEA_DYNAMIC,	// Dynamic address calculating: register (with address) -> register_dest
 
-			LOAD_DYNAMIC,	//Loading by address in register //Register With Loading Address,Register,Size
-			STORE_DYNAMIC,	//Storing by address in register //Register With Storing Address,Register,Size
+			LOAD_DYNAMIC,	//Loading by address in register //Register With Loading Address[SRC],Register[DST],Size
+			STORE_DYNAMIC,	//Storing by address in register //Register With Storing Address[DST],Register[SRC],Size
 
-			LOAD_CONST_STATIC,	//load constant value to register. Linker will replace id on offset
+			LOAD_CONST_STATIC,	//load constant value to register. Linker will replace id on offset| Constant Register Size
 			LEA_CONST,	//Load constant pointer in register. ConstantID, register
 
 			LOAD_STATIC,	//Loading by address in register //MemoryAddress,Register,Size
 			STORE_STATIC,	//Storing by address in register //MemoryAddress,Register,Size
 
-			ALLOC,		//register for allocation's pointer, register with size in bytes, reset memory (1 or 0). If is third arg is null - automaticaly sets to 1
-			FREE,	  //register with pointer
+			ALLOC,		//register for allocation's pointer, size in bytes, reset memory (1 or 0). If is third arg is null - automaticaly sets to 1
+			FREE,	  //register with pointer, register with size
+
+			COPY_DYNAMIC,		//Dynamic copy. Reg0 - address-dest, Reg1 - address-src, Reg2 - size
+			COPY_STATIC,		//Static copy. Immediate0 - address-dest, Immediate1 - address-src, Immediate2 - size
 
 			SECTION_MEMORY_ED,
 			// Control flow arg0 = where
 			SECTION_CONTROL_FLOW_ST,
-			JMP_LABEL,
-			JMP,
+			JMP_LABEL,	//arg0[where]
+			JMP,		//arg0[where]
 			JMPCV,      //CV- Condition Valid - arg0[where], arg1[condition register]
 			JMPCNV,     //CNV - Condition Not Valid - arg0[where], arg1[condition register]
 			CALL,
@@ -143,10 +146,11 @@ namespace MSLL
 			SYMBOL_LABEL,	//Symbol declaring (function), arg0 - symbol_id -> inserting GRAB_FRAME with positive in MSLVM_1
 
 			MOV_FROM_SR,	//Move from special register. REG-DEST, SPECIAL_REG_ID-SRC
-			SPEC_CALL,	//VM_CALL/SYSTEM_CALL
+			SPEC_CALL,	//VM_CALL/SYSTEM_CALL CALL_TYPE, arg1, arg2
 
 			SECTION_SPECIAL_ED,
 		};
+
 		enum Flag {
 			UnhandledSymbol = 1 << 0,
 		};

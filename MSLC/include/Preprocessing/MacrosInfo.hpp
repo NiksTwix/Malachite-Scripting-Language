@@ -11,6 +11,14 @@ namespace MSLC
 	{
         using MacrosID = size_t;
 
+
+
+        struct ParameterLabel 
+        {
+            size_t id = 0;
+            std::string name;
+        };
+
         enum class MacroType {
             Constant,
             FunctionLike
@@ -26,7 +34,7 @@ namespace MSLC
 
             // Для FunctionLike
             std::vector<Token> body_tokens;
-            std::vector<std::string> parameters;
+            std::vector<ParameterLabel> parameters;
 
             // Минимальная отладочная информация
             size_t line_defined = 0;
@@ -50,7 +58,7 @@ namespace MSLC
 
             MacrosID DefineFunction(const std::string& name,
                 std::vector<Token> body_tokens,
-                std::vector<std::string> parameters,
+                std::vector<ParameterLabel> parameters,
                 size_t line = 0);
 
             // Main methods of fast access

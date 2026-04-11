@@ -87,5 +87,11 @@ namespace MSLC
 
 		constexpr std::string_view 	w_define_const = "define_const";
 		constexpr std::string_view 	w_define_insertion = "define_insertion";
+
+		/*
+			Macros using:
+			#define_insertion F(x) { x + 1 }
+			a: int = #F(10) // # prefix
+		*/
 	}
 } 

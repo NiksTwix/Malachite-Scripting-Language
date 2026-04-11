@@ -206,7 +206,7 @@ namespace MSLC
                         }
                         else 
                         {
-                            Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Invalid access to field.", Diagnostics::SyntaxError, Diagnostics::SourceCode, token.line));
+                            Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Invalid access to field.", Diagnostics::SyntaxError, Diagnostics::SourceCode, token.debug_info));
                             continue;
                         }
                     }

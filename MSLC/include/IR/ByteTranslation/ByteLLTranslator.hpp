@@ -23,6 +23,7 @@ namespace MSLC
 					{Pseudo::LowLevelOpCode::MOVRI,ByteOpCode::MOVRI},
 					{Pseudo::LowLevelOpCode::ALLOC,ByteOpCode::ALLOC},
 					{Pseudo::LowLevelOpCode::FREE,ByteOpCode::FREE},
+					{Pseudo::LowLevelOpCode::COPY,ByteOpCode::COPY_DYNAMIC},
 					{Pseudo::LowLevelOpCode::SPEC_CALL,ByteOpCode::SPEC_CALL},
 					{Pseudo::LowLevelOpCode::LABEL,ByteOpCode::JMP_LABEL},
 					{Pseudo::LowLevelOpCode::JMP_NIF,ByteOpCode::JMPCNV},

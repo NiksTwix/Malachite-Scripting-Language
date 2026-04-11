@@ -16,16 +16,27 @@ namespace MSLC
 		};
 
 
+		struct MacroArgument
+		{
+			std::vector<Token> tokens;
+		};
+
 		class Preprocessor 
 		{
 			void HandleDirective(PreprocessingState& state);
 
-			void HandleDirectiveCall(PreprocessingState& state);
+			void HandleDirectiveCallImmediately(PreprocessingState& state);
 
 
 
 			//Directives handlers
 			void HandleDefineConstant(PreprocessingState& state);
+			void HandleDefineInsertion(PreprocessingState& state);
+
+			void Postprocess(CompilationInfo::CompilationState& c_state, std::vector<Token>& tokens);
+
+			void InsertMacro(CompilationInfo::CompilationState& c_state, std::vector<Token>& tokens, std::vector<Token>& source, size_t& i, MacroDefinition* macro);
+
 		public:
 			void Preprocess(CompilationInfo::CompilationState& c_state, std::vector<Token>& tokens);
 		};

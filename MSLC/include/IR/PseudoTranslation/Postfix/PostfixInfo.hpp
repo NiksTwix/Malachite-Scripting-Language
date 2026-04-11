@@ -73,13 +73,13 @@ namespace MSLC
 				{
 					type = group_type;
 					complex = tokens;
-					line = simple.line;
+					line = simple.debug_info;
 					this->simple = simple;
 				}
 				TokensGroup(Tokenization::Token token)
 				{
 					type = GroupType::Simple;
-					line = token.line;
+					line = token.debug_info;
 					simple = token;
 				}
 				TokensGroup(GroupType type) : type(type)

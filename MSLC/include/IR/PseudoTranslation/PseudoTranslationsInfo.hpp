@@ -78,7 +78,7 @@ namespace MSLC
 				ST_DECL,
 				DeclareVariable,	//arg - symbol
 				DefineFunction,
-				ED_DEC,
+				ED_DECL,
 
 				ST_USING,
 				Use,			//variable

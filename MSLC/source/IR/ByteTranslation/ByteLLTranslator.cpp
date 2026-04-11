@@ -206,7 +206,16 @@ namespace MSLC
 					push_command(state, operation.source_line, command);
 				}
 				break;
-
+				case Pseudo::LowLevelOpCode::COPY:
+				{
+					ByteCommand command;
+					command.code = op_code_conversions[operation.code];
+					command.arg0 = CommandArgument(GetAllocatedRegister(state, (Pseudo::LowLevelRegisters)operation.arg0.data), CommandSource::Register);
+					command.arg1 = CommandArgument(GetAllocatedRegister(state, (Pseudo::LowLevelRegisters)operation.arg1.data), CommandSource::Register);
+					command.arg2 = CommandArgument(GetAllocatedRegister(state, (Pseudo::LowLevelRegisters)operation.arg2.data), CommandSource::Register);
+					push_command(state, operation.source_line, command);
+				}
+				break;
 
 				default:
 					break;

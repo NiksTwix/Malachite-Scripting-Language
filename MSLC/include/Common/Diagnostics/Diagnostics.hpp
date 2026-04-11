@@ -44,6 +44,12 @@ namespace MSLC
 			IRCode,
 		};
 
+        struct DebugInfo 
+        {
+            uint32_t line;
+            uint16_t module_id;
+        };
+
 
 		struct InformationMessage
 		{

@@ -8,6 +8,7 @@ namespace MSLC
         void Preprocessor::HandleDefineConstant(PreprocessingState& state)
         {
             // Пропускаем саму директиву
+            state.tokens->at(state.current_index).type = TokenType::UNDEFINED;
             state.current_index++;
             int size = state.tokens->size();
 
@@ -71,23 +72,204 @@ namespace MSLC
             }        
         }
 
-        void Preprocessor::HandleDirectiveCall(PreprocessingState& state)
+        void Preprocessor::HandleDefineInsertion(PreprocessingState& state)
         {
-            Token& macro_token = state.tokens->at(state.current_index);
-            std::string name = macro_token.value.strVal;
+            state.tokens->at(state.current_index).type = TokenType::UNDEFINED;
+            state.current_index++;  //Skip directive
+            int depth = 0;   //For {}
+            Token identifier = state.tokens->at(state.current_index);
+            state.tokens->at(state.current_index).type = TokenType::UNDEFINED;
+            state.current_index++;
 
-            auto& macro = state.c_state->GetMacrosTable().GetMacro(name);
+            size_t end = state.tokens->size();
 
-            if (macro.type == MacroType::Constant) {
-                // Просто заменяем токен на месте
-                macro_token.type = TokenType::LITERAL;
-                macro_token.value = macro.constant_value;
+            std::vector<ParameterLabel> header;
+            std::vector<Token> body;
+
+            uint8_t arg_name_tokens_count = 0;
+
+            bool header_f = false;
+            bool body_f = false;
+            for (; state.current_index < end; state.current_index++) 
+            {
+                Token t = state.tokens->at(state.current_index);
+                state.tokens->at(state.current_index).type = TokenType::UNDEFINED;
+                if (t.type == TokenType::DELIMITER && t.value.strVal == "(" && !header_f)
+                {
+                    header_f = true;
+                    continue;
+                }
+                if (t.type == TokenType::DELIMITER && t.value.strVal == ")" && header_f)
+                {
+                    if (arg_name_tokens_count > 2)
+                    {
+                        Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Invalid argument is in macro's \"" + identifier.value.strVal + "\" header.", Diagnostics::SyntaxError, Diagnostics::SourceCode, identifier.debug_info));
+                    }
+                    header_f = false;
+                    continue;
+                }
+                if (t.type == TokenType::DELIMITER && t.value.strVal == "," && header_f)
+                {
+                    if (arg_name_tokens_count != 1) 
+                    {
+                        Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Invalid argument is in macro's \"" + identifier.value.strVal + "\" header.", Diagnostics::SyntaxError, Diagnostics::SourceCode, identifier.debug_info));
+                    }
+                    arg_name_tokens_count = 0;
+                    continue;
+                }
+                if (header_f)
+                {
+                    ParameterLabel label;
+                    label.name = t.value.strVal;
+                    label.id = header.size();
+                    header.push_back(label);
+                    arg_name_tokens_count += 1;
+                }
+                else 
+                {
+                    if (t.type == TokenType::DELIMITER && t.value.strVal == "{")
+                    {
+                        depth++;
+                        if (depth - 1 == 0)
+                        {
+                            body_f = true;
+                            continue;
+                        }
+                       
+                    }
+                    if (t.type == TokenType::DELIMITER && t.value.strVal == "}" && body_f)
+                    {
+                        depth--;
+                        if (depth == 0) break;
+                    }
+
+                    if (t.type == TokenType::IDENTIFIER) 
+                    {
+                        for (auto t1 : header) 
+                        {
+                            if (t1.name == t.value.strVal) 
+                            {
+                                t.type = TokenType::PREPROCESSOR_DIRECTIVE_ARG;
+                                t.value.uintVal = t1.id;
+                            }
+                        }
+                    }
+                    body.push_back(t);
+                }
+
+                
             }
-            else if (macro.type == MacroType::FunctionLike) {
-                macro_token.type = TokenType::PREPROCESSOR_DIRECTIVE_CALL;
-            }
-            // For function-like macros. Now we dont realize it. Replace main token on CompilationLabel::DirectiveCall -> handling will be in the PseudoTranslator 
+            state.c_state->GetMacrosTable().DefineFunction(identifier.value.strVal, body, header, identifier.debug_info);
+
         }
+
+        void Preprocessor::Postprocess(CompilationInfo::CompilationState& c_state, std::vector<Token>& tokens)
+        {
+            std::vector<Token> source = tokens;
+            tokens.clear();
+
+            for (size_t i = 0; i < source.size(); i++) 
+            {
+                Token& t = source[i];
+
+                if (t.type == TokenType::UNDEFINED) continue;
+
+                if (t.type == TokenType::PREPROCESSOR_DIRECTIVE_CALL) 
+                {
+                    auto* macro = c_state.GetMacrosTable().TryGetMacro(t.value.strVal);
+
+                    if (macro == nullptr)
+                    {
+                        Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Attempt of undefined macro \"" + t.value.strVal + "\" calling exists.", Diagnostics::SyntaxError, Diagnostics::SourceCode, t.debug_info));
+                        return;
+                    }
+
+
+                    if (macro->type == MacroType::Constant) {
+                        t.type = TokenType::LITERAL;
+                        t.value = macro->constant_value;
+                    }
+                    else if (macro->type == MacroType::FunctionLike) {
+                        //Skip identificator
+                        i++;
+                        InsertMacro(c_state, tokens, source, i, macro);
+                        continue;
+                    }
+                }
+
+
+                tokens.push_back(t);
+            }
+
+        }
+
+        void Preprocessor::InsertMacro(CompilationInfo::CompilationState& c_state, std::vector<Token>& tokens, std::vector<Token>& source, size_t& i, MacroDefinition* macro)
+        {
+
+            std::vector<MacroArgument> args;
+            MacroArgument current;
+            if (source[i].type == TokenType::DELIMITER && source[i].value.strVal == "(")
+            {
+                int depth = 0;
+
+                for (; i < source.size(); i++) 
+                {
+                    if (source[i].type == TokenType::DELIMITER && source[i].value.strVal == "(" && depth == 0)
+                    {
+                        continue;
+                    }
+                    if (source[i].type == TokenType::DELIMITER && source[i].value.strVal == "," && depth == 0)
+                    {
+                        if (current.tokens.empty()) Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Invalid argument is in macros call.", Diagnostics::SyntaxError, Diagnostics::SourceCode, source[i].debug_info));
+                        args.push_back(current);
+                        current = MacroArgument();
+                        continue;
+                    }
+                    if (source[i].type == TokenType::DELIMITER && source[i].value.strVal == ")" && depth == 0)
+                    {
+                        if (!current.tokens.empty())  args.push_back(current);
+
+                        break;
+                    }
+                    if (source[i].type == TokenType::DELIMITER && source[i].value.strVal == ")") depth--;
+
+                    if (source[i].type == TokenType::DELIMITER && source[i].value.strVal == "(") depth++;
+
+                    
+                   
+                    
+                    if (depth < 0) 
+                    {
+                        Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Extraneous ) is in macro call.", Diagnostics::SyntaxError, Diagnostics::SourceCode, source[i].debug_info));
+                        return;
+                    }
+
+
+                    current.tokens.push_back(source[i]);
+                }
+            }
+
+            if (args.size() != macro->parameters.size()) 
+            {
+                Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Macro's arguments are invalid.", Diagnostics::LogicError, Diagnostics::SourceCode, source[i].debug_info));
+                return;
+            }
+
+            for (auto t : macro->body_tokens) 
+            {
+                if (t.type == TokenType::PREPROCESSOR_DIRECTIVE_ARG)
+                {
+                    MacroArgument& arg = args[t.value.uintVal];
+                    for (auto to : arg.tokens) 
+                    {
+                        tokens.push_back(to);
+                    }
+                    continue;
+                }
+                tokens.push_back(t);
+            }
+        }
+
 
         void Preprocessor::Preprocess(CompilationInfo::CompilationState& c_state,
             std::vector<Token>& tokens)
@@ -99,11 +281,14 @@ namespace MSLC
             // Один проход, всё на месте
             for (state.current_index = 0; state.current_index < tokens.size(); state.current_index++) {
                 Token& t = tokens[state.current_index];
-                state.current_line = t.line;  // Для сообщений об ошибках
+                state.current_line = t.debug_info;  // Для сообщений об ошибках
 
                 if (t.type == TokenType::PREPROCESSOR_DIRECTIVE) {
                     if (t.value.strVal == Directives::w_define_const) {
                         HandleDefineConstant(state);
+                    }
+                    if (t.value.strVal == Directives::w_define_insertion) {
+                        HandleDefineInsertion(state);
                     }
                     if (t.value.strVal == Directives::w_import) {
                         if (state.current_index + 1 < tokens.size() && tokens[state.current_index + 1].type == TokenType::LITERAL && tokens[state.current_index + 1].value.type == Definitions::ValueType::STRING)
@@ -121,11 +306,10 @@ namespace MSLC
                     // Помечаем саму директиву как UNDEFINED
                     t.type = TokenType::UNDEFINED;
                 }
-                else if (t.type == TokenType::IDENTIFIER &&
-                    c_state.GetMacrosTable().HasMacro(t.value.strVal)) {
-                    HandleDirectiveCall(state);
-                }
             }
+
+            Postprocess(c_state, tokens);
+
             // Всё! Ничего не удаляем, парсер сам пропустит UNDEFINED
         }
 	}

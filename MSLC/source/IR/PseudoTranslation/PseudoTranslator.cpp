@@ -14,12 +14,12 @@ namespace MSLC
 				{
 					if (node.tokens.front().value.uintVal == (uint8_t)Tokenization::CompilationLabel::OPEN_VISIBLE_SCOPE) 
 					{
-						pts.pseudo_code.Pushback(PseudoOperation(PseudoOpCode::PushFrame,0,0,0,node.tokens.front().line));
+						pts.pseudo_code.Pushback(PseudoOperation(PseudoOpCode::PushFrame,0,0,0,node.tokens.front().debug_info));
 						pts.cs_observer->PushNewFrame();
 					}
 					else if (node.tokens.front().value.uintVal == (uint8_t)Tokenization::CompilationLabel::CLOSE_VISIBLE_SCOPE)
 					{
-						pts.pseudo_code.Pushback(PseudoOperation(PseudoOpCode::PopFrame, 0, 0, 0, node.tokens.front().line));
+						pts.pseudo_code.Pushback(PseudoOperation(PseudoOpCode::PopFrame, 0, 0, 0, node.tokens.front().debug_info));
 						pts.cs_observer->PopFrame();
 					}
 					return;	//Compilation labels are simple tokens: they dont have children

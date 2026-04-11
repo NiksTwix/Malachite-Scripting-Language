@@ -28,6 +28,7 @@ namespace MSLC
 
 			//Directives
 			PREPROCESSOR_DIRECTIVE,
+			PREPROCESSOR_DIRECTIVE_ARG,
 			PREPROCESSOR_DIRECTIVE_CALL,
 		};
 	
@@ -52,13 +53,13 @@ namespace MSLC
 			//std::string source_value;
 			Definitions::ValueContainer value;
 			TokenType type;
-			size_t line;
+			size_t debug_info;
 			size_t module_id;
 
-			Token(Definitions::ValueContainer val_con, TokenType type, size_t line = 0, size_t module_id = 0) : value(val_con), type(type), line(line), module_id(module_id) {}
-			Token(TokenType type) : value((uint64_t)0), type(type), line(0), module_id(0) {}
-			Token() : value((uint64_t)0), type(TokenType::UNDEFINED), line(0), module_id(0) {}
-			Token(TokenType type, size_t line = 0, size_t module_id = 0) : value((uint64_t)0), type(type), line(line), module_id(module_id) {}
+			Token(Definitions::ValueContainer val_con, TokenType type, size_t line = 0, size_t module_id = 0) : value(val_con), type(type), debug_info(line), module_id(module_id) {}
+			Token(TokenType type) : value((uint64_t)0), type(type), debug_info(0), module_id(0) {}
+			Token() : value((uint64_t)0), type(TokenType::UNDEFINED), debug_info(0), module_id(0) {}
+			Token(TokenType type, size_t line = 0, size_t module_id = 0) : value((uint64_t)0), type(type), debug_info(line), module_id(module_id) {}
 		};
 
 
@@ -122,6 +123,7 @@ namespace MSLC
 					{std::string(AttributeArgs::w_protected),TokenType::ATTRIBUTE_ARG},
 					{std::string(Directives::w_import),TokenType::PREPROCESSOR_DIRECTIVE},
 					{std::string(Directives::w_define_const), TokenType::PREPROCESSOR_DIRECTIVE},
+					{std::string(Directives::w_define_insertion), TokenType::PREPROCESSOR_DIRECTIVE},
 					{"(", TokenType::DELIMITER },
 					{")", TokenType::DELIMITER},
 					{"{", TokenType::DELIMITER},

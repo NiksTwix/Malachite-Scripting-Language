@@ -175,6 +175,9 @@ namespace MSLC
 				ALLOC,		//register for allocation's pointer, size in bytes, reset memory (1 or 0). If is third arg is null - automaticaly sets to 1
 				FREE,	  //register with pointer, register with size
 
+				COPY_DYNAMIC,		//Dynamic copy. Reg0 - address-dest, Reg1 - address-src, Reg2 - size
+				COPY_STATIC,		//Static copy. Immediate0 - address-dest, Immediate1 - address-src, Immediate2 - size
+
 				SECTION_MEMORY_ED,
 				// Control flow arg0 = where
 				SECTION_CONTROL_FLOW_ST,
@@ -378,24 +381,64 @@ namespace MSLC
 				PrimitiveAnalogs static_primitive_type = PrimitiveAnalogs::UInt;
 				size_t static_data_size = 0;		// Size of typed value
 
-				CompilationInfo::Types::TypeID type_id = CompilationInfo::INVALID_ID;
+				CompilationInfo::Values::ValueInfo value_info;	//dynamic
 
-
+				CompilationInfo::CompilationState* state;
 
 				ValueFrame(ValueSource source,size_t data, PrimitiveAnalogs type, size_t size) : source(source), data(data), dynamic_primitive_type(type), dynamic_data_size(size), static_primitive_type(type), static_data_size(size) {}
-
-				bool contains_pointer = false;	//for pointer variables
-
 
 				static ValueFrame Invalid()
 				{
 					return ValueFrame(ValueSource::Immediate,0, PrimitiveAnalogs::UInt, 0);
 				}
+				void SetValueInfo(CompilationInfo::Values::ValueInfo vinfo)
+				{
+					value_info = vinfo;
+					if (vinfo.isPointer()) 
+					{
+						static_primitive_type = PrimitiveAnalogs::UInt;
+						dynamic_primitive_type = PrimitiveAnalogs::UInt;
+						static_data_size = POINTER_SIZE;
+						dynamic_data_size = POINTER_SIZE;
+					}
+					else 
+					{
+						auto desc = GetTypeDesc(vinfo.type_id, state);
+						dynamic_primitive_type = desc->primitive_analog;
+						static_primitive_type = desc->primitive_analog;
+						static_data_size = desc->GetAlignedSize();
+						dynamic_data_size = desc->GetAlignedSize();
+					}
+				}
 
+				void Dereference()
+				{
+					if (value_info.pointers_depth > 0) value_info.pointers_depth--;
+					if (value_info.pointers_depth == 0)
+					{
+						value_info.flags &= ~CompilationInfo::Values::ValueFlags::Pointer;
+						value_info.flags &= ~CompilationInfo::Values::ValueFlags::ConstPointer;
+						source = ValueSource::DynamicAddress;
+						dynamic_primitive_type = GetTypeDesc(value_info.type_id, state)->primitive_analog;
+						dynamic_data_size = GetTypeDesc(value_info.type_id, state)->GetAlignedSize();
+					}
+
+				}
+				void GetPointer() 
+				{
+					value_info.pointers_depth++;
+					value_info.flags |= CompilationInfo::Values::ValueFlags::Pointer;
+					source = ValueSource::Pointer;
+					dynamic_primitive_type = PrimitiveAnalogs::UInt;
+					dynamic_data_size = POINTER_SIZE;
+				}
 				static CompilationInfo::Types::TypeDescription* GetTypeDesc(CompilationInfo::Types::TypeID id, CompilationInfo::CompilationState* state) 
 				{
 					return state->GetGST().GetType(id);
 				}
+
+
+
 
 			};
 

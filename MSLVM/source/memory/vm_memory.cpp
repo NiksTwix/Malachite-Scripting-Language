@@ -78,7 +78,7 @@ namespace MSLVM
 	void DynamicMemory::Write(uint64_t address, uint64_t value, size_t size)
 	{
 		uint64_t native_address = ToNative(address);
-		if (native_address < stack_sa)
+		if (address < stack_sa)
 		{
 			status = ErrorCode::AttemptOfRODRewriting;
 			return;
@@ -87,6 +87,19 @@ namespace MSLVM
 		for (size_t i = 0; i < size; i++) {
 			m_pointer[native_address + i] = static_cast<uint8_t>((value >> (i * BYTE)) & 0xFF);
 		}
+	}
+
+	void DynamicMemory::Copy(uint64_t destination, uint64_t source, uint64_t size)
+	{
+		if (destination < stack_sa)
+		{
+			status = ErrorCode::AttemptOfRODRewriting;
+			return;
+		}
+		uint64_t native_addressd = ToNative(destination);
+		uint64_t native_addresss = ToNative(source);
+
+		memcpy(m_pointer + native_addressd, m_pointer + native_addresss, size);
 	}
 
 	VMOperation& DynamicMemory::GetOperation(size_t index)

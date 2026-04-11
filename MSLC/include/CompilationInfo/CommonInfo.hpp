@@ -76,9 +76,9 @@ namespace MSLC
 				uint8_t flags;
 				uint16_t pointers_depth = 0;
 
-				inline bool isPointer() const { return flags & ValueFlags::Pointer; }
+				inline bool isPointer() const { return flags & ValueFlags::Pointer && pointers_depth > 0; }
 				inline bool isLink() const { return flags & ValueFlags::Reference; }
-				inline bool isConstPointer() const { return flags & ValueFlags::ConstPointer; }
+				inline bool isConstPointer() const { return flags & ValueFlags::ConstPointer && pointers_depth > 0; }
 				inline bool isConstValue() const { return flags & ValueFlags::ConstValue; }
 				inline bool isImmediate() const { return flags & ValueFlags::Immediate; }
 			};

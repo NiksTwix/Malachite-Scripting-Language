@@ -74,7 +74,7 @@ namespace MSLL
 			CMP_RR_INTEGER,          //arg0 - first, arg1 - second, arg2 - null
 			CMP_RR_UNSIGNED,          //arg0 - first, arg1 - first, arg2 - null
 			CMP_RR_REAL,     //arg0 - first, arg1 - second, arg2 - null; For double with nan checking
-			GET_FLAG,		//arg0 - dest, arg1 - FLAG_NUMBER 
+			GET_FLAG,		//arg0 - dest, arg1 - FLAG_NUMBER0 , arg1 - FLAG_NUMBER1 In variable flag mode, the OR operation is used.
 			//Memory
 
 			//LOAD_RM,    //register-arg0,             address loading from - arg1, size [1-8 bytes] - arg2
@@ -86,9 +86,9 @@ namespace MSLL
 			POP,                 // arg0[register to], arg1[size (not register)]
 
 			//Current scope
-			LOAD_ABSOLUTE,			//arg0[register]            arg1[immediate value of memory-offset]          arg2[size in bytes] 
-			LOAD_LOCAL,          //arg0[register]            arg1[immediate value of memory-offset]          arg2[size in bytes]  
-			STORE_LOCAL,         //arg0[register]       arg1[immediate value of memory-offset]               arg2[size in bytes]  
+			LOAD_ABSOLUTE,			//arg0[register]            arg1[immediate value of memory-offset]          arg2[size in bytes] // independed by FP
+			LOAD_LOCAL,          //arg0[register]            arg1[immediate value of memory-offset]          arg2[size in bytes]  // depended by FP
+			STORE_LOCAL,         //arg0[register]       arg1[immediate value of memory-offset]               arg2[size in bytes]   // depended by FP
 
 			CALC_FRAME_ADDRESS,		//register(ARG0) offset(ARG1)
 			LOAD_BY_ADDRESS,			// register(ARG0), register - address(ARG1), size(ARG2)
@@ -98,8 +98,10 @@ namespace MSLL
 			LOAD_CONST_BY_ADDRESS,	//register-dest, reg with address, size
 
 			ALLOCATE_MEMORY,		//arg0[register of address's saving], arg1[register with size of memory's interval]
-			FREE_MEMORY,			//arg0[register with address]
+			FREE_MEMORY,			//arg0[register with address], arg1[register with size of memory's interval]
 			GRAB_FRAME,				//arg0[bytes] If bytes < 0 => grab to up, else - grab to down 
+			STATIC_COPY,			//arg0[immediate with address-dest],arg0[immediate with address-dest],arg0[size]
+			DYNAMIC_COPY,			//arg0[register with pointer-dest],arg0[register with pointer-src],arg0[register with size]
 			// Control flow arg0 = where
 			JMP,
 			JMP_CV,      //CV- Condition Valid - arg0[where], arg1[condition register]

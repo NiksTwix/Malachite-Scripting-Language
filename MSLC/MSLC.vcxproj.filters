@@ -67,6 +67,12 @@
     <Filter Include="Файлы заголовков\IR\Pseudo\LowLevel">
       <UniqueIdentifier>{884260a3-b154-4a7e-8192-e2934c23972e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Исходные файлы\IR\Byte\BCH">
+      <UniqueIdentifier>{d61f36b6-35ca-4834-993c-83bc163e04e1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы заголовков\IR\Byte\BCH">
+      <UniqueIdentifier>{b7f601aa-ca8f-4b9c-9cca-f35016e4a666}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MSLC.cpp">
@@ -117,7 +123,7 @@
     <ClCompile Include="source\IR\ByteTranslation\ByteTranslator.cpp">
       <Filter>Исходные файлы\IR\Byte</Filter>
     </ClCompile>
-    <ClCompile Include="source\IR\ByteTranslation\ByteCommandsHandlers.cpp">
+    <ClCompile Include="source\IR\ByteTranslation\ByteCommandsHandler.cpp">
       <Filter>Исходные файлы\IR\Byte</Filter>
     </ClCompile>
     <ClCompile Include="source\IR\ByteTranslation\ByteDebugInfo.cpp">
@@ -134,6 +140,18 @@
     </ClCompile>
     <ClCompile Include="source\IR\ByteTranslation\ByteLLTranslator.cpp">
       <Filter>Исходные файлы\IR\Byte</Filter>
+    </ClCompile>
+    <ClCompile Include="source\IR\ByteTranslation\BCH\BCHAL.cpp">
+      <Filter>Исходные файлы\IR\Byte\BCH</Filter>
+    </ClCompile>
+    <ClCompile Include="source\IR\ByteTranslation\BCH\BCHControlFlow.cpp">
+      <Filter>Исходные файлы\IR\Byte\BCH</Filter>
+    </ClCompile>
+    <ClCompile Include="source\IR\ByteTranslation\BCH\BCHDataFlow.cpp">
+      <Filter>Исходные файлы\IR\Byte\BCH</Filter>
+    </ClCompile>
+    <ClCompile Include="source\IR\ByteTranslation\BCH\BCHUtils.cpp">
+      <Filter>Исходные файлы\IR\Byte\BCH</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -206,7 +224,7 @@
     <ClInclude Include="include\IR\ByteTranslation\ByteTranslator.hpp">
       <Filter>Файлы заголовков\IR\Byte</Filter>
     </ClInclude>
-    <ClInclude Include="include\IR\ByteTranslation\ByteCommandsHandlers.hpp">
+    <ClInclude Include="include\IR\ByteTranslation\ByteCommandsHandler.hpp">
       <Filter>Файлы заголовков\IR\Byte</Filter>
     </ClInclude>
     <ClInclude Include="include\IR\ByteTranslation\ByteDebugInfo.hpp">
@@ -238,6 +256,18 @@
     </ClInclude>
     <ClInclude Include="include\Definitions\ValueContainer.hpp">
       <Filter>Файлы заголовков\Info</Filter>
+    </ClInclude>
+    <ClInclude Include="include\IR\ByteTranslation\BCH\BCHAL.hpp">
+      <Filter>Файлы заголовков\IR\Byte\BCH</Filter>
+    </ClInclude>
+    <ClInclude Include="include\IR\ByteTranslation\BCH\BCHControlFlow.hpp">
+      <Filter>Файлы заголовков\IR\Byte\BCH</Filter>
+    </ClInclude>
+    <ClInclude Include="include\IR\ByteTranslation\BCH\BCHDataFlow.hpp">
+      <Filter>Файлы заголовков\IR\Byte\BCH</Filter>
+    </ClInclude>
+    <ClInclude Include="include\IR\ByteTranslation\BCH\BCHUtils.hpp">
+      <Filter>Файлы заголовков\IR\Byte\BCH</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

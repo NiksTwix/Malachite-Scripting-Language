@@ -24,6 +24,9 @@ namespace MSLC {
 				MODI,	//Register-dest,register-src0,register-src1
 				NEGI,	//Register-dest,register-src0
 				MOVRI,	//Register-dest, immediate-src 
+
+				COPY,	//Register-dest,register-src0,register-size
+
 				MOV,	//Register-dest,register-src0
 				SPEC_CALL,	//SPECIAL_CALL| call_id (depends by VM's version), arg0,arg1
 				//PRINT_REG,	//(char/int/real), register-source
@@ -104,6 +107,7 @@ namespace MSLC {
 					{"JMP_NIF",JMP_NIF}, //label id, register
 					{"ALLOC",ALLOC},
 					{"FREE",FREE},
+					{"COPY",COPY},
 				};
 				std::unordered_map<std::string, LowLevelRegisters> registers_id =
 				{

@@ -20,7 +20,8 @@ private:
 
 		HEX_QWORD,
 		DEC_QWORD,
-	
+		
+		CHARACTER,
 	};
 
 	std::unordered_map<std::string, RODViewType> rv_types = 
@@ -33,6 +34,7 @@ private:
 		{"DEC_DWORD",RODViewType::DEC_DWORD},
 		{"HEX_QWORD",RODViewType::HEX_QWORD},
 		{"DEC_QWORD",RODViewType::DEC_QWORD},
+		{"CHARACTER",RODViewType::CHARACTER},
 	};
 	std::unordered_map<RODViewType, std::string> rv_types_string =
 	{
@@ -44,6 +46,7 @@ private:
 		{RODViewType::DEC_DWORD,"DEC_DWORD"},
 		{RODViewType::HEX_QWORD,"HEX_QWORD"},
 		{RODViewType::DEC_QWORD,"DEC_QWORD"},
+		{RODViewType::CHARACTER,"CHARACTER"},
 	};
 	RODViewType rv_type = RODViewType::HEX_BYTES;
 

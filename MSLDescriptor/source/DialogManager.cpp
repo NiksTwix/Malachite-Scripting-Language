@@ -88,6 +88,23 @@ void DialogManager::PrintDump(InterpretationState& state)
 				i += 8;
 				break;
 			}
+			case RODViewType::CHARACTER:
+			{
+				if (i + 1 > difference) goto break_loop;
+
+				char c = (char)(*(state.rod_section.ptr + address + i));
+				std::cout << std::dec;
+				if (c == '\n')  std::cout << "\\n";
+				else if (c == '\t')  std::cout << "\\t";
+				else 
+				{
+					std::cout << c;
+				}
+				
+
+				i += 1;
+				break;
+			}
 			default:
 				i = difference; // exit loop
 				break;
@@ -139,7 +156,7 @@ void DialogManager::DialogROD(InterpretationState& state)
 
 			uint8_t uint_choice = choice - '0' - 1;
 
-			if (uint_choice > (uint8_t)RODViewType::DEC_QWORD) 
+			if (uint_choice > (uint8_t)RODViewType::CHARACTER) 
 			{
 				std::cerr << "Invalid type.\n";
 				break;

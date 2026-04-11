@@ -59,6 +59,9 @@ namespace MSLVM
         uint8_t ReadByte(uint64_t address);
         void Write(uint64_t address, uint64_t value, size_t size);		//64 - max size of data/ Little Endian
 
+        void Copy(uint64_t destination, uint64_t source, uint64_t size);
+
+
         VMOperation& GetOperation(size_t index);
 
         inline size_t GetOperationsCount() { return code_size / sizeof(VMOperation); }

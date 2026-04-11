@@ -23,7 +23,7 @@ namespace MSLC
 
             return id;
         }
-        MacrosID MacrosTable::DefineFunction(const std::string& name, std::vector<Token> body_tokens, std::vector<std::string> parameters, size_t line)
+        MacrosID MacrosTable::DefineFunction(const std::string& name, std::vector<Token> body_tokens, std::vector<ParameterLabel> parameters, size_t line)
         {
             MacrosID id = m_next_id++;
 

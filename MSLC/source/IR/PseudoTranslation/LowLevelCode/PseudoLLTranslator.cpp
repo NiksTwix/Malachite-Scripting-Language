@@ -181,7 +181,19 @@ namespace MSLC
 					operation.arg1 = reg_id1;	//size
 				}	
 					break;
+				case LowLevelOpCode::COPY:
+				{
+					if (arguments.size() != 3) goto error2;
+					LowLevelRegisters reg_id0 = LLTranslationMap::Get().GetRegisterID(arguments[0].tokens[0].value.strVal);
+					LowLevelRegisters reg_id1 = LLTranslationMap::Get().GetRegisterID(arguments[1].tokens[0].value.strVal);
+					LowLevelRegisters reg_id2 = LLTranslationMap::Get().GetRegisterID(arguments[2].tokens[0].value.strVal);
+					if (reg_id0 == LowLevelRegisters::InvalidR || reg_id1 == LowLevelRegisters::InvalidR || reg_id2 == LowLevelRegisters::InvalidR) goto error2;
 
+					operation.arg0 = reg_id0;
+					operation.arg1 = reg_id1;	
+					operation.arg2 = reg_id2;//size
+				}
+				break;
 
 				case LowLevelOpCode::SPEC_CALL: 
 				{
