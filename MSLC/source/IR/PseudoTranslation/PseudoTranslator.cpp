@@ -54,6 +54,7 @@ namespace MSLC
 				{
 					AnalyzeRecursive(node, *pts);
 				}
+				if (pts->pseudo_code.Empty()) return pts;
 				CompilationStateStringSerializator csss;
 				PseudoOperationsStringSerializator poss;
 

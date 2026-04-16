@@ -88,12 +88,12 @@ namespace MSLC
 				ED_USING,
 				ST_CONTROL_FLOW,
 				Call,
-				Jump,
-				JumpIf,
-				JumpNIf,
-				Label,
+				Jump,			//where label_id
+				JumpIf,			//where label_id	
+				JumpNIf,		//where label_id
+				Label,			// label_id
 
-				ET_CONTROL_FLOW,
+				ED_CONTROL_FLOW,
 
 
 				CreateArray,	//count of previous elements in stack, type_id (by first element)

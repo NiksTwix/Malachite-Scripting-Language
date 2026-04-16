@@ -17,7 +17,7 @@ namespace MSLC
 				}
 
 				commands_handler.FreeTempResources(b_state);
-
+				if (b_state->result.Empty()) return b_state;
 				CommandStringSerializer css;
 				std::cout << "Size: " << b_state->result.Size() << "\n";
 				for (size_t i = 0; i < b_state->result.Size(); i++) 

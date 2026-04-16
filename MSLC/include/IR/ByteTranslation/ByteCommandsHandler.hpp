@@ -14,6 +14,7 @@ namespace MSLC
 			private:
 				BCH::ArithmeticLogicHandler alh;
 				BCH::DataFlowHandler dfh;
+				BCH::ControlFlowHandler cfh;
 				::MSLC::IntermediateRepresentation::Byte::LLTranslator ll_translator;
 			public:
 				void HandleCommand(std::shared_ptr<ByteTranslationState>  b_state);

@@ -48,6 +48,10 @@ namespace MSLC
 				{
 					dfh.HandleDeclaring(b_state->pseudo_state_observer->pseudo_code, b_state);
 				}
+				else if (operation.op_code > Pseudo::PseudoOpCode::ST_CONTROL_FLOW && operation.op_code < Pseudo::PseudoOpCode::ED_CONTROL_FLOW)
+				{
+					cfh.Handle(b_state->pseudo_state_observer->pseudo_code, b_state);
+				}
 			}
 			void CommandsHandler::FreeTempResources(std::shared_ptr<ByteTranslationState> b_state)
 			{

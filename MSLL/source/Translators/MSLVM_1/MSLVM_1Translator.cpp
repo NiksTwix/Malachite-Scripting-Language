@@ -307,9 +307,26 @@ namespace MSLL
 			}
 				break;
 			case LinkDefinitions::ByteOpCode::JMPCV:
-				break;
 			case LinkDefinitions::ByteOpCode::JMPCNV:
+			{
+				LinkDefinitions::jmplabelid id = command.arg0.data;
+				size_t current_ip = result.size();
+				operation.code = command.code == LinkDefinitions::ByteOpCode::JMPCV ? VMOperationCode::JMP_CV: VMOperationCode::JMP_CNV;
+				operation.arg1 = command.arg1.data;	//REGISTER WITH CONDITION'S RESULT
+				if (auto it = state->label_jmp_ip.find(id); it != state->label_jmp_ip.end())
+				{
+					operation.arg0 = it->second;
+
+				}
+				else
+				{
+					state->except_handling_jmps[id].push_back(current_ip);
+				}
 				break;
+			}
+				
+
+
 			case LinkDefinitions::ByteOpCode::CALL:
 				break;
 			case LinkDefinitions::ByteOpCode::RET:
