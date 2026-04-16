@@ -260,6 +260,14 @@ namespace MSLC
 				}
 
 			}
+			//Try to unit a remainder
+			if (!group_of_nodes.empty() && last != ASTGroupType::None)
+			{
+				UnitToGroup(node, group_of_nodes, last);
+				last = ASTGroupType::None;
+				group_of_nodes.clear();
+			}
+
 		}
 
 		

@@ -7,6 +7,19 @@ namespace MSLC
 		{
 			void BasicSyntaxTranslator::HandleBasicSyntax(AST::ASTNode& node, PseudoTranslationState& pts, recursive_handler rhandler)
 			{
+
+				switch (node.group_type)
+				{
+				case AST::ASTGroupType::IfCondition:
+					break;
+				case AST::ASTGroupType::None:
+					break;
+				default:
+					break;
+				}
+
+
+				//In the future move it to separated handler
 				switch (node.type)
 				{
 				case AST::ASTNodeType::None: break;

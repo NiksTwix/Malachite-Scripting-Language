@@ -10,6 +10,7 @@ namespace MSLC
 		{
 			void PseudoTranslator::AnalyzeRecursive(AST::ASTNode& node, PseudoTranslationState& pts)
 			{
+				if (node.type == AST::ASTNodeType::None && node.tokens.empty() && node.children.empty()) return;
 				if (node.tokens.size() == 1 && node.tokens.front().type == Tokenization::TokenType::COMPILATION_LABEL) 
 				{
 					if (node.tokens.front().value.uintVal == (uint8_t)Tokenization::CompilationLabel::OPEN_VISIBLE_SCOPE) 
