@@ -27,17 +27,10 @@ namespace MSLC
 				}
 				size_t children_count = node.children.size();
 
-				if (children_count && node.tokens.size())	//MSL syntax construction
+				if (children_count)				//Maybe code construction or code block
 				{
 					basic_syntax_translator.HandleBasicSyntax(node, pts, [this](AST::ASTNode& node, PseudoTranslationState& pts) -> void {this->AnalyzeRecursive(node, pts); });
-					//Basic constructions
-				}
-				else if (children_count && node.tokens.empty())				//Code block (without header)
-				{
-					for (auto child : node.children) 
-					{
-						AnalyzeRecursive(child,pts);
-					}
+					
 				}
 				else	//MSL Expression
 				{
@@ -55,7 +48,12 @@ namespace MSLC
 				{
 					AnalyzeRecursive(node, *pts);
 				}
+				basic_syntax_translator.ClearTempResources();
+				
+
 				if (pts->pseudo_code.Empty()) return pts;
+
+
 				CompilationStateStringSerializator csss;
 				PseudoOperationsStringSerializator poss;
 

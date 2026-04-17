@@ -123,6 +123,10 @@ namespace MSLC
 					{PseudoOpCode::PushFrame, "PushFrame"},
 					{PseudoOpCode::PopFrame, "PopFrame"},
 					{PseudoOpCode::PushLLOpers, "PushLLOpers"},
+					{PseudoOpCode::Label, "Label"},
+					{PseudoOpCode::Jump, "Jump"},
+					{PseudoOpCode::JumpIf, "JumpIf"},
+					{PseudoOpCode::JumpNIf, "JumpNIf"},
 				};
 			}
 			std::string PseudoOperationsStringSerializator::Serialize(const PseudoOperation& operation)

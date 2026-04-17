@@ -6,6 +6,18 @@ namespace MSLC
 	{
 		namespace Pseudo
 		{
+			CompilationInfo::LabelID LLTranslator::RegisterOrGetAliasingLabelID(PseudoTranslationState& state, std::string str_id)
+			{
+				if (aliasing_labels_ids.count(str_id))
+				{
+					return aliasing_labels_ids[str_id];
+				}
+				aliasing_labels_ids[str_id] = state.cs_observer->GetGST().GetNewLabelID();
+
+				return aliasing_labels_ids[str_id];
+			}
+
+
 			void LLTranslator::Handle(PseudoTranslationState& state, std::vector<Argument>& arguments, std::vector<Token>& op_code, Diagnostics::DeclaringPlace  di)
 			{
 				LLOperation operation;
@@ -136,7 +148,7 @@ namespace MSLC
 					std::string argument = arguments[0].tokens[0].value.strVal;
 					if (argument.empty()) goto error2;
 
-					CompilationInfo::LabelID id = state.cs_observer->GetGST().RegisterOrGetLabelID(argument);
+					CompilationInfo::LabelID id = RegisterOrGetAliasingLabelID(state,argument);	//Labels are local for each module
 
 					operation.arg0 = LLArgument(LLArgumentSource::Immediate, id);
 
@@ -296,6 +308,10 @@ namespace MSLC
 					
 					Handle(state, arguments, op_code, cnode.declaring_place);
 				}
+			}
+			void LLTranslator::ClearTempResources()
+			{
+				aliasing_labels_ids.clear();
 			}
 		}
 	}

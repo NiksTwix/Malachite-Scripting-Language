@@ -237,7 +237,7 @@ namespace MSLC
 			for (size_t i = 0; i < node.children.size(); i++)
 			{
 				ASTNode& child_node = node.children[i];
-				if (child_node.tokens.size() == 0) continue;
+				if (child_node.tokens.size() == 0 && child_node.children.empty()) continue;
 				Postprocess(child_node);
 
 

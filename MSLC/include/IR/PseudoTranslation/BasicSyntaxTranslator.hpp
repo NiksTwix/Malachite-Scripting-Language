@@ -13,9 +13,15 @@ namespace MSLC
 			{
 				LLTranslator lltranslator;
 
+
+				void HandleIfCondition(AST::ASTNode& node, PseudoTranslationState& pts, recursive_handler rhandler);
+
 			public:
 				BasicSyntaxTranslator() = default;
 				void HandleBasicSyntax(AST::ASTNode& node, PseudoTranslationState& pts, recursive_handler rhandler);
+
+				void ClearTempResources();
+
 			};
 		}
 	}
