@@ -12,6 +12,9 @@ namespace MSLC
 
 				bool use_end_label = node.children.size() > 1;
 
+				AST::ASTNode insert_after_end_jump;
+
+
 				CompilationInfo::LabelID end_label = use_end_label ? pts.cs_observer->GetGST().GetNewLabelID() : CompilationInfo::INVALID_ID;
 
 				//if condition structure checking: if, elif, elif..., else
@@ -52,12 +55,12 @@ namespace MSLC
 
 						if (child.tokens.size() < 4)	//if (true)
 						{
-							Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Conditions block[if/elif] is invalid. If/elif block is without arguments.", Diagnostics::SyntaxError, Diagnostics::SourceCode, node.declaring_place));
+							Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Conditions block[if/elif] is invalid. If/elif block is without arguments.", Diagnostics::SyntaxError, Diagnostics::SourceCode, child.declaring_place));
 							return;
 						}
 						if (const auto& parenthese = child.tokens[1]; parenthese.type != TokenType::DELIMITER || parenthese.value.strVal != "(")	//if (true)
 						{
-							Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Conditions block[if/elif] is invalid. Condition's expression must be enclosed in parentheses.", Diagnostics::SyntaxError, Diagnostics::SourceCode, node.declaring_place));
+							Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Conditions block[if/elif] is invalid. Condition's expression must be enclosed in parentheses.", Diagnostics::SyntaxError, Diagnostics::SourceCode, child.declaring_place));
 							return;
 						}
 
@@ -71,7 +74,6 @@ namespace MSLC
 						size_t ci = 2;				//skip keyword and (
 
 						bool build_condition = true;
-						bool build_line_statement = false;	// expression -> statement
 						for (; ci < child.tokens.size(); ci++)		// if ( expression[2]
 						{
 							const Token& t = child.tokens[ci];
@@ -79,7 +81,7 @@ namespace MSLC
 							{
 								if (!build_condition) 
 								{
-									Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Conditions block[if/elif] is invalid. '(' stands after condition.", Diagnostics::SyntaxError, Diagnostics::SourceCode, node.declaring_place));
+									Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Conditions block[if/elif] is invalid. '(' stands after condition.", Diagnostics::SyntaxError, Diagnostics::SourceCode, child.declaring_place));
 									return;
 								}
 								parentheses_depth++;
@@ -90,39 +92,20 @@ namespace MSLC
 								if (parentheses_depth == 0) 
 								{
 									build_condition = false;
+									continue;
 								}
 							}
-
-							if (t.type == TokenType::OPERATOR && t.value.strVal == "->"	&& !build_condition) 
-							{
-								build_line_statement = true;
-
-								line_statement.tokens = Strings::StringOperations::TrimVector(child.tokens, ci + 1, child.tokens.size() - 1);
-								break;
-							}
-
 							if (build_condition) condition.tokens.push_back(t);
+							else 
+							{
+								line_statement.tokens.push_back(t);
+							}
 						}
 
-						if (parentheses_depth > 0) 
-						{
-							Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Conditions block[if/elif] is invalid. Condition's expression must be enclosed in parentheses.", Diagnostics::SyntaxError, Diagnostics::SourceCode, node.declaring_place));
-							return;
-						}
-						if (parentheses_depth < 0) 
-						{
-							Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Conditions block[if/elif] is invalid. Extaneous ')' exist in condition's expression.", Diagnostics::SyntaxError, Diagnostics::SourceCode, node.declaring_place));
-							return;
 
-						}
 						if (condition.tokens.empty()) 
 						{
-							Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Conditions block[if/elif] is invalid. Condition's expression is null.", Diagnostics::SyntaxError, Diagnostics::SourceCode, node.declaring_place));
-							return;
-						}
-						if (build_line_statement && line_statement.tokens.empty())
-						{
-							Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Conditions block[if/elif] is invalid. Line statement ([if condition] -> line_statement) is null.", Diagnostics::SyntaxError, Diagnostics::SourceCode, node.declaring_place));
+							Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Conditions block[if/elif] is invalid. Condition's expression is null.", Diagnostics::SyntaxError, Diagnostics::SourceCode, child.declaring_place));
 							return;
 						}
 
@@ -134,13 +117,13 @@ namespace MSLC
 						PseudoOperation jump = PseudoOperation(PseudoOpCode::JumpNIf, not_valid_jump_label, child.declaring_place);
 						pts.pseudo_code.Pushback(jump);
 
-						if (build_line_statement) 
+						if (!line_statement.tokens.empty()) 
 						{
 							rhandler(line_statement, pts);	// line_statement handling
 						}
-						else 
+						else
 						{
-							for (auto body_line:child.children) rhandler(body_line, pts);	//WARNING! keep controlling visible scopes
+							for (auto body_line : child.children) rhandler(body_line, pts);	//WARNING! keep controlling visible scopes
 						}
 
 						if (use_end_label) 
@@ -151,11 +134,24 @@ namespace MSLC
 
 						PseudoOperation label = PseudoOperation(PseudoOpCode::Label, not_valid_jump_label, child.declaring_place);
 						pts.pseudo_code.Pushback(label);
+
+
+						if (node.children.size() > 1 && !line_statement.tokens.empty() && !child.children.empty()) 
+						{
+							Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Breaking the structure of the condition block.", Diagnostics::SyntaxError, Diagnostics::SourceCode, child.declaring_place));
+							return;
+						}
+
+						if (!line_statement.tokens.empty()) //Insert code_block after line_statement and jump (if this block is last)
+						{
+							insert_after_end_jump = child;	
+						}
+
 					}
 
 					else if (child.type == AST::ASTNodeType::Else)
 					{
-						// else -> 
+						// else expression
 						// else {}
 
 						AST::ASTNode line_statement;
@@ -164,28 +160,27 @@ namespace MSLC
 
 						if (child.tokens.size() > 1) 
 						{
-							if (const Token& t = child.tokens[1]; t.type != TokenType::OPERATOR || t.value.strVal != "->") 
-							{
-								Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Conditions block[else] is invalid. Operator '->' is expected for line statetement defining.", Diagnostics::SyntaxError, Diagnostics::SourceCode, node.declaring_place));
-								return;
-							}
-
-							line_statement.tokens = Strings::StringOperations::TrimVector(child.tokens, 2, child.tokens.size() - 1);	//skip ->
+							line_statement.tokens = Strings::StringOperations::TrimVector(child.tokens, 1, child.tokens.size() - 1);	//skip else
 
 							rhandler(line_statement, pts);
-
+							if (use_end_label && !child.children.empty()) 
+							{
+								insert_after_end_jump = child;
+							}
 						}
 						else 
 						{
 							for (auto body_line : child.children) rhandler(body_line, pts);	//WARNING! keep controlling visible scopes
 						}
 
+
+
 						//JMP command for skipping is not needed because else in the end of condition construction
 					}
 					
 					else 
 					{
-						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Unknown structure exists in conditions block.", Diagnostics::SyntaxError, Diagnostics::SourceCode, node.declaring_place));
+						Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Unknown structure exists in conditions block.", Diagnostics::SyntaxError, Diagnostics::SourceCode, child.declaring_place));
 						return;
 					}
 
@@ -195,8 +190,18 @@ namespace MSLC
 				{
 					PseudoOperation endlabel = PseudoOperation(PseudoOpCode::Label, end_label, node.declaring_place);
 					pts.pseudo_code.Pushback(endlabel);
+
+
+					for (auto body_line: insert_after_end_jump.children) rhandler(body_line, pts);	//WARNING! keep controlling visible scopes
+
 				}
 				
+				/*
+				if (x>0) y = 1
+				{ //Code block (it mustnt be connected with if)
+				     z=2
+				}
+				*/
 			}
 
 

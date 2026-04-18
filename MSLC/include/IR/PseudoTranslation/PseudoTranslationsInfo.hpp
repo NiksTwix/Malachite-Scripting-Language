@@ -109,6 +109,10 @@ namespace MSLC
 				Binary = 1 << 0,
 				Unary = 1 << 1,
 				Assignment = 1 << 2,
+				Continue = 1 << 3,
+				Break = 1 << 4,
+				Unhandled = 1 << 5,
+
 			};
 
 			struct PseudoOperation
