@@ -39,6 +39,8 @@ namespace MSLC
 
 			OPEN_VISIBLE_SCOPE,    //Start of variable scope
 			CLOSE_VISIBLE_SCOPE,      //End of variable scope
+
+			//unused
 			FUNCTION_CALL,  //function(params)
 			OFFSET_ACCESS,  //array[index]
 

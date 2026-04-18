@@ -90,16 +90,16 @@ namespace MSLC
 
             bool header_f = false;
             bool body_f = false;
-            for (; state.current_index < end; state.current_index++) 
+            for (; state.current_index < end; state.current_index++)    //Not beatiful, but it works
             {
                 Token t = state.tokens->at(state.current_index);
                 state.tokens->at(state.current_index).type = TokenType::UNDEFINED;
-                if (t.type == TokenType::DELIMITER && t.value.strVal == "(" && !header_f)
+                if (t.type == TokenType::DELIMITER && t.value.strVal == "(" && !header_f && !body_f)
                 {
                     header_f = true;
                     continue;
                 }
-                if (t.type == TokenType::DELIMITER && t.value.strVal == ")" && header_f)
+                if (t.type == TokenType::DELIMITER && t.value.strVal == ")" && header_f && !body_f)
                 {
                     if (arg_name_tokens_count > 2)
                     {
@@ -108,7 +108,7 @@ namespace MSLC
                     header_f = false;
                     continue;
                 }
-                if (t.type == TokenType::DELIMITER && t.value.strVal == "," && header_f)
+                if (t.type == TokenType::DELIMITER && t.value.strVal == "," && header_f && !body_f)
                 {
                     if (arg_name_tokens_count != 1) 
                     {

@@ -71,22 +71,21 @@ namespace MSLC
 						line_statement.type = AST::ASTNodeType::Expression;
 
 						int parentheses_depth = 1;	// we have skiped open (
-						size_t ci = 2;				//skip keyword and (
+						size_t ci = 1;				//skip keyword
 
 						bool build_condition = true;
 						for (; ci < child.tokens.size(); ci++)		// if ( expression[2]
 						{
 							const Token& t = child.tokens[ci];
-							if (t.type == TokenType::DELIMITER && t.value.strVal == "(")
+							if (t.type == TokenType::DELIMITER && t.value.strVal == "(" && build_condition)
 							{
-								if (!build_condition) 
+								if (parentheses_depth == 0) 
 								{
-									Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Conditions block[if/elif] is invalid. '(' stands after condition.", Diagnostics::SyntaxError, Diagnostics::SourceCode, child.declaring_place));
-									return;
+									parentheses_depth++; continue;
 								}
 								parentheses_depth++;
 							}
-							if (t.type == TokenType::DELIMITER && t.value.strVal == ")") 
+							if (t.type == TokenType::DELIMITER && t.value.strVal == ")" && build_condition)
 							{
 								parentheses_depth--;
 								if (parentheses_depth == 0) 
@@ -102,14 +101,11 @@ namespace MSLC
 							}
 						}
 
-
 						if (condition.tokens.empty()) 
 						{
 							Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Conditions block[if/elif] is invalid. Condition's expression is null.", Diagnostics::SyntaxError, Diagnostics::SourceCode, child.declaring_place));
 							return;
 						}
-
-
 						rhandler(condition, pts);	// condition handling
 
 						CompilationInfo::LabelID not_valid_jump_label = pts.cs_observer->GetGST().GetNewLabelID();
@@ -146,18 +142,14 @@ namespace MSLC
 						{
 							insert_after_end_jump = child;	
 						}
-
 					}
 
 					else if (child.type == AST::ASTNodeType::Else)
 					{
-						// else expression
+						// else statement
 						// else {}
-
 						AST::ASTNode line_statement;
 						line_statement.type = AST::ASTNodeType::Expression;
-
-
 						if (child.tokens.size() > 1) 
 						{
 							line_statement.tokens = Strings::StringOperations::TrimVector(child.tokens, 1, child.tokens.size() - 1);	//skip else
@@ -172,9 +164,6 @@ namespace MSLC
 						{
 							for (auto body_line : child.children) rhandler(body_line, pts);	//WARNING! keep controlling visible scopes
 						}
-
-
-
 						//JMP command for skipping is not needed because else in the end of condition construction
 					}
 					
@@ -201,7 +190,130 @@ namespace MSLC
 				{ //Code block (it mustnt be connected with if)
 				     z=2
 				}
+				It fixes a bug of AST builder. Because it[ASTBuilder] doesnt consider 'if's semantic we should append {} separately
 				*/
+			}
+
+			void BasicSyntaxTranslator::HandleWhile(AST::ASTNode& node, PseudoTranslationState& pts, recursive_handler rhandler)
+			{
+
+				CompilationInfo::LabelID check_label = pts.cs_observer->GetGST().GetNewLabelID();
+
+				CompilationInfo::LabelID end_label = pts.cs_observer->GetGST().GetNewLabelID();
+			
+
+				/*
+				while (condition)
+				{
+				
+				}
+				
+				while (condition) statement
+				
+				*/
+				if (node.tokens.size() < 4)
+				{
+					Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Cycle's block[while] is invalid. Cycle's header structure is invalid.", Diagnostics::SyntaxError, Diagnostics::SourceCode, node.declaring_place));
+					return;
+				}
+				if (node.tokens[0].type != TokenType::KEYWORD || node.tokens[0].value.strVal != Keywords::w_while)
+				{
+					Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Cycle's block[while] is invalid. Cycle's identifier is invalid.", Diagnostics::SyntaxError, Diagnostics::SourceCode, node.declaring_place));
+					return;
+				}
+				//condition building
+
+				int parentheses_depth = 0;
+
+				AST::ASTNode condition;
+				condition.type = AST::ASTNodeType::Expression;
+				AST::ASTNode line_statement;
+				line_statement.type = AST::ASTNodeType::Expression;
+				size_t ci = 1; //skip while
+				bool build_condition = true;
+				for (; ci < node.tokens.size(); ci++)		// while ([1]
+				{
+					const Token& t = node.tokens[ci];
+					if (t.type == TokenType::DELIMITER && t.value.strVal == "(" && build_condition)
+					{
+						if (parentheses_depth == 0)
+						{
+							parentheses_depth++; continue;
+						}
+						parentheses_depth++;
+					}
+					if (t.type == TokenType::DELIMITER && t.value.strVal == ")" && build_condition)
+					{
+						parentheses_depth--;
+						if (parentheses_depth == 0)
+						{
+							build_condition = false;
+							continue;
+						}
+					}
+					if (build_condition) condition.tokens.push_back(t);
+					else
+					{
+						line_statement.tokens.push_back(t);
+					}
+				}
+
+				if (condition.tokens.empty())
+				{
+					Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Cycle's block[while] is invalid. Condition's expression is null.", Diagnostics::SyntaxError, Diagnostics::SourceCode, node.declaring_place));
+					return;
+				}
+				
+				//Add label
+				PseudoOperation conditionlabel = PseudoOperation(PseudoOpCode::Label, check_label, node.declaring_place);
+				pts.pseudo_code.Pushback(conditionlabel);
+				rhandler(condition, pts);
+
+				PseudoOperation jump_label = PseudoOperation(PseudoOpCode::JumpNIf, end_label, node.declaring_place);
+				pts.pseudo_code.Pushback(jump_label);
+
+				size_t current_index = pts.pseudo_code.Size();
+				if (!line_statement.tokens.empty())
+				{
+					rhandler(line_statement, pts);	// line_statement handling
+				}
+				else
+				{
+					for (auto body_line : node.children) rhandler(body_line, pts);	//WARNING! keep controlling visible scopes
+				}
+
+				//It will be Checking on break, continue keywords
+
+				for (;current_index < pts.pseudo_code.Size(); current_index++)
+				{
+					PseudoOperation& po = pts.pseudo_code[current_index];
+					if (!(po.flags & PseudoOperationFlags::Unhandled)) continue;
+					if (po.flags & PseudoOperationFlags::Break)
+					{
+						po.arg_0 = end_label;
+					}
+					else if (po.flags & PseudoOperationFlags::Continue)
+					{
+						po.arg_0 = check_label;
+					}
+					else 
+					{
+						continue;
+					}
+
+					po.flags &= ~(PseudoOperationFlags::Unhandled | PseudoOperationFlags::Break | PseudoOperationFlags::Continue);
+
+				}
+				//jump to heck
+				jump_label = PseudoOperation(PseudoOpCode::Jump, check_label, node.declaring_place);
+				pts.pseudo_code.Pushback(jump_label);
+				//end label
+				PseudoOperation endlabel = PseudoOperation(PseudoOpCode::Label, end_label, node.declaring_place);
+				pts.pseudo_code.Pushback(endlabel);
+				if (!line_statement.tokens.empty()) //Insert code_block after line_statement and jump (if this block is last)
+				{
+					for (auto body_line : node.children) rhandler(body_line, pts);//WARNING! keep controlling visible scopes
+				}
 			}
 
 
@@ -229,7 +341,9 @@ namespace MSLC
 						}
 					}
 					case AST::ASTNodeType::ForCycle: break;
-					case AST::ASTNodeType::WhileCycle: break;
+					case AST::ASTNodeType::WhileCycle: 
+						HandleWhile(node, pts, rhandler);
+						break;
 					case AST::ASTNodeType::Function: break;
 					case AST::ASTNodeType::ObjectTemplate: break;
 					case AST::ASTNodeType::LowLevelCodeBlock:

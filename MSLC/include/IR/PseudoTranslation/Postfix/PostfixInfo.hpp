@@ -45,7 +45,11 @@ namespace MSLC
 				Diagnostics::DeclaringPlace declaring_place;
 
 				bool IsSimple() const { return type == GroupType::Simple; }
-				bool IsSimpleOrQN() const { return type == GroupType::QualifiedName || simple.type == Tokenization::TokenType::IDENTIFIER || simple.type == Tokenization::TokenType::LITERAL || type == GroupType::ArrayLiteral;}
+				bool IsSimpleOrQN() const {
+					return type == GroupType::QualifiedName ||
+						type == GroupType::ArrayLiteral ||
+						type == GroupType::Simple;
+				}
 				TokensGroup()
 				{
 					type = GroupType::Simple;

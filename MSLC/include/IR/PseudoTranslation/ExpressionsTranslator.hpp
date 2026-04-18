@@ -16,6 +16,8 @@ namespace MSLC
 
 				void AnalyzeAPST(TokensGroup& node, PseudoTranslationState& pts);
 
+				void HandleSimpleKeyword(TokensGroup& node, PseudoTranslationState& pts); //continue, break
+
 				void HandleSimple(TokensGroup& node, PseudoTranslationState& pts);
 
 				CompilationInfo::Values::ValueInfo GetValueInfoFromType(TokensGroup& node, PseudoTranslationState& pts);

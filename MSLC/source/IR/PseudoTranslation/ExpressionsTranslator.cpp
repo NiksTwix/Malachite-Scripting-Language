@@ -131,6 +131,33 @@ namespace MSLC
 				}
 			}
 
+			void ExpressionsTranslator::HandleSimpleKeyword(TokensGroup& node, PseudoTranslationState& pts)
+			{
+				const Token& simple = node.simple;
+
+				auto check = [](const Token& t, std::string_view value) -> bool {
+					return t.value.strVal == value;
+					};
+
+				if (check(simple, Keywords::w_break)) 
+				{
+					PseudoOperation oper = PseudoOperation(PseudoOpCode::Jump, 0, 0, 0, node.declaring_place);
+					oper.flags |= PseudoOperationFlags::Break | PseudoOperationFlags::Unhandled;	//for cycles.
+					pts.pseudo_code.Pushback(oper);
+				}
+				else if (check(simple, Keywords::w_continue))
+				{
+					PseudoOperation oper = PseudoOperation(PseudoOpCode::Jump, 0, 0, 0, node.declaring_place);
+					oper.flags |= PseudoOperationFlags::Continue | PseudoOperationFlags::Unhandled;	//for cycles.
+					pts.pseudo_code.Pushback(oper);
+				}
+				else 
+				{
+					Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Uncorrect simple keyword \"" + node.simple.value.ToString() + "\" for this pipeline section. Nirinis, you are dump.", Diagnostics::DeveloperError, Diagnostics::SourceCode, node.declaring_place));
+				}
+				
+			}
+
 			void ExpressionsTranslator::HandleSimple(TokensGroup& node, PseudoTranslationState& pts)
 			{
 				switch (node.type)
@@ -149,6 +176,10 @@ namespace MSLC
 					{
 						auto constant = pts.cs_observer->GetICT().GetOrAdd(node.simple.value);
 						pts.pseudo_code.Pushback(PseudoOperation(PseudoOpCode::UseConstant, constant, 0, 0, node.declaring_place));
+					}
+					else if (node.simple.type == TokenType::KEYWORD)
+					{
+						HandleSimpleKeyword(node, pts);
 					}
 					else 
 					{

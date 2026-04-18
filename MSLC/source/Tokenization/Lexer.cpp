@@ -462,9 +462,14 @@ namespace MSLC
 						t.type = TokenType::DELIMITER;
 						t.value = delimiter;
 						t.declaring_place = state.declaring_place;
-						if (c == '{') state.current_depth++;
+						if (c == '{')
+						{
+							state.current_depth++;
+						}
 						if (c == '}')
 						{
+							auto t = InsertOpEnd(state, state.tokens, text);
+							if (t.type != TokenType::UNDEFINED)state.tokens.push_back(t);
 							state.current_depth--;
 						}
 
