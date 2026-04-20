@@ -12,8 +12,8 @@ namespace MSLC
 
 				bool use_end_label = node.children.size() > 1;
 
-				AST::ASTNode insert_after_end_jump;
-
+				AST::ASTNode body;
+				body.type = AST::ASTNodeType::CodeBlock;	//Code block for temporary containing of body's nodes
 
 				CompilationInfo::LabelID end_label = use_end_label ? pts.cs_observer->GetGST().GetNewLabelID() : CompilationInfo::INVALID_ID;
 
@@ -70,7 +70,7 @@ namespace MSLC
 						AST::ASTNode line_statement;
 						line_statement.type = AST::ASTNodeType::Expression;
 
-						int parentheses_depth = 1;	// we have skiped open (
+						int parentheses_depth = 0;	// we have skiped open (
 						size_t ci = 1;				//skip keyword
 
 						bool build_condition = true;
@@ -113,13 +113,17 @@ namespace MSLC
 						PseudoOperation jump = PseudoOperation(PseudoOpCode::JumpNIf, not_valid_jump_label, child.declaring_place);
 						pts.pseudo_code.Pushback(jump);
 
+
+						body.children = std::move(child.children);	//Move children. If they dont exist -> also move null value
+
 						if (!line_statement.tokens.empty()) 
 						{
 							rhandler(line_statement, pts);	// line_statement handling
 						}
 						else
 						{
-							for (auto body_line : child.children) rhandler(body_line, pts);	//WARNING! keep controlling visible scopes
+							rhandler(body, pts);	//WARNING! keep controlling visible scopes
+							body.children.clear();
 						}
 
 						if (use_end_label) 
@@ -132,15 +136,10 @@ namespace MSLC
 						pts.pseudo_code.Pushback(label);
 
 
-						if (node.children.size() > 1 && !line_statement.tokens.empty() && !child.children.empty()) 
+						if (node.children.size() > 1 && !line_statement.tokens.empty() && !body.children.empty()) 
 						{
 							Diagnostics::Logger::Get().Print(Diagnostics::InformationMessage("Breaking the structure of the condition block.", Diagnostics::SyntaxError, Diagnostics::SourceCode, child.declaring_place));
 							return;
-						}
-
-						if (!line_statement.tokens.empty()) //Insert code_block after line_statement and jump (if this block is last)
-						{
-							insert_after_end_jump = child;	
 						}
 					}
 
@@ -150,19 +149,19 @@ namespace MSLC
 						// else {}
 						AST::ASTNode line_statement;
 						line_statement.type = AST::ASTNodeType::Expression;
+
+						body.children = std::move(child.children);
+
 						if (child.tokens.size() > 1) 
 						{
 							line_statement.tokens = Strings::StringOperations::TrimVector(child.tokens, 1, child.tokens.size() - 1);	//skip else
 
 							rhandler(line_statement, pts);
-							if (use_end_label && !child.children.empty()) 
-							{
-								insert_after_end_jump = child;
-							}
 						}
 						else 
 						{
-							for (auto body_line : child.children) rhandler(body_line, pts);	//WARNING! keep controlling visible scopes
+							rhandler(body, pts);	//WARNING! keep controlling visible scopes
+							body.children.clear();
 						}
 						//JMP command for skipping is not needed because else in the end of condition construction
 					}
@@ -180,9 +179,11 @@ namespace MSLC
 					PseudoOperation endlabel = PseudoOperation(PseudoOpCode::Label, end_label, node.declaring_place);
 					pts.pseudo_code.Pushback(endlabel);
 
-
-					for (auto body_line: insert_after_end_jump.children) rhandler(body_line, pts);	//WARNING! keep controlling visible scopes
-
+				}
+				if (!body.children.empty())
+				{
+					rhandler(body, pts);	//WARNING! keep controlling visible scopes
+					body.children.clear();
 				}
 				
 				/*
@@ -224,6 +225,11 @@ namespace MSLC
 				//condition building
 
 				int parentheses_depth = 0;
+
+				AST::ASTNode body;
+				body.type = AST::ASTNodeType::CodeBlock;	//Code block for temporary containing of body's nodes
+
+				body.children = std::move(node.children);
 
 				AST::ASTNode condition;
 				condition.type = AST::ASTNodeType::Expression;
@@ -279,7 +285,8 @@ namespace MSLC
 				}
 				else
 				{
-					for (auto body_line : node.children) rhandler(body_line, pts);	//WARNING! keep controlling visible scopes
+					rhandler(body, pts);	//WARNING! keep controlling visible scopes
+					body.children.clear();
 				}
 
 				//It will be Checking on break, continue keywords
@@ -312,7 +319,8 @@ namespace MSLC
 				pts.pseudo_code.Pushback(endlabel);
 				if (!line_statement.tokens.empty()) //Insert code_block after line_statement and jump (if this block is last)
 				{
-					for (auto body_line : node.children) rhandler(body_line, pts);//WARNING! keep controlling visible scopes
+					rhandler(body, pts);	//WARNING! keep controlling visible scopes
+					body.children.clear();
 				}
 			}
 
