@@ -1,0 +1,86 @@
+CPU_INT:"MPLF_CPU_INT";
+CPU_FLOAT:"MPLF_CPU_FLOAT";
+CPU_CHAR: "MPLF_CPU_CHAR";
+CPU_POINTER: "MPLF_CPU_POINTER";
+CPU_NONE: "MPLF_CPU_NONE";
+NULL: 0;
+
+BasicPrimitiveFields
+{
+	key CompilerPseudonym: "MPLF_Basic";		//Pseudonym for using in cpp compiler's source code.
+	Signed: NULL;
+	CPUType: NULL;
+	Size: NULL;	//In bytes
+	Identifier: NULL;
+	DirectCompatibility: NULL; //Compiler will convert types by CPUType. Int->Float, Int->Uint
+}
+
+BasicStructureFields
+{
+	key CompilerPseudonym: "MPLF_BasicStructure";		//Pseudonym for using in cpp compiler's source code.
+	Alignment: NULL;	//In bytes
+	Identifier: NULL;
+	//DirectCompatibility is forbidden for structures //Config's structures cannot be converted in another types
+}
+//tag::field X //All fields of structures are public
+//	{
+//		Identifier: "X";
+//		Type: "MPLF_INT32"
+//	}
+//
+
+tag::primitive Real32
+{
+	copy BasicPrimitiveFields;
+	//BasicPrimitiveFields overriding
+	Signed: true;
+	Identifier: "real32";
+	key CompilerPseudonym: "MPLF_REAL32";
+	DirectCompatibility: ["MPLF_INT32","MPLF_REAL64"];
+	CPUType: CPU_FLOAT;
+	Size: 4;
+}
+
+tag::primitive Int32
+{
+	copy BasicPrimitiveFields;
+	//BasicPrimitiveFields overriding
+	Signed: true;
+	Identifier: "int32";
+	key CompilerPseudonym: "MPLF_INT32";	
+	DirectCompatibility: ["MPLF_INT64","MPLF_REAL32"];
+	CPUType: CPU_INT;
+	Size: 4;
+}
+
+
+tag::structure VectorInt
+{
+	copy BasicStructureFields;
+	//BasicStructureFields overriding
+	Identifier: "vector_int";
+	key CompilerPseudonym: "MPLF_VECTOR_INT";	
+	Alignment: Int32::Size;
+	tag::field X
+	{
+		Identifier: "x";
+		Type: "MPLF_INT32";
+	}
+	tag::field Y
+	{
+		Identifier: "y";
+		Type: "MPLF_INT32";
+	}
+	tag::field Z
+	{
+		Identifier: "z";
+		Type: "MPLF_INT32";
+	}
+}
+
+
+tag::alias Int
+{
+	Identifier: "int";
+	AliasedType: "MPLF_INT32";
+}

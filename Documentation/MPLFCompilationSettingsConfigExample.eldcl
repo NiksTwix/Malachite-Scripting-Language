@@ -1,0 +1,34 @@
+//Compilation Settings
+//Must be in the same folder which contains main source code's file
+
+
+	//LanguageVersion: 0.2;	//Embedded in compiler's source code
+
+tag::compilation_settings Settings
+{
+	FilesEncoding: "utf-8";
+	OptimizationLevel: 0;		//None
+	IncludingPaths: [
+	"C:\\Games\\Projects",	//Absolute
+	"..\\LowLevel"			//Relative (by main file)
+	];
+	OutputFolder: "C:\\User\\Kesha\\Downloads";
+}
+
+tag::program_info Settings
+{
+	OutputName: "MSL";
+	OutputType: "MSLI";
+	Creators: [
+	"Nirinis",
+	];
+	ProgramVersion: 0.1;
+}
+
+
+tag::compiler_settings Settings
+{
+	DebugLevel: "full";
+	UseLinkerImmediately: true;
+	LinkerPath: "C:\\Programs\\MSL\\Linker.exe";	//or Linker (in Linux)	/Also will be used relative paths
+}

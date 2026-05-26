@@ -1,0 +1,75 @@
+tag::literal Integer
+{
+	Map: "+digit+";
+	Type: "MPLF_INT32";
+}
+
+tag::literal Integer
+{
+	Map: "+digit+";
+	Type: "MPLF_INT32";
+}
+
+tag::literal IntegerHex
+{
+	Map: "0x+digit+";
+	Type: "MPLF_INT64";
+	Notation: "Hexadecimal";
+}
+
+tag::literal IntegerBin
+{
+	Map: "0b+digit+";
+	Type: "MPLF_INT64";
+	Notation: "Binary";
+}
+
+tag::literal IntegerU
+{
+	Map: "+digit+u";
+	Type: "MPLF_UINT32";
+}
+
+tag::literal IntegerL
+{
+	Map: "+digit+l";
+	Type: "MPLF_INT64";
+}
+
+tag::literal IntegerUL
+{
+	Map: "+digit+ul";
+	Type: "MPLF_UINT64";
+}
+
+tag::literal Real32
+{
+	Map: "+digit+.+digit+f";
+	Type: "MPLF_REAL32";
+}
+tag::literal Real32_f
+{
+	Map: ".+digit+f";
+	Type: "MPLF_REAL32";
+}
+tag::literal Real64
+{
+	Map: "+digit+.+digit+";
+	Type: "MPLF_REAL64";
+}
+tag::literal Real64_f
+{
+	Map: ".+digit+";
+	Type: "MPLF_REAL64";
+}
+tag::literal Char
+{
+	Map: "'+data[1]+'";		//Only 1 symbol
+	Type: "MPLF_CHAR";
+}
+tag::literal String		//Will think about it later
+{
+	Map: "\"+data+\"";
+	Type: "MPLF_CHAR";
+	//IsPointer: true;
+}
